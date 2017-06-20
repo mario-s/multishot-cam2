@@ -1,0 +1,17 @@
+package de.mario.camera
+
+import android.app.Activity
+import android.os.Bundle
+
+class MainActivity : Activity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        if(savedInstanceState == null){
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, CameraFragment.newInstance())
+                    .commit()
+        }
+    }
+}
