@@ -137,7 +137,7 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
         if (FragmentCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
             ConfirmationDialog().show(childFragmentManager, FRAGMENT_DIALOG)
         } else {
-            FragmentCompat.requestPermissions(this, arrayOf<String>(Manifest.permission.CAMERA),
+            FragmentCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA),
                     REQUEST_CAMERA_PERMISSION)
         }
     }
@@ -340,7 +340,7 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
             mPreviewRequestBuilder?.addTarget(surface)
 
             // Here, we create a CameraCaptureSession for camera preview.
-            mCameraDevice?.createCaptureSession(Arrays.asList(surface, mImageReader!!.getSurface()),
+            mCameraDevice?.createCaptureSession(Arrays.asList(surface, mImageReader!!.surface),
                     object : CameraCaptureSession.StateCallback() {
 
                         override fun onConfigured(cameraCaptureSession: CameraCaptureSession) {
@@ -469,7 +469,7 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
                     CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH)
 
             // Orientation
-            val rotation = activity.getWindowManager().getDefaultDisplay().getRotation()
+            val rotation = activity.windowManager.defaultDisplay.rotation
             captureBuilder?.set(CaptureRequest.JPEG_ORIENTATION, ORIENTATIONS.get(rotation))
 
             val captureCallback
