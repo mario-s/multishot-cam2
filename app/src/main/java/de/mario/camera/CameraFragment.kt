@@ -48,7 +48,7 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
 
     private val camState = CameraState()
 
-    private var toaster: Toaster? = null;
+    private var toaster: Toaster? = null
 
     private val ORIENTATIONS = SparseIntArray()
 
@@ -108,9 +108,9 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
         // a camera and start preview from here (otherwise, we wait until the surface is ready in
         // the SurfaceTextureListener).
         if (mTextureView!!.isAvailable) {
-            openCamera(mTextureView!!.width, mTextureView!!.height);
+            openCamera(mTextureView!!.width, mTextureView!!.height)
         } else {
-            mTextureView?.setSurfaceTextureListener(mSurfaceTextureListener);
+            mTextureView?.surfaceTextureListener = mSurfaceTextureListener
         }
     }
 
@@ -327,13 +327,13 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
      */
     private fun createCameraPreviewSession() {
         try {
-            val texture = mTextureView!!.getSurfaceTexture()
+            val texture = mTextureView!!.surfaceTexture
 
             // We configure the size of default buffer to be the size of camera preview we want.
             texture.setDefaultBufferSize(mPreviewSize!!.width, mPreviewSize!!.height)
 
             // This is the output Surface we need to start preview.
-            val surface = Surface(texture);
+            val surface = Surface(texture)
 
             // We set up a CaptureRequest.Builder with the output Surface.
             mPreviewRequestBuilder = mCameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
@@ -346,7 +346,7 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
                         override fun onConfigured(cameraCaptureSession: CameraCaptureSession) {
                             // The camera is already closed
                             if (null == mCameraDevice) {
-                                return;
+                                return
                             }
 
                             // When the session is ready, we start displaying the preview.
@@ -373,7 +373,7 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
                             toaster?.showToast("Failed")
                         }
                     }, null
-            );
+            )
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
         }
@@ -460,7 +460,7 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
             // This is the CaptureRequest.Builder that we use to take a picture.
             val captureBuilder =
                     mCameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
-            captureBuilder?.addTarget(mImageReader?.getSurface())
+            captureBuilder?.addTarget(mImageReader?.surface)
 
             // Use the same AE and AF modes as the preview.
             captureBuilder?.set(CaptureRequest.CONTROL_AF_MODE,
@@ -482,10 +482,10 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
                     Log.d(TAG, mFile.toString())
                     unlockFocus()
                 }
-            };
+            }
 
             mCaptureSession?.stopRepeating()
-            mCaptureSession!!.capture(captureBuilder?.build(), captureCallback, null);
+            mCaptureSession!!.capture(captureBuilder?.build(), captureCallback, null)
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
         }
@@ -530,7 +530,7 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
             when (camState.currentState) {
 
                  CameraState.STATE_WAITING_LOCK -> {
-                    val afState = result.get(CaptureResult.CONTROL_AF_STATE);
+                    val afState = result.get(CaptureResult.CONTROL_AF_STATE)
                     if (afState == null) {
                         captureStillPicture()
                     } else if (CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED == afState ||
@@ -548,7 +548,7 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
                 }
                 CameraState.STATE_WAITING_PRECAPTURE -> {
                     // CONTROL_AE_STATE can be null on some devices
-                    val aeState = result.get(CaptureResult.CONTROL_AE_STATE);
+                    val aeState = result.get(CaptureResult.CONTROL_AE_STATE)
                     if (aeState == null ||
                             aeState == CaptureResult.CONTROL_AE_STATE_PRECAPTURE ||
                             aeState == CaptureRequest.CONTROL_AE_STATE_FLASH_REQUIRED) {
@@ -557,7 +557,7 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
                 }
                 CameraState.STATE_WAITING_NON_PRECAPTURE -> {
                     // CONTROL_AE_STATE can be null on some devices
-                    val aeState = result.get(CaptureResult.CONTROL_AE_STATE);
+                    val aeState = result.get(CaptureResult.CONTROL_AE_STATE)
                     if (aeState == null || aeState != CaptureResult.CONTROL_AE_STATE_PRECAPTURE) {
                         camState.currentState = CameraState.STATE_PICTURE_TAKEN
                         captureStillPicture()
