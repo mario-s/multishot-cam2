@@ -188,10 +188,7 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
             // For still image captures, we use the largest available size.
             val sizes: List<Size> = map.getOutputSizes(ImageFormat.JPEG).asList()
             val largest: Size = Collections.max(sizes, CompareSizesByArea())
-            mImageReader = ImageReader.newInstance(largest.width, largest.height,
-                    ImageFormat.JPEG, /*maxImages*/2)
-            mImageReader?.setOnImageAvailableListener(
-                    mOnImageAvailableListener, mBackgroundHandler)
+            setupImageReader(largest)
 
             // Find out if we need to swap dimension to get the preview size relative to sensor
             // coordinate.
@@ -258,6 +255,13 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
                     .show(childFragmentManager, FRAGMENT_DIALOG)
         }
 
+    }
+
+    private fun setupImageReader(largest: Size) {
+        mImageReader = ImageReader.newInstance(largest.width, largest.height,
+                ImageFormat.JPEG, /*maxImages*/2)
+        mImageReader?.setOnImageAvailableListener(
+                mOnImageAvailableListener, mBackgroundHandler)
     }
 
     /**
