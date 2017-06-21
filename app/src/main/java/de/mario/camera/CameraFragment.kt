@@ -29,8 +29,6 @@ import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CaptureRequest
 
 
-
-
 class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPermissionsResultCallback {
 
     private val TAG = "CameraFragment"
@@ -48,33 +46,7 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
     private val REQUEST_CAMERA_PERMISSION = 1
     private val FRAGMENT_DIALOG = "dialog"
 
-    /**
-     * Camera state: Showing camera preview.
-     */
-    private val STATE_PREVIEW = 0
-    /**
-     * Camera state: Waiting for the focus to be locked.
-     */
-    private val STATE_WAITING_LOCK = 1
-    /**
-     * Camera state: Waiting for the exposure to be precapture state.
-     */
-    private val STATE_WAITING_PRECAPTURE = 2
-    /**
-     * Camera state: Waiting for the exposure state to be something other than precapture.
-     */
-    private val STATE_WAITING_NON_PRECAPTURE = 3
-    /**
-     * Camera state: Picture was taken.
-     */
-    private val STATE_PICTURE_TAKEN = 4
-
-    /**
-     * The current state of camera state for taking pictures.
-
-     * @see .mCaptureCallback
-     */
-    private var mState = STATE_PREVIEW
+    private val camState = CameraState()
 
     private var toaster: Toaster? = null;
 
@@ -448,7 +420,7 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
             mPreviewRequestBuilder!!.set(CaptureRequest.CONTROL_AF_TRIGGER,
                     CameraMetadata.CONTROL_AF_TRIGGER_START)
             // Tell #mCaptureCallback to wait for the lock.
-            mState = STATE_WAITING_LOCK
+            camState.currentState = CameraState.STATE_WAITING_LOCK
             mCaptureSession?.capture(mPreviewRequestBuilder?.build(), mCaptureCallback,
                     mBackgroundHandler!!)
         } catch (e: CameraAccessException) {
@@ -468,7 +440,7 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
             mPreviewRequestBuilder!!.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER,
                     CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START)
             // Tell #mCaptureCallback to wait for the precapture sequence to be set.
-            mState = STATE_WAITING_PRECAPTURE
+            camState.currentState = CameraState.STATE_WAITING_PRECAPTURE
             mCaptureSession?.capture(mPreviewRequestBuilder?.build(), mCaptureCallback,
                     mBackgroundHandler)
         } catch (e: CameraAccessException) {
@@ -533,7 +505,7 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
             mCaptureSession?.capture(mPreviewRequestBuilder!!.build(), mCaptureCallback,
                     mBackgroundHandler)
             // After this, the camera will go back to the normal state of preview.
-            mState = STATE_PREVIEW
+            camState.currentState = CameraState.STATE_PREVIEW
             mCaptureSession?.setRepeatingRequest(mPreviewRequest, mCaptureCallback,
                     mBackgroundHandler)
         } catch (e: CameraAccessException) {
@@ -555,9 +527,9 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
         }
 
         private fun process(result: CaptureResult) {
-            when (mState) {
+            when (camState.currentState) {
 
-                 STATE_WAITING_LOCK -> {
+                 CameraState.STATE_WAITING_LOCK -> {
                     val afState = result.get(CaptureResult.CONTROL_AF_STATE);
                     if (afState == null) {
                         captureStillPicture()
@@ -567,27 +539,27 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
                         val aeState = result.get(CaptureResult.CONTROL_AE_STATE)
                         if (aeState == null ||
                                 aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED) {
-                            mState = STATE_PICTURE_TAKEN
+                            camState.currentState = CameraState.STATE_PICTURE_TAKEN
                             captureStillPicture()
                         } else {
                             runPrecaptureSequence()
                         }
                     }
                 }
-                STATE_WAITING_PRECAPTURE -> {
+                CameraState.STATE_WAITING_PRECAPTURE -> {
                     // CONTROL_AE_STATE can be null on some devices
                     val aeState = result.get(CaptureResult.CONTROL_AE_STATE);
                     if (aeState == null ||
                             aeState == CaptureResult.CONTROL_AE_STATE_PRECAPTURE ||
                             aeState == CaptureRequest.CONTROL_AE_STATE_FLASH_REQUIRED) {
-                        mState = STATE_WAITING_NON_PRECAPTURE
+                        camState.currentState = CameraState.STATE_WAITING_NON_PRECAPTURE
                     }
                 }
-                STATE_WAITING_NON_PRECAPTURE -> {
+                CameraState.STATE_WAITING_NON_PRECAPTURE -> {
                     // CONTROL_AE_STATE can be null on some devices
                     val aeState = result.get(CaptureResult.CONTROL_AE_STATE);
                     if (aeState == null || aeState != CaptureResult.CONTROL_AE_STATE_PRECAPTURE) {
-                        mState = STATE_PICTURE_TAKEN
+                        camState.currentState = CameraState.STATE_PICTURE_TAKEN
                         captureStillPicture()
                     }
                 }
