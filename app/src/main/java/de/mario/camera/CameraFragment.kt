@@ -47,6 +47,7 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
     private val FRAGMENT_DIALOG = "dialog"
 
     private val camState = CameraState()
+    private val mCaptureCallback = CaptureCallback(camState, this::runPrecaptureSequence, this::captureStillPicture)
 
     private var toaster: Toaster? = null
 
@@ -192,18 +193,7 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
 
             // Find out if we need to swap dimension to get the preview size relative to sensor
             // coordinate.
-            val displayRotation = activity.windowManager.defaultDisplay.rotation
-            val sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION)!!
-            var swappedDimensions = false
-            when (displayRotation) {
-                Surface.ROTATION_0, Surface.ROTATION_180 -> if (sensorOrientation == 90 || sensorOrientation == 270) {
-                    swappedDimensions = true
-                }
-                Surface.ROTATION_90, Surface.ROTATION_270 -> if (sensorOrientation == 0 || sensorOrientation == 180) {
-                    swappedDimensions = true
-                }
-                else -> Log.e(TAG, "Display rotation is invalid: " + displayRotation)
-            }
+            val swappedDimensions = swapDimensions(characteristics)
 
             val displaySize = Point()
             activity.windowManager.defaultDisplay.getSize(displaySize)
@@ -255,6 +245,22 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
                     .show(childFragmentManager, FRAGMENT_DIALOG)
         }
 
+    }
+
+    private fun swapDimensions(characteristics: CameraCharacteristics): Boolean {
+        val displayRotation = activity.windowManager.defaultDisplay.rotation
+        val sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION)!!
+        var swappedDimensions = false
+        when (displayRotation) {
+            Surface.ROTATION_0, Surface.ROTATION_180 -> if (sensorOrientation == 90 || sensorOrientation == 270) {
+                swappedDimensions = true
+            }
+            Surface.ROTATION_90, Surface.ROTATION_270 -> if (sensorOrientation == 0 || sensorOrientation == 180) {
+                swappedDimensions = true
+            }
+            else -> Log.e(TAG, "Display rotation is invalid: " + displayRotation)
+        }
+        return swappedDimensions
     }
 
     private fun setupImageReader(largest: Size) {
@@ -444,9 +450,6 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
      */
     private fun captureStillPicture() {
         try {
-            if (null == activity || null == mCameraDevice) {
-                return
-            }
             // This is the CaptureRequest.Builder that we use to take a picture.
             val captureBuilder =
                     mCameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
@@ -503,60 +506,6 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
         }
     }
 
-    private val mCaptureCallback = object : CameraCaptureSession.CaptureCallback() {
-        override fun onCaptureProgressed(session: CameraCaptureSession,
-                                         request: CaptureRequest,
-                                         partialResult: CaptureResult) {
-            process(partialResult)
-        }
-
-        override fun onCaptureCompleted(session: CameraCaptureSession,
-                                        request: CaptureRequest,
-                                        result: TotalCaptureResult) {
-            process(result)
-        }
-
-        private fun process(result: CaptureResult) {
-            when (camState.currentState) {
-
-                 CameraState.STATE_WAITING_LOCK -> {
-                    val afState = result.get(CaptureResult.CONTROL_AF_STATE)
-                    if (afState == null) {
-                        captureStillPicture()
-                    } else if (CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED == afState ||
-                            CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED == afState) {
-                        // CONTROL_AE_STATE can be null on some devices
-                        val aeState = result.get(CaptureResult.CONTROL_AE_STATE)
-                        if (aeState == null ||
-                                aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED) {
-                            camState.currentState = CameraState.STATE_PICTURE_TAKEN
-                            captureStillPicture()
-                        } else {
-                            runPrecaptureSequence()
-                        }
-                    }
-                }
-                CameraState.STATE_WAITING_PRECAPTURE -> {
-                    // CONTROL_AE_STATE can be null on some devices
-                    val aeState = result.get(CaptureResult.CONTROL_AE_STATE)
-                    if (aeState == null ||
-                            aeState == CaptureResult.CONTROL_AE_STATE_PRECAPTURE ||
-                            aeState == CaptureRequest.CONTROL_AE_STATE_FLASH_REQUIRED) {
-                        camState.currentState = CameraState.STATE_WAITING_NON_PRECAPTURE
-                    }
-                }
-                CameraState.STATE_WAITING_NON_PRECAPTURE -> {
-                    // CONTROL_AE_STATE can be null on some devices
-                    val aeState = result.get(CaptureResult.CONTROL_AE_STATE)
-                    if (aeState == null || aeState != CaptureResult.CONTROL_AE_STATE_PRECAPTURE) {
-                        camState.currentState = CameraState.STATE_PICTURE_TAKEN
-                        captureStillPicture()
-                    }
-                }
-            }
-        }
-    }
-
     private val mOnImageAvailableListener = ImageReader.OnImageAvailableListener { reader ->
         mBackgroundHandler?.post(ImageSaver(reader.acquireNextImage(), mFile!!))
     }
@@ -583,8 +532,7 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
             mCameraOpenCloseLock.release()
             cameraDevice.close()
             mCameraDevice = null
-            val activity = activity
-            activity?.finish()
+            activity.finish()
         }
     }
 
