@@ -388,23 +388,9 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
         if (null == mTextureView || null == mPreviewSize || null == activity) {
             return
         }
+        val viewSize = Size(viewWidth, viewHeight)
         val rotation = activity.windowManager.defaultDisplay.rotation
-        val matrix = Matrix()
-        val viewRect = RectF(0f, 0f, viewWidth.toFloat(), viewHeight.toFloat())
-        val bufferRect = RectF(0f, 0f, mPreviewSize!!.height.toFloat(), mPreviewSize!!.width.toFloat())
-        val centerX = viewRect.centerX()
-        val centerY = viewRect.centerY()
-        if (Surface.ROTATION_90 == rotation || Surface.ROTATION_270 == rotation) {
-            bufferRect.offset(centerX - bufferRect.centerX(), centerY - bufferRect.centerY())
-            matrix.setRectToRect(viewRect, bufferRect, Matrix.ScaleToFit.FILL)
-            val scale = Math.max(
-                    viewHeight.toFloat() / mPreviewSize!!.height.toFloat(),
-                    viewWidth.toFloat() / mPreviewSize!!.width.toFloat())
-            matrix.postScale(scale, scale, centerX, centerY)
-            matrix.postRotate(90f * (rotation - 2), centerX, centerY)
-        } else if (Surface.ROTATION_180 == rotation) {
-            matrix.postRotate(180f, centerX, centerY)
-        }
+        val matrix = MatrixFactory.create(mPreviewSize!!, viewSize, rotation)
         mTextureView!!.setTransform(matrix)
     }
 
