@@ -7,7 +7,6 @@ import android.app.Fragment
 import android.content.Context
 import android.util.Size
 import android.support.v13.app.FragmentCompat
-import android.util.SparseIntArray
 import java.util.concurrent.Semaphore
 import android.media.ImageReader
 import android.os.Handler
@@ -46,12 +45,12 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
     private val REQUEST_CAMERA_PERMISSION = 1
     private val FRAGMENT_DIALOG = "dialog"
 
+    private val orientations = SurfaceOrientation()
+
     private val camState = CameraState()
     private val mCaptureCallback = CaptureCallback(camState, this::runPrecaptureSequence, this::captureStillPicture)
 
     private var toaster: Toaster? = null
-
-    private val ORIENTATIONS = SparseIntArray()
 
     private val mCameraOpenCloseLock = Semaphore(1)
 
@@ -69,13 +68,6 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
     private var mTextureView: AutoFitTextureView? = null
     private var mPreviewSize: Size? = null
     private var mCaptureSession: CameraCaptureSession? = null
-
-    init {
-        ORIENTATIONS.append(Surface.ROTATION_0, 90)
-        ORIENTATIONS.append(Surface.ROTATION_90, 0)
-        ORIENTATIONS.append(Surface.ROTATION_180, 270)
-        ORIENTATIONS.append(Surface.ROTATION_270, 180)
-    }
 
     companion object Factory {
         fun newInstance(): CameraFragment {
@@ -463,7 +455,7 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
 
             // Orientation
             val rotation = activity.windowManager.defaultDisplay.rotation
-            captureBuilder?.set(CaptureRequest.JPEG_ORIENTATION, ORIENTATIONS.get(rotation))
+            captureBuilder?.set(CaptureRequest.JPEG_ORIENTATION, orientations.get(rotation))
 
             val captureCallback
                     = object : CameraCaptureSession.CaptureCallback() {
