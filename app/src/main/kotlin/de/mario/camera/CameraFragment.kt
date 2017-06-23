@@ -4,7 +4,6 @@ package de.mario.camera
 import android.Manifest
 import android.app.AlertDialog
 import android.app.Fragment
-import android.content.Context
 import android.util.Size
 import java.util.concurrent.Semaphore
 import android.media.ImageReader
@@ -45,11 +44,12 @@ class CameraFragment : Fragment(), OnClickListener {
 
     private val orientations = SurfaceOrientation()
 
+    private val cameraHandler = CameraHandler(this)
     private val camState = CameraState()
     private val mCaptureCallback = CaptureCallback(camState, this::runPrecaptureSequence, this::captureStillPicture)
     private val cameraPermission = RequestPermissionCallback(this)
 
-    private var toaster: Toaster? = null
+    private val toaster = Toaster(this)
 
     private val mCameraOpenCloseLock = Semaphore(1)
 
@@ -88,7 +88,6 @@ class CameraFragment : Fragment(), OnClickListener {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         mFile = File(activity.getExternalFilesDir(null), "pic.jpg")
-        toaster = Toaster(activity)
     }
 
     override fun onResume() {
@@ -122,26 +121,6 @@ class CameraFragment : Fragment(), OnClickListener {
         }
     }
 
-
-    private fun getCameraManager() = activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-
-
-    private fun findCameraId(): String? {
-        var id: String? = null
-        val manager = getCameraManager()
-        for (cameraId in manager.cameraIdList) {
-            val characteristics = manager.getCameraCharacteristics(cameraId)
-
-            // We don't use a front facing camera in this sample.
-            val facing = characteristics.get(CameraCharacteristics.LENS_FACING)
-            if (CameraCharacteristics.LENS_FACING_FRONT == facing) {
-                continue
-            }
-            id = cameraId
-        }
-        return id
-    }
-
     /**
      * Sets up member variables related to camera.
 
@@ -151,7 +130,7 @@ class CameraFragment : Fragment(), OnClickListener {
      */
     private fun setUpCameraOutputs(width: Int, height: Int) {
         try {
-            val cameraId = findCameraId()!!
+            val cameraId = cameraHandler.findCameraId()!!
 
             mPreviewSize = createPreviewSize(cameraId, Size(width, height))
 
@@ -162,7 +141,7 @@ class CameraFragment : Fragment(), OnClickListener {
                         mPreviewSize!!.height, mPreviewSize!!.width)
             } else {
                 mTextureView?.setAspectRatio(
-                        mPreviewSize!!.height, mPreviewSize!!.width)
+                        mPreviewSize!!.width, mPreviewSize!!.height)
             }
 
             mCameraId = cameraId
@@ -174,11 +153,10 @@ class CameraFragment : Fragment(), OnClickListener {
             ErrorDialog.newInstance(getString(R.string.camera_error))
                     .show(childFragmentManager, FRAGMENT_DIALOG)
         }
-
     }
 
     private fun createPreviewSize(cameraId: String, origin: Size): Size {
-        val characteristics = getCameraManager().getCameraCharacteristics(cameraId)
+        val characteristics = cameraHandler.getCameraCharacteristics(cameraId)
         val map = characteristics.get(
                 CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
 
@@ -255,12 +233,11 @@ class CameraFragment : Fragment(), OnClickListener {
         } else {
             setUpCameraOutputs(width, height)
             configureTransform(width, height)
-            val manager = getCameraManager()
             try {
                 if (!mCameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
                     throw RuntimeException("Time out waiting to lock camera opening.")
                 }
-                manager.openCamera(mCameraId, mStateCallback, mBackgroundHandler)
+                cameraHandler.openCamera(mCameraId!!, mStateCallback, mBackgroundHandler!!)
             } catch (e: CameraAccessException) {
                 Log.w(TAG, e.message, e)
             } catch (e: InterruptedException) {
@@ -356,7 +333,7 @@ class CameraFragment : Fragment(), OnClickListener {
 
                         override fun onConfigureFailed(
                                  cameraCaptureSession: CameraCaptureSession) {
-                            toaster?.showToast("Failed")
+                            toaster.showToast("Failed")
                         }
                     }, null
             )
@@ -399,8 +376,6 @@ class CameraFragment : Fragment(), OnClickListener {
             Log.w(TAG, e.message, e)
         }
     }
-
-
 
     /**
      * Run the precapture sequence for capturing a still image. This method should be called when
@@ -447,7 +422,7 @@ class CameraFragment : Fragment(), OnClickListener {
                 override fun onCaptureCompleted( session: CameraCaptureSession,
                                                  request: CaptureRequest,
                                                  result: TotalCaptureResult) {
-                    toaster?.showToast("Saved: " + mFile)
+                    toaster.showToast("Saved: " + mFile)
                     Log.d(TAG, mFile.toString())
                     unlockFocus()
                 }
