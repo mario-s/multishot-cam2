@@ -6,7 +6,6 @@ import android.app.AlertDialog
 import android.app.Fragment
 import android.content.Context
 import android.util.Size
-import android.support.v13.app.FragmentCompat
 import java.util.concurrent.Semaphore
 import android.media.ImageReader
 import android.os.Handler
@@ -28,7 +27,7 @@ import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CaptureRequest
 
 
-class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPermissionsResultCallback {
+class CameraFragment : Fragment(), OnClickListener {
 
     private val TAG = "CameraFragment"
 
@@ -42,13 +41,13 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
      */
     private val MAX_PREVIEW_HEIGHT = 1080
 
-    private val REQUEST_CAMERA_PERMISSION = 1
     private val FRAGMENT_DIALOG = "dialog"
 
     private val orientations = SurfaceOrientation()
 
     private val camState = CameraState()
     private val mCaptureCallback = CaptureCallback(camState, this::runPrecaptureSequence, this::captureStillPicture)
+    private val cameraPermission = RequestPermissionCallback(this)
 
     private var toaster: Toaster? = null
 
@@ -126,26 +125,6 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
 
     private fun getCameraManager() = activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
 
-    private fun requestCameraPermission() {
-        if (FragmentCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
-            ConfirmationDialog().show(childFragmentManager, FRAGMENT_DIALOG)
-        } else {
-            FragmentCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA),
-                    REQUEST_CAMERA_PERMISSION)
-        }
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
-                                            grantResults: IntArray) {
-        if (requestCode == REQUEST_CAMERA_PERMISSION) {
-            if (grantResults.size != 1 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                ErrorDialog.newInstance(getString(R.string.request_permission))
-                        .show(childFragmentManager, FRAGMENT_DIALOG)
-            }
-        } else {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        }
-    }
 
     private fun findCameraId(): String? {
         var id: String? = null
@@ -272,7 +251,7 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
      */
     private fun openCamera(width: Int, height: Int) {
         if (checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            requestCameraPermission()
+            cameraPermission.requestCameraPermission()
         } else {
             setUpCameraOutputs(width, height)
             configureTransform(width, height)
