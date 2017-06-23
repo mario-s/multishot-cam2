@@ -152,9 +152,8 @@ class CameraFragment : Fragment(), OnClickListener {
     private fun setUpCameraOutputs(width: Int, height: Int) {
         try {
             val cameraId = findCameraId()!!
-            val characteristics = getCameraManager().getCameraCharacteristics(cameraId)
 
-            mPreviewSize = createPreviewSize(characteristics, Size(width, height))
+            mPreviewSize = createPreviewSize(cameraId, Size(width, height))
 
             // We fit the aspect ratio of TextureView to the size of preview we picked.
             val orientation = resources.configuration.orientation
@@ -178,7 +177,8 @@ class CameraFragment : Fragment(), OnClickListener {
 
     }
 
-    private fun createPreviewSize(characteristics: CameraCharacteristics, origin: Size): Size {
+    private fun createPreviewSize(cameraId: String, origin: Size): Size {
+        val characteristics = getCameraManager().getCameraCharacteristics(cameraId)
         val map = characteristics.get(
                 CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
 
