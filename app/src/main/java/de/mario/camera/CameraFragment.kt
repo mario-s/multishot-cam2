@@ -175,46 +175,7 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
             val cameraId = findCameraId()!!
             val characteristics = getCameraManager().getCameraCharacteristics(cameraId)
 
-            val map = characteristics.get(
-                    CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
-
-            // For still image captures, we use the largest available size.
-            val sizes: List<Size> = map.getOutputSizes(ImageFormat.JPEG).asList()
-            val largest: Size = Collections.max(sizes, CompareSizesByArea())
-            setupImageReader(largest)
-
-            // Find out if we need to swap dimension to get the preview size relative to sensor
-            // coordinate.
-            val swappedDimensions = swapDimensions(characteristics)
-
-            val displaySize = Point()
-            activity.windowManager.defaultDisplay.getSize(displaySize)
-            var rotatedPreviewWidth = width
-            var rotatedPreviewHeight = height
-            var maxPreviewWidth = displaySize.x
-            var maxPreviewHeight = displaySize.y
-
-            if (swappedDimensions) {
-                rotatedPreviewWidth = height
-                rotatedPreviewHeight = width
-                maxPreviewWidth = displaySize.y
-                maxPreviewHeight = displaySize.x
-            }
-
-            if (maxPreviewWidth > MAX_PREVIEW_WIDTH) {
-                maxPreviewWidth = MAX_PREVIEW_WIDTH
-            }
-
-            if (maxPreviewHeight > MAX_PREVIEW_HEIGHT) {
-                maxPreviewHeight = MAX_PREVIEW_HEIGHT
-            }
-
-            // Danger, W.R.! Attempting to use too large a preview size could  exceed the camera
-            // bus' bandwidth limitation, resulting in gorgeous previews but the storage of
-            // garbage capture data.
-            mPreviewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture::class.java),
-                    rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth,
-                    maxPreviewHeight, largest)
+            mPreviewSize = createPreviewSize(characteristics, Size(width, height))
 
             // We fit the aspect ratio of TextureView to the size of preview we picked.
             val orientation = resources.configuration.orientation
@@ -227,7 +188,6 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
             }
 
             mCameraId = cameraId
-            return
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
         } catch (e: NullPointerException) {
@@ -237,6 +197,51 @@ class CameraFragment : Fragment(), OnClickListener, FragmentCompat.OnRequestPerm
                     .show(childFragmentManager, FRAGMENT_DIALOG)
         }
 
+    }
+
+    private fun createPreviewSize(characteristics: CameraCharacteristics, origin: Size): Size {
+        val map = characteristics.get(
+                CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+
+        // For still image captures, we use the largest available size.
+        val sizes: List<Size> = map.getOutputSizes(ImageFormat.JPEG).asList()
+        val largest: Size = Collections.max(sizes, CompareSizesByArea())
+        setupImageReader(largest)
+
+        // Find out if we need to swap dimension to get the preview size relative to sensor
+        // coordinate.
+        val swappedDimensions = swapDimensions(characteristics)
+        val width = origin.width
+        val height = origin.height
+
+        val displaySize = Point()
+        activity.windowManager.defaultDisplay.getSize(displaySize)
+        var rotatedPreviewWidth = width
+        var rotatedPreviewHeight = height
+        var maxPreviewWidth = displaySize.x
+        var maxPreviewHeight = displaySize.y
+
+        if (swappedDimensions) {
+            rotatedPreviewWidth = height
+            rotatedPreviewHeight = width
+            maxPreviewWidth = displaySize.y
+            maxPreviewHeight = displaySize.x
+        }
+
+        if (maxPreviewWidth > MAX_PREVIEW_WIDTH) {
+            maxPreviewWidth = MAX_PREVIEW_WIDTH
+        }
+
+        if (maxPreviewHeight > MAX_PREVIEW_HEIGHT) {
+            maxPreviewHeight = MAX_PREVIEW_HEIGHT
+        }
+
+        // Danger, W.R.! Attempting to use too large a preview size could  exceed the camera
+        // bus' bandwidth limitation, resulting in gorgeous previews but the storage of
+        // garbage capture data.
+        return chooseOptimalSize(map.getOutputSizes(SurfaceTexture::class.java),
+                rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth,
+                maxPreviewHeight, largest)
     }
 
     private fun swapDimensions(characteristics: CameraCharacteristics): Boolean {
