@@ -70,7 +70,7 @@ class CameraFragment : Fragment(), OnClickListener {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        view.findViewById(R.id.picture).setOnClickListener(this)
+        view.findViewById(R.id.shutter).setOnClickListener(this)
         view.findViewById(R.id.info).setOnClickListener(this)
         mTextureView = view.findViewById(R.id.texture) as AutoFitTextureView
     }
@@ -103,7 +103,7 @@ class CameraFragment : Fragment(), OnClickListener {
 
     override fun onClick(view: View) {
         when (view.id) {
-            R.id.picture -> takePicture()
+            R.id.shutter -> takePicture()
             R.id.info -> AlertDialog.Builder(activity!!)
                             .setMessage(R.string.intro_message)
                             .setPositiveButton(android.R.string.ok, null)
@@ -120,9 +120,9 @@ class CameraFragment : Fragment(), OnClickListener {
      */
     private fun setUpCameraOutputs(width: Int, height: Int) {
         try {
-            val cameraId = cameraHandler.findCameraId()!!
+            mCameraId = cameraHandler.findCameraId()
 
-            mPreviewSize = createPreviewSize(cameraId, Size(width, height))
+            mPreviewSize = createPreviewSize(mCameraId!!, Size(width, height))
 
             // We fit the aspect ratio of TextureView to the size of preview we picked.
             val orientation = resources.configuration.orientation
@@ -133,11 +133,10 @@ class CameraFragment : Fragment(), OnClickListener {
                 mTextureView?.setAspectRatio(
                         mPreviewSize!!.width, mPreviewSize!!.height)
             }
-
-            mCameraId = cameraId
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
         } catch (e: NullPointerException) {
+            Log.w(TAG, e.message, e)
             // Currently an NPE is thrown when the Camera2API is used but not supported on the
             // device this code runs.
             ErrorDialog.newInstance(getString(R.string.camera_error))

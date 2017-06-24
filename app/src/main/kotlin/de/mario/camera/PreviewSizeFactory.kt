@@ -24,8 +24,7 @@ class PreviewSizeFactory(val fragment: Fragment) {
      */
     private val MAX_PREVIEW_HEIGHT = 1080
 
-
-    private val activity = fragment.activity
+    private fun defaultDisplay() = fragment.activity.windowManager.defaultDisplay
 
     fun createPreviewSize(characteristics: CameraCharacteristics, origin: Size): Size {
         val map = characteristics.get(
@@ -40,7 +39,7 @@ class PreviewSizeFactory(val fragment: Fragment) {
         val height = origin.height
 
         val displaySize = Point()
-        activity.windowManager.defaultDisplay.getSize(displaySize)
+        defaultDisplay().getSize(displaySize)
         var rotatedPreviewWidth = width
         var rotatedPreviewHeight = height
         var maxPreviewWidth = displaySize.x
@@ -70,7 +69,7 @@ class PreviewSizeFactory(val fragment: Fragment) {
     }
 
     private fun swapDimensions(characteristics: CameraCharacteristics): Boolean {
-        val displayRotation = activity.windowManager.defaultDisplay.rotation
+        val displayRotation = defaultDisplay().rotation
         val sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION)!!
         var swappedDimensions = false
         when (displayRotation) {
