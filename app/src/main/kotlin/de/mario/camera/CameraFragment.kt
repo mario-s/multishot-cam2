@@ -70,7 +70,7 @@ class CameraFragment : Fragment(), OnClickListener {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        view.findViewById(R.id.shutter).setOnClickListener(this)
+        view.findViewById(R.id.picture).setOnClickListener(this)
         view.findViewById(R.id.info).setOnClickListener(this)
         mTextureView = view.findViewById(R.id.texture) as AutoFitTextureView
     }
@@ -103,7 +103,7 @@ class CameraFragment : Fragment(), OnClickListener {
 
     override fun onClick(view: View) {
         when (view.id) {
-            R.id.shutter -> takePicture()
+            R.id.picture -> takePicture()
             R.id.info -> AlertDialog.Builder(activity!!)
                             .setMessage(R.string.intro_message)
                             .setPositiveButton(android.R.string.ok, null)
