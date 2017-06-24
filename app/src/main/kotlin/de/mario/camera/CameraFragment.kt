@@ -128,10 +128,10 @@ class CameraFragment : Fragment(), OnClickListener {
             val orientation = resources.configuration.orientation
             if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 mTextureView?.setAspectRatio(
-                        mPreviewSize!!.height, mPreviewSize!!.width)
+                        mPreviewSize!!.width, mPreviewSize!!.height)
             } else {
                 mTextureView?.setAspectRatio(
-                        mPreviewSize!!.width, mPreviewSize!!.height)
+                        mPreviewSize!!.height, mPreviewSize!!.width)
             }
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
