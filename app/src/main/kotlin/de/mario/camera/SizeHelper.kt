@@ -1,5 +1,7 @@
 package de.mario.camera
 
+import android.graphics.ImageFormat
+import android.hardware.camera2.CameraCharacteristics
 import android.util.Log
 import android.util.Size
 import java.util.*
@@ -39,12 +41,31 @@ object SizeHelper {
         // Pick the smallest of those big enough. If there is no one big enough, pick the
         // largest of those not big enough.
         if (bigEnough.size > 0) {
-            return Collections.min(bigEnough, CameraFragment.CompareSizesByArea())
+            return Collections.min(bigEnough, CompareSizesByArea())
         } else if (notBigEnough.size > 0) {
-            return Collections.max(notBigEnough, CameraFragment.CompareSizesByArea())
+            return Collections.max(notBigEnough, CompareSizesByArea())
         } else {
             Log.w("SizeHelper", "Couldn't find any suitable preview size")
             return choices[0]
+        }
+    }
+
+    fun findLargestSize(characteristics: CameraCharacteristics): Size {
+        val map = characteristics.get(
+                CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+
+        // For still image captures, we use the largest available size.
+        val sizes: List<Size> = map.getOutputSizes(ImageFormat.JPEG).asList()
+        return Collections.max(sizes, CompareSizesByArea())
+    }
+
+    internal class CompareSizesByArea : Comparator<Size> {
+
+        override fun compare(lhs: Size, rhs: Size): Int {
+            // We cast here to ensure the multiplications won't overflow
+            val l = lhs.width.toLong() * lhs.height
+            val r = rhs.width.toLong() * rhs.height
+            return java.lang.Long.signum(l - r)
         }
     }
 }
