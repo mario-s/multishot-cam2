@@ -12,34 +12,40 @@ import org.junit.Test
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.*
 
+import org.jetbrains.spek.api.Spek
+import org.jetbrains.spek.api.dsl.describe
+import org.jetbrains.spek.api.dsl.it
+import org.junit.platform.runner.JUnitPlatform
+import org.junit.runner.RunWith
+
 /**
  */
-class CameraHandlerTest {
+@RunWith(JUnitPlatform::class)
+object CameraHandlerTest : Spek({
+    val ID = "foo"
 
-    private val ID = "foo"
+    describe("the camera handler") {
+        var cameraManager: CameraManager? = null
 
-    private var cameraManager: CameraManager? = null
+        var classUnderTest: CameraHandler? = null
 
-    private var classUnderTest: CameraHandler? = null
+        beforeEachTest {
+            val fragment = mock(Fragment::class.java)
+            val activity = mock(Activity::class.java)
+            cameraManager = mock(CameraManager::class.java)
+            classUnderTest = CameraHandler(fragment)
 
-    @Before
-    fun setup() {
-        val fragment = mock(Fragment::class.java)
-        val activity = mock(Activity::class.java)
-        cameraManager = mock(CameraManager::class.java)
-        classUnderTest = CameraHandler(fragment)
+            given(fragment.activity).willReturn(activity)
+            given(activity.getSystemService(Context.CAMERA_SERVICE)).willReturn(cameraManager!!)
+        }
 
-        given(fragment.activity).willReturn(activity)
-        given(activity.getSystemService(Context.CAMERA_SERVICE)).willReturn(cameraManager!!)
+        it("should return an id for a camera") {
+            val camCaracteristics = mock(CameraCharacteristics::class.java)
+            given(cameraManager!!.cameraIdList).willReturn(arrayOf(ID))
+            given(cameraManager!!.getCameraCharacteristics(ID)).willReturn(camCaracteristics)
+
+            val camId = classUnderTest?.findCameraId()
+            assertThat(camId, equalTo(ID))
+        }
     }
-
-    @Test
-    fun test_FindCameraId() {
-        val camCaracteristics = mock(CameraCharacteristics::class.java)
-        given(cameraManager!!.cameraIdList).willReturn(arrayOf(ID))
-        given(cameraManager!!.getCameraCharacteristics(ID)).willReturn(camCaracteristics)
-
-        val camId = classUnderTest?.findCameraId()
-        assertThat(camId, equalTo(ID))
-    }
-}
+})

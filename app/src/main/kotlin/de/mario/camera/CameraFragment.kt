@@ -278,9 +278,6 @@ class CameraFragment : Fragment(), OnClickListener {
 
 
     private fun configureTransform(viewWidth: Int, viewHeight: Int) {
-        if (null == mTextureView || null == mPreviewSize || null == activity) {
-            return
-        }
         val viewSize = Size(viewWidth, viewHeight)
         val rotation = activity.windowManager.defaultDisplay.rotation
         val matrix = MatrixFactory.create(mPreviewSize!!, viewSize, rotation)
