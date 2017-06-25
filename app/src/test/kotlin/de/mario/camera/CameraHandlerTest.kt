@@ -4,11 +4,11 @@ import android.app.Activity
 import android.app.Fragment
 import android.content.Context
 import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CameraManager
+import android.os.Handler
 import org.hamcrest.CoreMatchers.*
 import org.junit.Assert.assertThat
-import org.junit.Before
-import org.junit.Test
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.*
 
@@ -40,12 +40,19 @@ object CameraHandlerTest : Spek({
         }
 
         it("should return an id for a camera") {
-            val camCaracteristics = mock(CameraCharacteristics::class.java)
+            val caracteristics = mock(CameraCharacteristics::class.java)
             given(cameraManager!!.cameraIdList).willReturn(arrayOf(ID))
-            given(cameraManager!!.getCameraCharacteristics(ID)).willReturn(camCaracteristics)
+            given(cameraManager!!.getCameraCharacteristics(ID)).willReturn(caracteristics)
 
             val camId = classUnderTest?.findCameraId()
             assertThat(camId, equalTo(ID))
+        }
+
+        it("should forward open camera call") {
+            val callBack = mock(CameraDevice.StateCallback::class.java)
+            val handler = mock(Handler::class.java)
+            classUnderTest?.openCamera(ID, callBack, handler)
+            verify(cameraManager!!).openCamera(ID, callBack, handler)
         }
     }
 })
