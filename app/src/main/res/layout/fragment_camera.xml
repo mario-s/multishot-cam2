@@ -34,8 +34,7 @@
         <de.mario.camera.AutoFitTextureView
             android:id="@+id/texture"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"/>
+            android:layout_height="wrap_content"/>
 
     </FrameLayout>
 
