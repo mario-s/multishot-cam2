@@ -26,19 +26,25 @@ object MatrixFactoryTest : Spek({
             given(size.height).willReturn(100)
         }
 
-        it("should return a matrix for a rotation of 90 degree") {
-            val result = MatrixFactory.create(size, size, 90)
+        fun verify(rotation : Int) {
+            val result = MatrixFactory.create(size, size, rotation)
             assertThat(result, notNullValue())
+        }
+
+        it("should return a matrix for a rotation of 0 degree") {
+            verify(0)
+        }
+
+        it("should return a matrix for a rotation of 90 degree") {
+            verify(90)
         }
 
         it("should return a matrix for a rotation of 180 degree") {
-            val result = MatrixFactory.create(size, size, 180)
-            assertThat(result, notNullValue())
+            verify(180)
         }
 
         it("should return a matrix for a rotation of 270 degree") {
-            val result = MatrixFactory.create(size, size, 270)
-            assertThat(result, notNullValue())
+            verify(270)
         }
     }
 })
