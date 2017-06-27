@@ -43,19 +43,21 @@ class CameraFragment : Fragment(), OnClickListener {
 
     private val mCameraOpenCloseLock = Semaphore(1)
 
+    private lateinit var mFile: File
+
+    private lateinit var mPreviewRequestBuilder: CaptureRequest.Builder
+    private lateinit var mPreviewRequest: CaptureRequest
+
+    private lateinit var mTextureView: AutoFitTextureView
+    private lateinit var mPreviewSize: Size
+
     private var mCameraId: String? = null
     private var mCameraDevice: CameraDevice? = null
 
     private var mBackgroundThread: HandlerThread? = null
     private var mBackgroundHandler: Handler? = null
     private var mImageReader: ImageReader? = null
-    private var mFile: File? = null
 
-    private var mPreviewRequestBuilder: CaptureRequest.Builder? = null
-    private var mPreviewRequest: CaptureRequest? = null
-
-    private var mTextureView: AutoFitTextureView? = null
-    private var mPreviewSize: Size? = null
     private var mCaptureSession: CameraCaptureSession? = null
 
     companion object Factory {
@@ -88,10 +90,10 @@ class CameraFragment : Fragment(), OnClickListener {
         // available, and "onSurfaceTextureAvailable" will not be called. In that case, we can open
         // a camera and start preview from here (otherwise, we wait until the surface is ready in
         // the SurfaceTextureListener).
-        if (mTextureView!!.isAvailable) {
-            openCamera(mTextureView!!.width, mTextureView!!.height)
+        if (mTextureView.isAvailable) {
+            openCamera(mTextureView.width, mTextureView.height)
         } else {
-            mTextureView?.surfaceTextureListener = mSurfaceTextureListener
+            mTextureView.surfaceTextureListener = mSurfaceTextureListener
         }
     }
 
@@ -127,11 +129,11 @@ class CameraFragment : Fragment(), OnClickListener {
             // We fit the aspect ratio of TextureView to the size of preview we picked.
             val orientation = resources.configuration.orientation
             if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                mTextureView?.setAspectRatio(
-                        mPreviewSize!!.width, mPreviewSize!!.height)
+                mTextureView.setAspectRatio(
+                        mPreviewSize.width, mPreviewSize.height)
             } else {
-                mTextureView?.setAspectRatio(
-                        mPreviewSize!!.height, mPreviewSize!!.width)
+                mTextureView.setAspectRatio(
+                        mPreviewSize.height, mPreviewSize.width)
             }
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
@@ -224,20 +226,20 @@ class CameraFragment : Fragment(), OnClickListener {
      */
     private fun createCameraPreviewSession() {
         try {
-            val texture = mTextureView!!.surfaceTexture
+            val texture = mTextureView.surfaceTexture
 
             // We configure the size of default buffer to be the size of camera preview we want.
-            texture.setDefaultBufferSize(mPreviewSize!!.width, mPreviewSize!!.height)
+            texture.setDefaultBufferSize(mPreviewSize.width, mPreviewSize.height)
 
             // This is the output Surface we need to start preview.
             val surface = Surface(texture)
 
             // We set up a CaptureRequest.Builder with the output Surface.
-            mPreviewRequestBuilder = mCameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
-            mPreviewRequestBuilder?.addTarget(surface)
+            mPreviewRequestBuilder = mCameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)!!
+            mPreviewRequestBuilder.addTarget(surface)
 
             // Here, we create a CameraCaptureSession for camera preview.
-            mCameraDevice?.createCaptureSession(Arrays.asList(surface, mImageReader!!.surface),
+            mCameraDevice?.createCaptureSession(Arrays.asList(surface, mImageReader?.surface),
                     object : CameraCaptureSession.StateCallback() {
 
                         override fun onConfigured(cameraCaptureSession: CameraCaptureSession) {
@@ -250,14 +252,14 @@ class CameraFragment : Fragment(), OnClickListener {
                             mCaptureSession = cameraCaptureSession
                             try {
                                 // Auto focus should be continuous for camera preview.
-                                mPreviewRequestBuilder?.set(CaptureRequest.CONTROL_AF_MODE,
+                                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE,
                                         CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
                                 // Flash is automatically enabled when necessary.
-                                mPreviewRequestBuilder?.set(CaptureRequest.CONTROL_AE_MODE,
+                                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
                                         CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH)
 
                                 // Finally, we start displaying the camera preview.
-                                mPreviewRequest = mPreviewRequestBuilder?.build()
+                                mPreviewRequest = mPreviewRequestBuilder.build()
                                 mCaptureSession?.setRepeatingRequest(mPreviewRequest,
                                         mCaptureCallback, mBackgroundHandler)
                             } catch (e: CameraAccessException) {
@@ -278,10 +280,13 @@ class CameraFragment : Fragment(), OnClickListener {
 
 
     private fun configureTransform(viewWidth: Int, viewHeight: Int) {
+        mTextureView.setTransform(createMatrix(viewWidth, viewHeight))
+    }
+
+    private fun createMatrix(viewWidth: Int, viewHeight: Int): Matrix {
         val viewSize = Size(viewWidth, viewHeight)
         val rotation = activity.windowManager.defaultDisplay.rotation
-        val matrix = MatrixFactory.create(mPreviewSize!!, viewSize, rotation)
-        mTextureView!!.setTransform(matrix)
+        return MatrixFactory.create(mPreviewSize, viewSize, rotation)
     }
 
     /**
@@ -297,11 +302,11 @@ class CameraFragment : Fragment(), OnClickListener {
     private fun lockFocus() {
         try {
             // This is how to tell the camera to lock focus.
-            mPreviewRequestBuilder!!.set(CaptureRequest.CONTROL_AF_TRIGGER,
+            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
                     CameraMetadata.CONTROL_AF_TRIGGER_START)
             // Tell #mCaptureCallback to wait for the lock.
             camState.currentState = CameraState.STATE_WAITING_LOCK
-            mCaptureSession?.capture(mPreviewRequestBuilder?.build(), mCaptureCallback,
+            mCaptureSession?.capture(mPreviewRequestBuilder.build(), mCaptureCallback,
                     mBackgroundHandler!!)
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
@@ -315,11 +320,11 @@ class CameraFragment : Fragment(), OnClickListener {
     private fun runPrecaptureSequence() {
         try {
             // This is how to tell the camera to trigger.
-            mPreviewRequestBuilder!!.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER,
+            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER,
                     CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START)
             // Tell #mCaptureCallback to wait for the precapture sequence to be set.
             camState.currentState = CameraState.STATE_WAITING_PRECAPTURE
-            mCaptureSession?.capture(mPreviewRequestBuilder?.build(), mCaptureCallback,
+            mCaptureSession?.capture(mPreviewRequestBuilder.build(), mCaptureCallback,
                     mBackgroundHandler)
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
@@ -373,11 +378,11 @@ class CameraFragment : Fragment(), OnClickListener {
     private fun unlockFocus() {
         try {
             // Reset the auto-focus trigger
-            mPreviewRequestBuilder!!.set(CaptureRequest.CONTROL_AF_TRIGGER,
+            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
                     CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
-            mPreviewRequestBuilder!!.set(CaptureRequest.CONTROL_AE_MODE,
+            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
                     CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH)
-            mCaptureSession?.capture(mPreviewRequestBuilder!!.build(), mCaptureCallback,
+            mCaptureSession?.capture(mPreviewRequestBuilder.build(), mCaptureCallback,
                     mBackgroundHandler)
             // After this, the camera will go back to the normal state of preview.
             camState.currentState = CameraState.STATE_PREVIEW
@@ -389,7 +394,7 @@ class CameraFragment : Fragment(), OnClickListener {
     }
 
     private val mOnImageAvailableListener = ImageReader.OnImageAvailableListener { reader ->
-        mBackgroundHandler?.post(ImageSaver(reader.acquireNextImage(), mFile!!))
+        mBackgroundHandler?.post(ImageSaver(reader.acquireNextImage(), mFile))
     }
 
     /**
