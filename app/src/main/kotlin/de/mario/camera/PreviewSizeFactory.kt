@@ -64,8 +64,8 @@ class PreviewSizeFactory(val fragment: Fragment) {
         // bus' bandwidth limitation, resulting in gorgeous previews but the storage of
         // garbage capture data.
         return chooseOptimalSize(map.getOutputSizes(SurfaceTexture::class.java),
-                rotatedPreviewWidth, rotatedPreviewHeight, maxPreviewWidth,
-                maxPreviewHeight, largest)
+                Size(rotatedPreviewWidth, rotatedPreviewHeight), Size(maxPreviewWidth,
+                maxPreviewHeight), largest)
     }
 
     private fun swapDimensions(characteristics: CameraCharacteristics): Boolean {
