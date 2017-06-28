@@ -22,18 +22,34 @@ object SizeHelperTest : Spek( {
 
     describe("the size helper") {
 
+        val min = mock(Size::class.java)
+        val max = mock(Size::class.java)
+
+        beforeEachTest {
+            given(max.width).willReturn(100)
+            given(max.height).willReturn(100)
+        }
+
         it("should return the maximum size") {
-            val min = mock(Size::class.java)
-            val max = mock(Size::class.java)
             val characteristic = mock(CameraCharacteristics::class.java)
             val map = mock(StreamConfigurationMap::class.java)
 
             given(characteristic.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)).willReturn(map)
             given(map.getOutputSizes(ImageFormat.JPEG)).willReturn(arrayOf(min, max))
-            given(max.width).willReturn(100)
-            given(max.height).willReturn(100)
 
             val result = SizeHelper.findLargestSize(characteristic)
+            assertThat(result, equalTo(max))
+        }
+
+        it("should return the maximum for optimal size when all three sizes are max") {
+            val choices = arrayOf(min, max)
+            val result = SizeHelper.chooseOptimalSize(choices, max, max, max)
+            assertThat(result, equalTo(max))
+        }
+
+        it("should return the maximum for optimal size when two sizes are max") {
+            val choices = arrayOf(min, max)
+            val result = SizeHelper.chooseOptimalSize(choices, max, max, min)
             assertThat(result, equalTo(max))
         }
 

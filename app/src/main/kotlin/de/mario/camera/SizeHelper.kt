@@ -25,10 +25,12 @@ object SizeHelper {
         // Collect the supported resolutions that are smaller than the preview Surface
         val notBigEnough = ArrayList<Size>()
 
+        val ratio = if(aspectRatio.width > 0) aspectRatio.height / aspectRatio.width else 1
         for (option in choices) {
-            if (option.width <= maxSize.width && option.height <= maxSize.height &&
-                    option.height == option.width * aspectRatio.height / aspectRatio.width) {
-                if (option.width >= textureViewSize.width && option.height >= textureViewSize.height) {
+            val optWidth = option.width
+            val optHeight = option.height
+            if (optWidth <= maxSize.width && optHeight <= maxSize.height && optHeight == optWidth * ratio) {
+                if (optWidth >= textureViewSize.width && optHeight >= textureViewSize.height) {
                     bigEnough.add(option)
                 } else {
                     notBigEnough.add(option)
