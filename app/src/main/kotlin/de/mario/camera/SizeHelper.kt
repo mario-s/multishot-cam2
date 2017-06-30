@@ -2,6 +2,7 @@ package de.mario.camera
 
 import android.graphics.ImageFormat
 import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.params.StreamConfigurationMap
 import android.util.Log
 import android.util.Size
 import java.util.*
@@ -55,6 +56,10 @@ object SizeHelper {
                 CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
 
         // For still image captures, we use the largest available size.
+        return findLargestSize(map)
+    }
+
+    fun findLargestSize(map : StreamConfigurationMap) : Size {
         val sizes: List<Size> = map.getOutputSizes(ImageFormat.JPEG).asList()
         return Collections.max(sizes, CompareSizesByArea())
     }

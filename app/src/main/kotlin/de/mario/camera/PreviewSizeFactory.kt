@@ -29,7 +29,7 @@ class PreviewSizeFactory(val fragment: Fragment) {
     fun createPreviewSize(characteristics: CameraCharacteristics, origin: Size): Size {
         val map = characteristics.get(
                 CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
-        val largest: Size = SizeHelper.findLargestSize(characteristics)
+        val largest: Size = SizeHelper.findLargestSize(map)
 
 
         // Find out if we need to swap dimension to get the preview size relative to sensor
@@ -70,7 +70,7 @@ class PreviewSizeFactory(val fragment: Fragment) {
 
     private fun swapDimensions(characteristics: CameraCharacteristics): Boolean {
         val displayRotation = defaultDisplay().rotation
-        val sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION)!!
+        val sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION)
         var swappedDimensions = false
         when (displayRotation) {
             Surface.ROTATION_0, Surface.ROTATION_180 -> if (sensorOrientation == 90 || sensorOrientation == 270) {
