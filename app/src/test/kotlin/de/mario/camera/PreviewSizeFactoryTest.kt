@@ -54,7 +54,7 @@ object PreviewSizeFactoryTest : Spek( {
 
             given(map.getOutputSizes(ImageFormat.JPEG)).willReturn(arr)
             given(map.getOutputSizes(SurfaceTexture::class.java)).willReturn(arr)
-            given(characteristic.get(isNull(CameraCharacteristics.Key::class.java))).willReturn(map).willReturn(0)
+            given(characteristic.get(isNull<CameraCharacteristics.Key<Any>>())).willReturn(map).willReturn(Integer(0))
 
             val result = classUnderTest.createPreviewSize(characteristic, max)
             assertThat(result, equalTo(min))
