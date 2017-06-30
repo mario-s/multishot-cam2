@@ -16,8 +16,6 @@ import org.jetbrains.spek.api.dsl.it
 import org.junit.Assert.assertThat
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers.eq
 import org.mockito.ArgumentMatchers.isNull
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.mock
