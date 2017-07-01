@@ -13,7 +13,7 @@ class ImageSaver(val image: Image, val file: File) : Runnable {
     private val TAG = "ImageSaver"
 
     override fun run() {
-        val buffer = image.getPlanes()[0].getBuffer()
+        val buffer = image.planes[0].buffer
         val bytes = ByteArray(buffer.remaining())
         buffer.get(bytes)
         var output: FileOutputStream? = null
