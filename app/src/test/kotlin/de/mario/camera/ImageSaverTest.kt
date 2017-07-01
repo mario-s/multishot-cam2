@@ -6,13 +6,13 @@ import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
 
 import org.junit.platform.runner.JUnitPlatform
-import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import android.media.Image
+import org.hamcrest.CoreMatchers.equalTo
+import org.junit.Assert.assertThat
+import org.junit.rules.TemporaryFolder
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.verify
-import java.io.File
 import java.nio.ByteBuffer
 
 /**
@@ -23,30 +23,30 @@ object ImageSaverTest : Spek( {
 
     describe("the image saver") {
 
-        val temp = TemporaryFolder()
-        var file: File? = null
-        var image: Image? = null
+        val tmp = TemporaryFolder()
 
         beforeEachTest {
-            temp.create()
-            file = temp.newFile("pic.jpg")
-            image = mock(Image::class.java)
+            tmp.create()
         }
 
         afterEachTest {
-            temp.delete()
+            tmp.delete()
         }
 
         it("should store an image") {
+
+            val file = tmp.newFile("test.jpg")
+            val image = mock(Image::class.java)
             val plane = mock(Image.Plane::class.java)
             val buffer = mock(ByteBuffer::class.java)
 
-            given(image!!.planes).willReturn(arrayOf(plane))
+            given(image.planes).willReturn(arrayOf(plane))
             given(plane.buffer).willReturn(buffer)
 
-            val classUnderTest = ImageSaver(image!!, file!!)
+            val classUnderTest = ImageSaver(image, file)
             classUnderTest.run()
-            verify(buffer).remaining()
+
+            assertThat(file.exists(), equalTo(true))
         }
 
     }
