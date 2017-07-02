@@ -36,7 +36,7 @@ class CameraFragment : Fragment(), OnClickListener {
     private val previewSizeFactory = PreviewSizeFactory(this)
     private val cameraHandler = CameraHandler(this)
     private val camState = CameraState()
-    private val mCaptureCallback = CaptureCallback(camState, this::runPrecaptureSequence, this::captureStillPicture)
+    private val mCaptureCallback = CaptureCallback(camState, this::precaptureSequence, this::capturePicture)
     private val cameraPermission = RequestPermissionCallback(this)
 
     private val toaster = Toaster(this)
@@ -317,7 +317,7 @@ class CameraFragment : Fragment(), OnClickListener {
      * Run the precapture sequence for capturing a still image. This method should be called when
      * we get a response in [.mCaptureCallback] from [.lockFocus].
      */
-    private fun runPrecaptureSequence() {
+    private fun precaptureSequence() {
         try {
             // This is how to tell the camera to trigger.
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER,
@@ -335,7 +335,7 @@ class CameraFragment : Fragment(), OnClickListener {
      * Capture a still picture. This method should be called when we get a response in
      * {@link #mCaptureCallback} from both {@link #lockFocus()}.
      */
-    private fun captureStillPicture() {
+    private fun capturePicture() {
         try {
             // This is the CaptureRequest.Builder that we use to take a picture.
             val captureBuilder =
