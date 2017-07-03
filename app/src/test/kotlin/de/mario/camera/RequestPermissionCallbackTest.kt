@@ -1,15 +1,7 @@
 package de.mario.camera
 
-import android.app.Activity
 import android.app.Fragment
-import android.content.Context
 import android.content.pm.PackageManager
-import android.hardware.camera2.CameraCharacteristics
-import android.hardware.camera2.CameraDevice
-import android.hardware.camera2.CameraManager
-import android.os.Handler
-import org.hamcrest.CoreMatchers.*
-import org.junit.Assert.assertThat
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.*
 
@@ -32,6 +24,7 @@ object RequestPermissionCallbackTest : Spek({
 
         it("should request camera permissions") {
             classUnderTest.requestCameraPermission()
+            verify(fragment, never()).childFragmentManager
         }
 
         it("forwards permission results to the fragment") {
