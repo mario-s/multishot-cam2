@@ -1,6 +1,5 @@
 package de.mario.camera
 
-import android.content.DialogInterface
 import android.app.AlertDialog
 import android.app.Dialog
 import android.app.DialogFragment
@@ -25,16 +24,14 @@ class ErrorDialog : DialogFragment() {
         }
     }
 
-    override fun onCreateDialog(savedInstanceState: Bundle): Dialog {
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return create(activity, arguments.getString(ARG_MESSAGE))
     }
 
     private fun create(activity: Activity, msg: String): Dialog {
-        val ok = R.string.ok
-        val listener = DialogInterface.OnClickListener { _, _ -> activity.finish() }
         return AlertDialog.Builder(activity)
                 .setMessage(msg)
-                .setPositiveButton(ok, listener)
+                .setPositiveButton(R.string.ok, { _, _ -> activity.finish() })
                 .create()
     }
 
