@@ -7,6 +7,7 @@ import android.app.DialogFragment
 import android.os.Bundle
 
 import android.R
+import android.app.Activity
 
 /**
  */
@@ -19,15 +20,21 @@ class ErrorDialog : DialogFragment() {
             val dialog = ErrorDialog()
             val args = Bundle()
             args.putString(ARG_MESSAGE, message)
-            dialog.setArguments(args)
+            dialog.arguments = args
             return dialog
         }
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle): Dialog {
+        return create(activity, arguments.getString(ARG_MESSAGE))
+    }
+
+    private fun create(activity: Activity, msg: String): Dialog {
+        val ok = R.string.ok
+        val listener = DialogInterface.OnClickListener { _, _ -> activity.finish() }
         return AlertDialog.Builder(activity)
-                .setMessage(arguments.getString(ARG_MESSAGE))
-                .setPositiveButton(R.string.ok, DialogInterface.OnClickListener { _, _ -> activity.finish() })
+                .setMessage(msg)
+                .setPositiveButton(ok, listener)
                 .create()
     }
 
