@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:key="camera"
+        android:title="@string/camera">
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/grid"
+            android:summary="@string/prefs_grid_enabled_description"
+            android:title="@string/prefs_grid_enabled_title" />
+
+    </PreferenceCategory>
+</PreferenceScreen>

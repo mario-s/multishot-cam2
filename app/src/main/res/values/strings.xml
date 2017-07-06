@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">Multishot Camera</string>
     <string name="picture">Picture</string>
     <string name="description_info">Info</string>
@@ -14,4 +14,11 @@
 
         ]]>
     </string>
+    <string name="camera">Camera</string>
+    <string name="shutter">Shutter</string>
+
+    <string name="grid"><xliff:g id="preference_key">grid</xliff:g></string>
+    <string name="prefs_grid_enabled_description">Show a 3x3 grid on the preview.</string>
+    <string name="prefs_grid_enabled_title">Show Grid</string>
+
 </resources>
