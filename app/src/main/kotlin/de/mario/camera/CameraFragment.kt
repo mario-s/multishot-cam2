@@ -4,6 +4,7 @@ package de.mario.camera
 import android.Manifest
 import android.app.AlertDialog
 import android.app.Fragment
+import android.content.Intent
 import android.util.Size
 import java.util.concurrent.Semaphore
 import android.media.ImageReader
@@ -31,6 +32,9 @@ class CameraFragment : Fragment(), OnClickListener {
     private val TAG = "CameraFragment"
 
     private val FRAGMENT_DIALOG = "dialog"
+
+    //the ids of the buttons
+    private val BUTTONS = arrayOf(R.id.picture, R.id.settings, R.id.info)
 
     private val orientations = SurfaceOrientation()
     private val previewSizeFactory = PreviewSizeFactory(this)
@@ -72,8 +76,10 @@ class CameraFragment : Fragment(), OnClickListener {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        view.findViewById(R.id.picture).setOnClickListener(this)
-        view.findViewById(R.id.info).setOnClickListener(this)
+        for (id in BUTTONS) {
+            view.findViewById(id).setOnClickListener(this)
+        }
+
         mTextureView = view.findViewById(R.id.texture) as AutoFitTextureView
     }
 
@@ -106,6 +112,7 @@ class CameraFragment : Fragment(), OnClickListener {
     override fun onClick(view: View) {
         when (view.id) {
             R.id.picture -> takePicture()
+            R.id.settings -> startSettings()
             R.id.info -> AlertDialog.Builder(activity!!)
                             .setMessage(R.string.intro_message)
                             .setPositiveButton(android.R.string.ok, null)
@@ -294,6 +301,11 @@ class CameraFragment : Fragment(), OnClickListener {
      */
     private fun takePicture() {
         lockFocus()
+    }
+
+    private fun startSettings() {
+        val intent = Intent(activity, SettingsActivity::class.java)
+        startActivity(intent)
     }
 
     /**

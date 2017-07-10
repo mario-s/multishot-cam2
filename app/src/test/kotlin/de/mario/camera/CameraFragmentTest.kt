@@ -38,7 +38,7 @@ object CameraFragmentTest : Spek({
             given(view.findViewById(R.id.texture)).willReturn(textureView)
 
             instance.onViewCreated(view, null)
-            verify(view, times(3)).findViewById(anyInt())
+            verify(view, times(4)).findViewById(anyInt())
         }
 
     }
