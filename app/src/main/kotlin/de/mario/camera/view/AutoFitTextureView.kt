@@ -1,10 +1,9 @@
-package de.mario.camera
+package de.mario.camera.view
 
 import android.content.Context
 import android.util.AttributeSet
 import android.util.Size
 import android.view.TextureView
-import android.view.View
 
 /**
  */
@@ -51,8 +50,8 @@ open class AutoFitTextureView : TextureView {
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        val width = View.MeasureSpec.getSize(widthMeasureSpec)
-        val height = View.MeasureSpec.getSize(heightMeasureSpec)
+        val width = MeasureSpec.getSize(widthMeasureSpec)
+        val height = MeasureSpec.getSize(heightMeasureSpec)
         if (0 == mRatioWidth || 0 == mRatioHeight) {
             setDimension(width, height)
         } else {

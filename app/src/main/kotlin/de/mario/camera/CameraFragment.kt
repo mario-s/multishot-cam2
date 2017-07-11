@@ -25,6 +25,8 @@ import java.util.concurrent.TimeUnit
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CaptureRequest
 import de.mario.camera.SizeHelper.findLargestSize
+import de.mario.camera.settings.SettingsActivity
+import de.mario.camera.view.AutoFitTextureView
 
 
 class CameraFragment : Fragment(), OnClickListener {

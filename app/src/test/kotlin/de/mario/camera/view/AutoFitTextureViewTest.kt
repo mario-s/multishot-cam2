@@ -1,4 +1,4 @@
-package de.mario.camera
+package de.mario.camera.view
 
 
 import android.content.Context
@@ -34,7 +34,7 @@ object AutoFitTextureViewTest : Spek({
         }
     }
 
-    describe("the camera fragment") {
+    describe("the auto fit texture view") {
 
         val context = mock(Context::class.java)
         val classUnderTest = TestView(context)

@@ -1,4 +1,4 @@
-package de.mario.camera
+package de.mario.camera.settings
 
 import android.app.Activity
 import android.os.Bundle
