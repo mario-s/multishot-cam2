@@ -5,28 +5,30 @@ import android.Manifest
 import android.app.AlertDialog
 import android.app.Fragment
 import android.content.Intent
-import android.util.Size
-import java.util.concurrent.Semaphore
-import android.media.ImageReader
-import android.os.Handler
-import java.io.File
-import android.os.Bundle
-import android.view.*
-import android.view.View.OnClickListener
-import android.os.HandlerThread
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.graphics.*
+import android.graphics.ImageFormat
+import android.graphics.Matrix
+import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
+import android.media.ImageReader
+import android.os.Bundle
+import android.os.Handler
+import android.os.HandlerThread
 import android.support.v4.content.ContextCompat.checkSelfPermission
 import android.util.Log
-import java.util.*
-import java.util.concurrent.TimeUnit
-import android.hardware.camera2.CameraAccessException
-import android.hardware.camera2.CaptureRequest
+import android.util.Size
+import android.view.*
+import android.view.View.OnClickListener
 import de.mario.camera.SizeHelper.findLargestSize
+import de.mario.camera.settings.SettingsAccess
 import de.mario.camera.settings.SettingsActivity
 import de.mario.camera.view.AutoFitTextureView
+import de.mario.camera.view.GridView
+import java.io.File
+import java.util.*
+import java.util.concurrent.Semaphore
+import java.util.concurrent.TimeUnit
 
 
 class CameraFragment : Fragment(), OnClickListener {
@@ -49,6 +51,7 @@ class CameraFragment : Fragment(), OnClickListener {
 
     private val mCameraOpenCloseLock = Semaphore(1)
 
+    private lateinit var settings: SettingsAccess
     private lateinit var mFile: File
 
     private lateinit var mPreviewRequestBuilder: CaptureRequest.Builder
@@ -81,17 +84,23 @@ class CameraFragment : Fragment(), OnClickListener {
         for (id in BUTTONS) {
             view.findViewById(id).setOnClickListener(this)
         }
-
         mTextureView = view.findViewById(R.id.texture) as AutoFitTextureView
+    }
+
+    private fun toggleViews(view: View) {
+        val grid = view.findViewById(R.id.grid) as GridView
+        grid.enable(settings.isEnabled(R.string.grid))
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        settings = SettingsAccess(activity)
         mFile = File(activity.getExternalFilesDir(null), "pic.jpg")
     }
 
     override fun onResume() {
         super.onResume()
+        toggleViews(view)
         startBackgroundThread()
 
         // When the screen is turned off and turned back on, the SurfaceTexture is already

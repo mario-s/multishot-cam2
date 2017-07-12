@@ -23,7 +23,7 @@ object GridViewTest : Spek({
     describe("the grid view") {
 
         val context = mock(Context::class.java)
-        val classUnderTest = GridView(context)
+        val classUnderTest = GridView(context, null)
 
         it("should draw 4 lines on the canvas") {
             val canvas = mock(Canvas::class.java)

@@ -7,11 +7,9 @@ import org.hamcrest.CoreMatchers.notNullValue
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
-
+import org.junit.Assert.assertThat
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
-
-import org.junit.Assert.assertThat
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.*
@@ -20,8 +18,6 @@ import org.mockito.Mockito.*
  */
 @RunWith(JUnitPlatform::class)
 object CameraFragmentTest : Spek({
-
-    val ID = "foo"
 
     describe("the camera fragment") {
 

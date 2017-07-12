@@ -7,8 +7,8 @@
     <FrameLayout
         android:id="@+id/top"
         android:layout_width="match_parent"
-        android:layout_alignParentTop="true"
         android:layout_height="30dp"
+        android:layout_alignParentTop="true"
         android:background="#fff">
 
         <ImageButton
@@ -25,14 +25,20 @@
     <!-- center -->
     <FrameLayout
         android:id="@+id/preview"
-        android:layout_below="@+id/top"
-        android:paddingTop="3dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/black">
+        android:layout_above="@+id/control"
+        android:layout_below="@+id/top"
+        android:background="@android:color/black"
+        android:paddingTop="3dp">
 
         <de.mario.camera.view.AutoFitTextureView
             android:id="@+id/texture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <de.mario.camera.view.GridView
+            android:id="@+id/grid"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
@@ -62,8 +68,8 @@
             style="@style/ButtonStyle"
             android:layout_width="38dp"
             android:layout_height="38dp"
-            android:layout_marginRight="5dip"
             android:layout_gravity="center_vertical|right"
+            android:layout_marginRight="5dip"
             android:src="@drawable/gear"
             android:text="@string/ac_settings"/>
 

@@ -3,12 +3,19 @@ package de.mario.camera.view
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Paint
+import android.util.AttributeSet
 import android.view.View
 
 /**
  * This class returns a [Paint].
  */
-abstract class AbstractPaintView(context: Context) : View(context) {
+abstract class AbstractPaintView : View {
+
+    constructor(context: Context) : this(context, null)
+
+    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
+
+    constructor(context: Context, attrs: AttributeSet?, defStyle: Int) : super(context, attrs, defStyle)
 
     private val WIDTH = 1F
 
