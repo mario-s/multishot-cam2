@@ -19,19 +19,19 @@ object SizeHelper {
      * and whose aspect ratio matches with the specified value.
      *
      */
-    fun chooseOptimalSize(choices: Array<Size>, textureViewSize: Size, maxSize: Size, aspectRatio: Size): Size {
+    fun chooseOptimalSize(choices: Array<Size>, textureSize: Size, maxSize: Size, aspectRatio: Size): Size {
 
         // Collect the supported resolutions that are at least as big as the preview Surface
         val bigEnough = ArrayList<Size>()
         // Collect the supported resolutions that are smaller than the preview Surface
         val notBigEnough = ArrayList<Size>()
 
-        val ratio = if(aspectRatio.width > 0) aspectRatio.height / aspectRatio.width else 1
         for (option in choices) {
-            val optWidth = option.width
-            val optHeight = option.height
-            if (optWidth <= maxSize.width && optHeight <= maxSize.height && optHeight == optWidth * ratio) {
-                if (optWidth >= textureViewSize.width && optHeight >= textureViewSize.height) {
+            val w = option.width
+            val h = option.height
+            if (w <= maxSize.width && h <= maxSize.height &&
+                    h == w * aspectRatio.height / aspectRatio.width) {
+                if (w >= textureSize.width && h >= textureSize.height) {
                     bigEnough.add(option)
                 } else {
                     notBigEnough.add(option)

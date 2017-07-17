@@ -26,6 +26,8 @@ object SizeHelperTest : Spek( {
         val max = mock(Size::class.java)
 
         beforeEachTest {
+            given(min.width).willReturn(1)
+            given(max.height).willReturn(1)
             given(max.width).willReturn(100)
             given(max.height).willReturn(100)
         }
@@ -47,10 +49,10 @@ object SizeHelperTest : Spek( {
             assertThat(result, equalTo(max))
         }
 
-        it("should return the maximum for optimal size when two sizes are max") {
+        it("should return the minimum for optimal size when two sizes are max") {
             val choices = arrayOf(min, max)
             val result = SizeHelper.chooseOptimalSize(choices, max, max, min)
-            assertThat(result, equalTo(max))
+            assertThat(result, equalTo(min))
         }
 
     }
