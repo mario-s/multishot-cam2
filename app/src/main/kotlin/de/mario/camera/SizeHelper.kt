@@ -11,6 +11,8 @@ import java.util.*
 /**
  */
 object SizeHelper {
+    private data class Grouped(val bigEnough: ArrayList<Size>, val notBigEnough: ArrayList<Size>)
+
     /*
      * Given {@code choices} of {@code Size}s supported by a camera, choose the smallest one that
      * is at least as large as the respective texture view size, and that is at most as large as the
@@ -21,6 +23,21 @@ object SizeHelper {
      */
     fun chooseOptimalSize(choices: Array<Size>, textureSize: Size, maxSize: Size, aspectRatio: Size): Size {
 
+        val grouped = groupChoices(choices, textureSize, maxSize, aspectRatio)
+
+        // Pick the smallest of those big enough. If there is no one big enough, pick the
+        // largest of those not big enough.
+        if (grouped.bigEnough.isNotEmpty()) {
+            return Collections.min(grouped.bigEnough, CompareSizesByArea())
+        } else if (grouped.notBigEnough.isNotEmpty()) {
+            return Collections.max(grouped.notBigEnough, CompareSizesByArea())
+        } else {
+            Log.w("SizeHelper", "Couldn't find any suitable preview size")
+            return choices[0]
+        }
+    }
+
+    private fun groupChoices(choices: Array<Size>, textureSize: Size, maxSize: Size, aspectRatio: Size): Grouped {
         // Collect the supported resolutions that are at least as big as the preview Surface
         val bigEnough = ArrayList<Size>()
         // Collect the supported resolutions that are smaller than the preview Surface
@@ -39,16 +56,7 @@ object SizeHelper {
             }
         }
 
-        // Pick the smallest of those big enough. If there is no one big enough, pick the
-        // largest of those not big enough.
-        if (bigEnough.size > 0) {
-            return Collections.min(bigEnough, CompareSizesByArea())
-        } else if (notBigEnough.size > 0) {
-            return Collections.max(notBigEnough, CompareSizesByArea())
-        } else {
-            Log.w("SizeHelper", "Couldn't find any suitable preview size")
-            return choices[0]
-        }
+        return Grouped(bigEnough, notBigEnough)
     }
 
     fun findLargestSize(characteristics: CameraCharacteristics): Size {
