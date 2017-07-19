@@ -81,9 +81,7 @@ class CameraFragment : Fragment(), OnClickListener {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        for (id in BUTTONS) {
-            view.findViewById(id).setOnClickListener(this)
-        }
+        BUTTONS.forEach { view.findViewById(it).setOnClickListener(this) }
         mTextureView = view.findViewById(R.id.texture) as AutoFitTextureView
     }
 
