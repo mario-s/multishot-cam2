@@ -11,7 +11,7 @@ import java.util.*
 /**
  */
 object SizeHelper {
-    private data class Grouped(val bigEnough: ArrayList<Size>, val notBigEnough: ArrayList<Size>)
+    private data class Result(val bigEnough: ArrayList<Size>, val notBigEnough: ArrayList<Size>)
 
     /*
      * Given {@code choices} of {@code Size}s supported by a camera, choose the smallest one that
@@ -23,40 +23,38 @@ object SizeHelper {
      */
     fun chooseOptimalSize(choices: Array<Size>, textureSize: Size, maxSize: Size, aspectRatio: Size): Size {
 
-        val grouped = groupChoices(choices, textureSize, maxSize, aspectRatio)
+        val result = filterChoices(choices, textureSize, maxSize, aspectRatio)
 
         // Pick the smallest of those big enough. If there is no one big enough, pick the
         // largest of those not big enough.
-        if (grouped.bigEnough.isNotEmpty()) {
-            return Collections.min(grouped.bigEnough, CompareSizesByArea())
-        } else if (grouped.notBigEnough.isNotEmpty()) {
-            return Collections.max(grouped.notBigEnough, CompareSizesByArea())
+        if (result.bigEnough.isNotEmpty()) {
+            return Collections.min(result.bigEnough, CompareSizesByArea())
+        } else if (result.notBigEnough.isNotEmpty()) {
+            return Collections.max(result.notBigEnough, CompareSizesByArea())
         } else {
             Log.w("SizeHelper", "Couldn't find any suitable preview size")
             return choices[0]
         }
     }
 
-    private fun groupChoices(choices: Array<Size>, textureSize: Size, maxSize: Size, aspectRatio: Size): Grouped {
+    private fun filterChoices(choices: Array<Size>, textureSize: Size, maxSize: Size, aspectRatio: Size): Result {
         // Collect the supported resolutions that are at least as big as the preview Surface
         val bigEnough = ArrayList<Size>()
         // Collect the supported resolutions that are smaller than the preview Surface
         val notBigEnough = ArrayList<Size>()
 
-        for (option in choices) {
-            val w = option.width
-            val h = option.height
-            if (w <= maxSize.width && h <= maxSize.height &&
-                    h == w * aspectRatio.height / aspectRatio.width) {
-                if (w >= textureSize.width && h >= textureSize.height) {
-                    bigEnough.add(option)
-                } else {
-                    notBigEnough.add(option)
-                }
+        choices.filter {
+            (it.width <= maxSize.width && it.height <= maxSize.height &&
+                    it.height == it.width * aspectRatio.height / aspectRatio.width)
+        }.forEach {
+            if (it.width >= textureSize.width && it.height >= textureSize.height) {
+                bigEnough.add(it)
+            } else {
+                notBigEnough.add(it)
             }
         }
 
-        return Grouped(bigEnough, notBigEnough)
+        return Result(bigEnough, notBigEnough)
     }
 
     fun findLargestSize(characteristics: CameraCharacteristics): Size {
