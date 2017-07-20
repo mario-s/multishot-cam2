@@ -1,4 +1,4 @@
-package de.mario.camera
+package de.mario.camera.orientation
 
 
 import android.view.View
