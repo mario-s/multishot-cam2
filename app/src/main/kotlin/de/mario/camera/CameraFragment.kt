@@ -21,6 +21,7 @@ import android.util.Size
 import android.view.*
 import android.view.View.OnClickListener
 import de.mario.camera.SizeHelper.findLargestSize
+import de.mario.camera.orientation.ViewsOrientationListener
 import de.mario.camera.settings.SettingsAccess
 import de.mario.camera.settings.SettingsActivity
 import de.mario.camera.view.AutoFitTextureView
@@ -31,14 +32,7 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 
 
-class CameraFragment : Fragment(), OnClickListener {
-
-    private val TAG = "CameraFragment"
-
-    private val FRAGMENT_DIALOG = "dialog"
-
-    //the ids of the buttons
-    private val BUTTONS = arrayOf(R.id.picture, R.id.settings, R.id.info)
+open class CameraFragment : Fragment(), OnClickListener {
 
     private val orientations = SurfaceOrientation()
     private val previewSizeFactory = PreviewSizeFactory(this)
@@ -51,6 +45,7 @@ class CameraFragment : Fragment(), OnClickListener {
 
     private val mCameraOpenCloseLock = Semaphore(1)
 
+    private lateinit var viewsOrientationListener: ViewsOrientationListener
     private lateinit var settings: SettingsAccess
     private lateinit var mFile: File
 
@@ -69,7 +64,15 @@ class CameraFragment : Fragment(), OnClickListener {
 
     private var mCaptureSession: CameraCaptureSession? = null
 
-    companion object Factory {
+    companion object {
+
+        private val TAG = "CameraFragment"
+
+        private val FRAGMENT_DIALOG = "dialog"
+
+        //the ids of the buttons
+        private val BUTTONS = arrayOf(R.id.picture, R.id.settings, R.id.info)
+
         fun newInstance(): CameraFragment {
             return CameraFragment()
         }
@@ -92,6 +95,10 @@ class CameraFragment : Fragment(), OnClickListener {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
+        viewsOrientationListener = ViewsOrientationListener(activity)
+        BUTTONS.forEach {viewsOrientationListener.addView(activity.findViewById(it))}
+
         settings = SettingsAccess(activity)
         mFile = File(activity.getExternalFilesDir(null), "pic.jpg")
     }
@@ -115,6 +122,7 @@ class CameraFragment : Fragment(), OnClickListener {
     override fun onPause() {
         closeCamera()
         stopBackgroundThread()
+        BUTTONS.forEach {viewsOrientationListener.removeView(activity.findViewById(it))}
         super.onPause()
     }
 
