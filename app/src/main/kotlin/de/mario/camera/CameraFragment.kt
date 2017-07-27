@@ -21,9 +21,11 @@ import android.util.Size
 import android.view.*
 import android.view.View.OnClickListener
 import de.mario.camera.SizeHelper.findLargestSize
+import de.mario.camera.glue.SettingsAccessable
 import de.mario.camera.orientation.ViewsOrientationListener
 import de.mario.camera.settings.SettingsAccess
 import de.mario.camera.settings.SettingsActivity
+import de.mario.camera.view.AbstractPaintView
 import de.mario.camera.view.AutoFitTextureView
 import de.mario.camera.view.GridView
 import java.io.File
@@ -46,7 +48,7 @@ open class CameraFragment : Fragment(), OnClickListener {
     private val mCameraOpenCloseLock = Semaphore(1)
 
     private lateinit var viewsOrientationListener: ViewsOrientationListener
-    private lateinit var settings: SettingsAccess
+    private lateinit var settings: SettingsAccessable
     private lateinit var mFile: File
 
     private lateinit var mPreviewRequestBuilder: CaptureRequest.Builder
@@ -89,8 +91,10 @@ open class CameraFragment : Fragment(), OnClickListener {
     }
 
     private fun toggleViews(view: View) {
-        val grid = view.findViewById(R.id.grid) as GridView
-        grid.enable(settings.isEnabled(R.string.grid))
+        fun findView(id: Int): AbstractPaintView = view.findViewById(id) as AbstractPaintView
+
+        findView(R.id.grid).enable(settings.isEnabled(R.string.grid))
+        findView(R.id.level).enable(settings.isEnabled(R.string.level))
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

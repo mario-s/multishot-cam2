@@ -3,6 +3,8 @@ package de.mario.camera
 
 import android.app.Activity
 import android.view.View
+import de.mario.camera.glue.SettingsAccessable
+import de.mario.camera.view.AbstractPaintView
 import de.mario.camera.view.AutoFitTextureView
 import org.hamcrest.CoreMatchers.notNullValue
 import org.jetbrains.spek.api.Spek
@@ -15,6 +17,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.*
+import org.springframework.test.util.ReflectionTestUtils
 
 /**
  */
@@ -63,6 +66,26 @@ object CameraFragmentTest : Spek({
             instance.onActivityCreated(null)
 
             verify(activity, times(3)).findViewById(anyInt())
+        }
+
+        it("onResume should toogle views") {
+            val instance = spy(CameraFragment())
+            val paintView = mock(AbstractPaintView::class.java)
+            val view = mock(View::class.java)
+            val textureView = mock(AutoFitTextureView::class.java)
+            val settings = mock(SettingsAccessable::class.java)
+
+            ReflectionTestUtils.setField(instance, "mTextureView", textureView)
+            ReflectionTestUtils.setField(instance, "settings", settings)
+
+            given(instance.view).willReturn(view)
+            given(view.findViewById(anyInt())).willReturn(paintView)
+
+            instance.onResume()
+
+            val order = inOrder(view, settings)
+            order.verify(view, atLeastOnce()).findViewById(anyInt())
+            order.verify(settings, atLeastOnce()).isEnabled(anyInt())
         }
 
     }
