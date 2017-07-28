@@ -101,15 +101,25 @@ open class CameraFragment : Fragment(), OnClickListener {
         super.onActivityCreated(savedInstanceState)
 
         viewsOrientationListener = ViewsOrientationListener(activity)
-        BUTTONS.forEach {viewsOrientationListener.addView(activity.findViewById(it))}
-
         settings = SettingsAccess(activity)
         mFile = File(activity.getExternalFilesDir(null), "pic.jpg")
     }
 
+    private fun toogleOrientationListener(enable: Boolean) {
+        if(enable) {
+            BUTTONS.forEach {viewsOrientationListener.addView(activity.findViewById(it))}
+            viewsOrientationListener.enable()
+        } else {
+            viewsOrientationListener.disable()
+            BUTTONS.forEach {viewsOrientationListener.removeView(activity.findViewById(it))}
+        }
+    }
+
     override fun onResume() {
         super.onResume()
+
         toggleViews(view)
+        toogleOrientationListener(true)
         startBackgroundThread()
 
         // When the screen is turned off and turned back on, the SurfaceTexture is already
@@ -126,7 +136,7 @@ open class CameraFragment : Fragment(), OnClickListener {
     override fun onPause() {
         closeCamera()
         stopBackgroundThread()
-        BUTTONS.forEach {viewsOrientationListener.removeView(activity.findViewById(it))}
+        toogleOrientationListener(false)
         super.onPause()
     }
 

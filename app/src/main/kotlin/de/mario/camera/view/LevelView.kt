@@ -4,6 +4,7 @@ package de.mario.camera.view
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
+import android.util.AttributeSet
 import android.view.OrientationEventListener
 
 import de.mario.camera.orientation.OrientationNoiseFilter
@@ -12,7 +13,7 @@ import de.mario.camera.orientation.OrientationNoiseFilter
 /**
  * This view draws an indicator when the device is near horizontal or vertical.
  */
-class LevelView(context: Context) : AbstractPaintView(context) {
+class LevelView(context: Context, attrs: AttributeSet?) : AbstractPaintView(context, attrs) {
 
     private val listener = LevelOrientationListener(context)
 
