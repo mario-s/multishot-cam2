@@ -23,7 +23,7 @@ object LevelViewTest : Spek({
     describe("the level view") {
 
         val context = mock(Context::class.java)
-        val classUnderTest = LevelView(context)
+        val classUnderTest = LevelView(context, null)
 
         it("should draw a line") {
             val canvas = mock(Canvas::class.java)

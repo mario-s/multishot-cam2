@@ -22,6 +22,7 @@ import android.view.*
 import android.view.View.OnClickListener
 import de.mario.camera.SizeHelper.findLargestSize
 import de.mario.camera.glue.SettingsAccessable
+import de.mario.camera.glue.ViewsOrientationListenable
 import de.mario.camera.orientation.ViewsOrientationListener
 import de.mario.camera.settings.SettingsAccess
 import de.mario.camera.settings.SettingsActivity
@@ -47,7 +48,7 @@ open class CameraFragment : Fragment(), OnClickListener {
 
     private val mCameraOpenCloseLock = Semaphore(1)
 
-    private lateinit var viewsOrientationListener: ViewsOrientationListener
+    private lateinit var viewsOrientationListener: ViewsOrientationListenable
     private lateinit var settings: SettingsAccessable
     private lateinit var mFile: File
 

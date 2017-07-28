@@ -2,13 +2,14 @@ package de.mario.camera.orientation
 
 import android.content.Context
 import android.view.View
+import de.mario.camera.glue.ViewsOrientationListenable
 
 import java.util.ArrayList
 
 /**
  * Orientation listener to update the rotation of views.
  */
-class ViewsOrientationListener(context: Context) : AbstractOrientationListener(context) {
+class ViewsOrientationListener(context: Context) : AbstractOrientationListener(context), ViewsOrientationListenable {
 
     private val views = ArrayList<View>()
 
@@ -25,11 +26,11 @@ class ViewsOrientationListener(context: Context) : AbstractOrientationListener(c
         }
     }
 
-    fun addView(view: View) {
+    override fun addView(view: View) {
         views.add(view)
     }
 
-    fun removeView(view: View) {
+    override fun removeView(view: View) {
         views.remove(view)
     }
 }
