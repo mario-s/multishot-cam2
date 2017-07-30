@@ -36,9 +36,10 @@ class LevelView(context: Context, attrs: AttributeSet?) : AbstractPaintView(cont
 
             val cx = canvas.width / 2
             val cy = canvas.height / 2
+            val len = cx * 2 / 3
 
             canvas.rotate((-orientation).toFloat(), cx.toFloat(), cy.toFloat())
-            canvas.drawLine((cx - cx * W_LEN).toFloat(), cy.toFloat(), (cx + cx * W_LEN).toFloat(), cy.toFloat(), stroke)
+            canvas.drawLine((cx - len).toFloat(), cy.toFloat(), (cx + len).toFloat(), cy.toFloat(), stroke)
         }
     }
 
@@ -73,6 +74,5 @@ class LevelView(context: Context, attrs: AttributeSet?) : AbstractPaintView(cont
 
     companion object {
         private val TOL = 1
-        private val W_LEN = 2 / 3
     }
 }
