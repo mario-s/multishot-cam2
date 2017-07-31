@@ -3,7 +3,7 @@ package de.mario.camera.settings
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
-
+import de.mario.camera.glue.SettingsAccessable
 
 
 import java.lang.Integer.parseInt
@@ -11,7 +11,7 @@ import java.lang.Integer.parseInt
 /**
  * This class provides easy access to settings values.
  */
-class SettingsAccess(private val context: Context){
+class SettingsAccess(private val context: Context) : SettingsAccessable{
 
     fun getString(key: String): String {
         return prefs().getString(key, "")
@@ -25,11 +25,11 @@ class SettingsAccess(private val context: Context){
         return parseInt(prefs().getString(key, "0"))
     }
 
-    fun isEnabled(key: Int): Boolean {
+    override fun isEnabled(key: Int): Boolean {
         return isEnabled(context.getString(key))
     }
 
-    fun isEnabled(key: String): Boolean {
+    override fun isEnabled(key: String): Boolean {
         return prefs().getBoolean(key, false)
     }
 

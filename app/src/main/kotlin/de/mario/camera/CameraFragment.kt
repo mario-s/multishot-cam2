@@ -21,8 +21,12 @@ import android.util.Size
 import android.view.*
 import android.view.View.OnClickListener
 import de.mario.camera.SizeHelper.findLargestSize
+import de.mario.camera.glue.SettingsAccessable
+import de.mario.camera.glue.ViewsOrientationListenable
+import de.mario.camera.orientation.ViewsOrientationListener
 import de.mario.camera.settings.SettingsAccess
 import de.mario.camera.settings.SettingsActivity
+import de.mario.camera.view.AbstractPaintView
 import de.mario.camera.view.AutoFitTextureView
 import de.mario.camera.view.GridView
 import java.io.File
@@ -31,14 +35,7 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 
 
-class CameraFragment : Fragment(), OnClickListener {
-
-    private val TAG = "CameraFragment"
-
-    private val FRAGMENT_DIALOG = "dialog"
-
-    //the ids of the buttons
-    private val BUTTONS = arrayOf(R.id.picture, R.id.settings, R.id.info)
+open class CameraFragment : Fragment(), OnClickListener {
 
     private val orientations = SurfaceOrientation()
     private val previewSizeFactory = PreviewSizeFactory(this)
@@ -51,7 +48,8 @@ class CameraFragment : Fragment(), OnClickListener {
 
     private val mCameraOpenCloseLock = Semaphore(1)
 
-    private lateinit var settings: SettingsAccess
+    private lateinit var viewsOrientationListener: ViewsOrientationListenable
+    private lateinit var settings: SettingsAccessable
     private lateinit var mFile: File
 
     private lateinit var mPreviewRequestBuilder: CaptureRequest.Builder
@@ -69,7 +67,15 @@ class CameraFragment : Fragment(), OnClickListener {
 
     private var mCaptureSession: CameraCaptureSession? = null
 
-    companion object Factory {
+    companion object {
+
+        private val TAG = "CameraFragment"
+
+        private val FRAGMENT_DIALOG = "dialog"
+
+        //the ids of the buttons
+        private val BUTTONS = arrayOf(R.id.picture, R.id.settings, R.id.info)
+
         fun newInstance(): CameraFragment {
             return CameraFragment()
         }
@@ -81,26 +87,40 @@ class CameraFragment : Fragment(), OnClickListener {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        for (id in BUTTONS) {
-            view.findViewById(id).setOnClickListener(this)
-        }
+        BUTTONS.forEach { view.findViewById(it).setOnClickListener(this) }
         mTextureView = view.findViewById(R.id.texture) as AutoFitTextureView
     }
 
     private fun toggleViews(view: View) {
-        val grid = view.findViewById(R.id.grid) as GridView
-        grid.enable(settings.isEnabled(R.string.grid))
+        fun findView(id: Int): AbstractPaintView = view.findViewById(id) as AbstractPaintView
+
+        findView(R.id.grid).enable(settings.isEnabled(R.string.grid))
+        findView(R.id.level).enable(settings.isEnabled(R.string.level))
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
+        viewsOrientationListener = ViewsOrientationListener(activity)
         settings = SettingsAccess(activity)
         mFile = File(activity.getExternalFilesDir(null), "pic.jpg")
     }
 
+    private fun toogleOrientationListener(enable: Boolean) {
+        if(enable) {
+            BUTTONS.forEach {viewsOrientationListener.addView(activity.findViewById(it))}
+            viewsOrientationListener.enable()
+        } else {
+            viewsOrientationListener.disable()
+            BUTTONS.forEach {viewsOrientationListener.removeView(activity.findViewById(it))}
+        }
+    }
+
     override fun onResume() {
         super.onResume()
+
         toggleViews(view)
+        toogleOrientationListener(true)
         startBackgroundThread()
 
         // When the screen is turned off and turned back on, the SurfaceTexture is already
@@ -117,6 +137,7 @@ class CameraFragment : Fragment(), OnClickListener {
     override fun onPause() {
         closeCamera()
         stopBackgroundThread()
+        toogleOrientationListener(false)
         super.onPause()
     }
 

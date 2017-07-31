@@ -10,5 +10,11 @@
             android:summary="@string/prefs_grid_enabled_description"
             android:title="@string/prefs_grid_enabled_title" />
 
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/level"
+            android:summary="@string/prefs_level_enabled_description"
+            android:title="@string/prefs_level_enabled_title" />
+
     </PreferenceCategory>
 </PreferenceScreen>
