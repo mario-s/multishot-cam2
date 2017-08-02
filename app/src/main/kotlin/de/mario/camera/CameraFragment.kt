@@ -1,6 +1,5 @@
 package de.mario.camera
 
-
 import android.Manifest
 import android.app.AlertDialog
 import android.app.Fragment
@@ -210,13 +209,13 @@ open class CameraFragment : Fragment(), OnClickListener {
             configureTransform(width, height)
             try {
                 if (!mCameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
-                    throw RuntimeException("Time out waiting to lock camera opening.")
+                    throw IllegalStateException("Time out waiting to lock camera opening.")
                 }
                 cameraHandler.openCamera(mCameraId!!, mStateCallback, mBackgroundHandler!!)
             } catch (e: CameraAccessException) {
                 Log.w(TAG, e.message, e)
             } catch (e: InterruptedException) {
-                throw RuntimeException("Interrupted while trying to lock camera opening.", e)
+                throw IllegalStateException("Interrupted while trying to lock camera opening.", e)
             }
         }
     }
@@ -335,10 +334,8 @@ open class CameraFragment : Fragment(), OnClickListener {
         lockFocus()
     }
 
-    private fun startSettings() {
-        val intent = Intent(activity, SettingsActivity::class.java)
-        startActivity(intent)
-    }
+    private fun startSettings() = startActivity(Intent(activity, SettingsActivity::class.java))
+
 
     /**
      * Lock the focus as the first step for a still image capture.
@@ -415,26 +412,22 @@ open class CameraFragment : Fragment(), OnClickListener {
         }
     }
 
-      /**
+    /**
      * Unlock the focus. This method should be called when still image capture sequence is
      * finished.
      */
     private fun unlockFocus() {
-        try {
-            // Reset the auto-focus trigger
-            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
-                    CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
-            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
-                    CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH)
-            mCaptureSession?.capture(mPreviewRequestBuilder.build(), mCaptureCallback,
-                    mBackgroundHandler)
-            // After this, the camera will go back to the normal state of preview.
-            camState.currentState = CameraState.STATE_PREVIEW
-            mCaptureSession?.setRepeatingRequest(mPreviewRequest, mCaptureCallback,
-                    mBackgroundHandler)
-        } catch (e: CameraAccessException) {
-            Log.w(TAG, e.message, e)
-        }
+        // Reset the auto-focus trigger
+        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
+                CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
+        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
+                CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH)
+        mCaptureSession?.capture(mPreviewRequestBuilder.build(), mCaptureCallback,
+                mBackgroundHandler)
+        // After this, the camera will go back to the normal state of preview.
+        camState.currentState = CameraState.STATE_PREVIEW
+        mCaptureSession?.setRepeatingRequest(mPreviewRequest, mCaptureCallback,
+                mBackgroundHandler)
     }
 
     private val mOnImageAvailableListener = ImageReader.OnImageAvailableListener { reader ->
