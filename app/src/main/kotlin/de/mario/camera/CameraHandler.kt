@@ -11,13 +11,13 @@ import android.os.Handler
  */
 class CameraHandler(val fragment: Fragment) {
 
-    private fun getCameraManager(): CameraManager = fragment.activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+    private fun cameraManager() = fragment.activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
 
-    fun getCameraCharacteristics(cameraId: String): CameraCharacteristics = getCameraManager().getCameraCharacteristics(cameraId)
+    fun getCameraCharacteristics(cameraId: String): CameraCharacteristics = cameraManager().getCameraCharacteristics(cameraId)
 
     fun findCameraId(): String? {
         var id: String? = null
-        val manager = getCameraManager()
+        val manager = cameraManager()
         for (cameraId in manager.cameraIdList) {
             val characteristics = getCameraCharacteristics(cameraId)
 
@@ -32,6 +32,6 @@ class CameraHandler(val fragment: Fragment) {
     }
 
     fun openCamera(cameraId: String, callback: CameraDevice.StateCallback, handler: Handler)  {
-        getCameraManager().openCamera(cameraId, callback, handler)
+        cameraManager().openCamera(cameraId, callback, handler)
     }
 }
