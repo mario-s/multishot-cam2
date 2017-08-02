@@ -1,4 +1,4 @@
-package photo.mario.de.camera;
+package de.mario.camera;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("photo.mario.de.multishotcamera", appContext.getPackageName());
+        assertEquals("de.mario.camera", appContext.getPackageName());
     }
 }
