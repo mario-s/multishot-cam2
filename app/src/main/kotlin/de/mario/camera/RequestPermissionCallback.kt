@@ -4,6 +4,8 @@ import android.Manifest
 import android.app.Fragment
 import android.content.pm.PackageManager
 import android.support.v13.app.FragmentCompat
+import de.mario.camera.widget.ConfirmationDialog
+import de.mario.camera.widget.ErrorDialog
 
 /**
  *

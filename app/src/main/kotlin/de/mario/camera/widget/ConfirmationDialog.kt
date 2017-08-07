@@ -1,4 +1,4 @@
-package de.mario.camera
+package de.mario.camera.widget
 
 import android.Manifest
 import android.app.Dialog
@@ -10,17 +10,17 @@ import android.os.Bundle
 
 /**
  */
-class ConfirmationDialog : DialogFragment() {
+class ConfirmationDialog : android.app.DialogFragment() {
 
     private val REQUEST_CAMERA_PERMISSION = 1
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+    override fun onCreateDialog(savedInstanceState: android.os.Bundle?): android.app.Dialog {
         val parent = parentFragment
-        return AlertDialog.Builder(activity)
-                .setMessage(R.string.request_permission)
+        return android.app.AlertDialog.Builder(activity)
+                .setMessage(de.mario.camera.R.string.request_permission)
                 .setPositiveButton(android.R.string.ok, { _, _ ->
-                    FragmentCompat.requestPermissions(parent,
-                            arrayOf<String>(Manifest.permission.CAMERA), REQUEST_CAMERA_PERMISSION)
+                    android.support.v13.app.FragmentCompat.requestPermissions(parent,
+                            arrayOf<String>(android.Manifest.permission.CAMERA), REQUEST_CAMERA_PERMISSION)
                 })
                 .setNegativeButton(android.R.string.cancel, { _, _ ->
                     parent.activity?.finish()

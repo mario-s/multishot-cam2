@@ -20,21 +20,24 @@ import android.util.Size
 import android.view.*
 import android.view.View.OnClickListener
 import de.mario.camera.SizeHelper.findLargestSize
+import de.mario.camera.glue.CameraControlable
 import de.mario.camera.glue.SettingsAccessable
 import de.mario.camera.glue.ViewsOrientationListenable
+import de.mario.camera.message.MessageHandler
 import de.mario.camera.orientation.ViewsOrientationListener
 import de.mario.camera.settings.SettingsAccess
 import de.mario.camera.settings.SettingsActivity
 import de.mario.camera.view.AbstractPaintView
 import de.mario.camera.view.AutoFitTextureView
-import de.mario.camera.view.GridView
+import de.mario.camera.widget.ErrorDialog
+import de.mario.camera.widget.Toaster
 import java.io.File
 import java.util.*
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 
 
-open class CameraFragment : Fragment(), OnClickListener {
+open class CameraFragment : Fragment(), OnClickListener, CameraControlable {
 
     private val orientations = SurfaceOrientation()
     private val previewSizeFactory = PreviewSizeFactory(this)
@@ -43,6 +46,7 @@ open class CameraFragment : Fragment(), OnClickListener {
     private val mCaptureCallback = CaptureCallback(camState, this::precaptureSequence, this::capturePicture)
     private val cameraPermission = RequestPermissionCallback(this)
 
+    private val messageHandler = MessageHandler(this)
     private val toaster = Toaster(this)
 
     private val mCameraOpenCloseLock = Semaphore(1)
@@ -80,6 +84,14 @@ open class CameraFragment : Fragment(), OnClickListener {
         }
     }
 
+    override fun getMessageHandler(): Handler {
+        return messageHandler
+    }
+
+    override fun getPictureSaveLocation(): File {
+        return mFile
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_camera, container, false)
@@ -102,7 +114,7 @@ open class CameraFragment : Fragment(), OnClickListener {
 
         viewsOrientationListener = ViewsOrientationListener(activity)
         settings = SettingsAccess(activity)
-        mFile = File(activity.getExternalFilesDir(null), "pic.jpg")
+        mFile = activity.getExternalFilesDir(null)
     }
 
     private fun toogleOrientationListener(enable: Boolean) {
@@ -307,13 +319,17 @@ open class CameraFragment : Fragment(), OnClickListener {
 
                         override fun onConfigureFailed(
                                  cameraCaptureSession: CameraCaptureSession) {
-                            toaster.showToast("Failed")
+                            showToast("Failed")
                         }
                     }, null
             )
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
         }
+    }
+
+    override fun showToast(msg: String) {
+        toaster.showToast(msg)
     }
 
 
@@ -399,7 +415,7 @@ open class CameraFragment : Fragment(), OnClickListener {
                 override fun onCaptureCompleted( session: CameraCaptureSession,
                                                  request: CaptureRequest,
                                                  result: TotalCaptureResult) {
-                    toaster.showToast("Saved: " + mFile)
+                    showToast("Saved: " + mFile)
                     Log.d(TAG, mFile.toString())
                     unlockFocus()
                 }
@@ -431,7 +447,7 @@ open class CameraFragment : Fragment(), OnClickListener {
     }
 
     private val mOnImageAvailableListener = ImageReader.OnImageAvailableListener { reader ->
-        mBackgroundHandler?.post(ImageSaver(reader.acquireNextImage(), mFile))
+        mBackgroundHandler?.post(ImageSaver(this, reader.acquireNextImage()))
     }
 
     /**

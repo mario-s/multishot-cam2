@@ -1,4 +1,4 @@
-package de.mario.camera
+package de.mario.camera.widget
 
 import android.app.Activity
 import android.app.Fragment
