@@ -53,7 +53,6 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable {
 
     private lateinit var viewsOrientationListener: ViewsOrientationListenable
     private lateinit var settings: SettingsAccessable
-    private lateinit var mFile: File
 
     private lateinit var mPreviewRequestBuilder: CaptureRequest.Builder
     private lateinit var mPreviewRequest: CaptureRequest
@@ -88,10 +87,6 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable {
         return messageHandler
     }
 
-    override fun getPictureSaveLocation(): File {
-        return mFile
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_camera, container, false)
@@ -114,7 +109,6 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable {
 
         viewsOrientationListener = ViewsOrientationListener(activity)
         settings = SettingsAccess(activity)
-        mFile = activity.getExternalFilesDir(null)
     }
 
     private fun toogleOrientationListener(enable: Boolean) {
@@ -332,7 +326,6 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable {
         toaster.showToast(msg)
     }
 
-
     private fun configureTransform(viewWidth: Int, viewHeight: Int) {
         mTextureView.setTransform(createMatrix(viewWidth, viewHeight))
     }
@@ -415,8 +408,6 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable {
                 override fun onCaptureCompleted( session: CameraCaptureSession,
                                                  request: CaptureRequest,
                                                  result: TotalCaptureResult) {
-                    showToast("Saved: " + mFile)
-                    Log.d(TAG, mFile.toString())
                     unlockFocus()
                 }
             }

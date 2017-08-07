@@ -8,5 +8,4 @@ import java.io.File
 interface CameraControlable {
     fun getMessageHandler(): Handler
     fun showToast(msg: String)
-    fun getPictureSaveLocation(): File
 }

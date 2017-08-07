@@ -1,6 +1,7 @@
 package de.mario.camera
 
 import android.media.Image
+import android.os.Environment
 import android.util.Log
 import de.mario.camera.glue.CameraControlable
 import de.mario.camera.message.MessageSender
@@ -15,6 +16,14 @@ class ImageSaver(val control: CameraControlable, val image: Image) : Runnable {
     private val sender = MessageSender(control.getMessageHandler())
 
     override fun run() {
+        if(!isExternalStorageWritable()){
+            sendMessage("fool")
+        }else {
+            save()
+        }
+    }
+
+    private fun save() {
         val buffer = image.planes[0].buffer
         val bytes = ByteArray(buffer.remaining())
         buffer.get(bytes)
@@ -28,18 +37,28 @@ class ImageSaver(val control: CameraControlable, val image: Image) : Runnable {
             image.close()
             try {
                 output?.close()
-                sendMessage()
+                sendMessage("saved")
             } catch (e: IOException) {
                 Log.w(TAG, e.message, e)
             }
         }
     }
 
-    private fun getFile(): File {
-        return File(control.getPictureSaveLocation(), "pic.jpg")
+    fun isExternalStorageWritable(): Boolean {
+        val state = Environment.getExternalStorageState()
+        if (Environment.MEDIA_MOUNTED == state) {
+            return true
+        }
+        return false
     }
 
-    private fun sendMessage() {
-        sender.send("foo")
+
+    private fun getFile(): File {
+        val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
+        return File(dir, "pic.jpg")
+    }
+
+    private fun sendMessage(msg: String) {
+        sender.send(msg)
     }
 }
