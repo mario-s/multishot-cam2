@@ -1,6 +1,7 @@
 package de.mario.camera.glue
 
 import android.os.Handler
+import java.io.File
 
 /**
  */
