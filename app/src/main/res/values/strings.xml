@@ -2,7 +2,8 @@
     <string name="app_name">Multishot Camera</string>
     <string name="picture">Picture</string>
     <string name="description_info">Info</string>
-    <string name="request_permission">This sample needs camera permission.</string>
+    <string name="request_camera_permission">This app needs camera permission.</string>
+    <string name="request_write_permission">This app needs write permission to save images.</string>
     <string name="camera_error">This device doesn\'t support Camera2 API.</string>
     <string name="intro_message">
         <![CDATA[
@@ -17,6 +18,8 @@
     <string name="camera">Camera</string>
     <string name="shutter">Shutter</string>
     <string name="ac_settings">Settings</string>
+    
+    <string name="no_storage">Unable to save image! The storage is not present.</string>
     <string name="photos_saved" formatted="false">%s photos saved to %s.</string>
 
     <string name="grid"><xliff:g id="preference_key">grid</xliff:g></string>

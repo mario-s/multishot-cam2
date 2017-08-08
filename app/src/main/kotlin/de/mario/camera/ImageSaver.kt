@@ -17,7 +17,7 @@ class ImageSaver(val control: CameraControlable, val image: Image) : Runnable {
 
     override fun run() {
         if(!isExternalStorageWritable()){
-            sendMessage("fool")
+            sendMessage(control.getString(R.string.no_storage))
         }else {
             save()
         }
@@ -29,15 +29,16 @@ class ImageSaver(val control: CameraControlable, val image: Image) : Runnable {
         buffer.get(bytes)
         var output: FileOutputStream? = null
         try {
-            output = FileOutputStream(getFile())
+            val file = getFile()
+            output = FileOutputStream(file)
             output?.write(bytes)
+            sendMessage(control.getString(R.string.photos_saved).format(1, file))
         } catch (e: IOException) {
             Log.w(TAG, e.message, e)
         } finally {
             image.close()
             try {
                 output?.close()
-                sendMessage("saved")
             } catch (e: IOException) {
                 Log.w(TAG, e.message, e)
             }
@@ -51,7 +52,6 @@ class ImageSaver(val control: CameraControlable, val image: Image) : Runnable {
         }
         return false
     }
-
 
     private fun getFile(): File {
         val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)

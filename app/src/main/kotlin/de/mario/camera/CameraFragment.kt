@@ -31,7 +31,6 @@ import de.mario.camera.view.AbstractPaintView
 import de.mario.camera.view.AutoFitTextureView
 import de.mario.camera.widget.ErrorDialog
 import de.mario.camera.widget.Toaster
-import java.io.File
 import java.util.*
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
@@ -44,7 +43,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable {
     private val cameraHandler = CameraHandler(this)
     private val camState = CameraState()
     private val mCaptureCallback = CaptureCallback(camState, this::precaptureSequence, this::capturePicture)
-    private val cameraPermission = RequestPermissionCallback(this)
+    private val permissionCallback = RequestPermissionCallback(this)
 
     private val messageHandler = MessageHandler(this)
     private val toaster = Toaster(this)
@@ -208,8 +207,10 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable {
      * Opens the camera specified by [CameraFragment.mCameraId].
      */
     private fun openCamera(width: Int, height: Int) {
-        if (checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            cameraPermission.requestCameraPermission()
+        if (hasNoPermissions(Manifest.permission.CAMERA)) {
+            permissionCallback.requestCameraPermission()
+        } else if(hasNoPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            permissionCallback.requestWritePermission()
         } else {
             setUpCameraOutputs(width, height)
             configureTransform(width, height)
@@ -224,6 +225,10 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable {
                 throw IllegalStateException("Interrupted while trying to lock camera opening.", e)
             }
         }
+    }
+
+    private fun hasNoPermissions(permission: String): Boolean {
+        return checkSelfPermission(activity, permission) != PackageManager.PERMISSION_GRANTED
     }
 
     private fun closeCamera() {
