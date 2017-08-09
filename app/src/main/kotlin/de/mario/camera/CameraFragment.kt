@@ -39,33 +39,30 @@ import java.util.concurrent.TimeUnit
 open class CameraFragment : Fragment(), OnClickListener, CameraControlable {
 
     private val orientations = SurfaceOrientation()
-    private val previewSizeFactory = PreviewSizeFactory(this)
-    private val cameraHandler = CameraHandler(this)
     private val camState = CameraState()
-    private val mCaptureCallback = CaptureCallback(camState, this::precaptureSequence, this::capturePicture)
-    private val permissionCallback = RequestPermissionCallback(this)
-
-    private val messageHandler = MessageHandler(this)
-    private val toaster = Toaster(this)
 
     private val mCameraOpenCloseLock = Semaphore(1)
 
-    private lateinit var viewsOrientationListener: ViewsOrientationListenable
-    private lateinit var settings: SettingsAccessable
+    private val toaster = Toaster(this)
+    private val messageHandler = MessageHandler(this)
+    private val cameraHandler = CameraHandler(this)
+    private val previewSizeFactory = PreviewSizeFactory(this)
+    private val permissionCallback = RequestPermissionCallback(this)
 
-    private lateinit var mPreviewRequestBuilder: CaptureRequest.Builder
-    private lateinit var mPreviewRequest: CaptureRequest
+    private val mCaptureCallback = CaptureCallback(camState, this::precaptureSequence, this::capturePicture)
 
     private lateinit var mTextureView: AutoFitTextureView
+    private lateinit var mPreviewRequestBuilder: CaptureRequest.Builder
+    private lateinit var mPreviewRequest: CaptureRequest
+    private lateinit var settings: SettingsAccessable
     private lateinit var mPreviewSize: Size
+    private lateinit var viewsOrientationListener: ViewsOrientationListenable
 
     private var mCameraId: String? = null
     private var mCameraDevice: CameraDevice? = null
-
     private var mBackgroundThread: HandlerThread? = null
     private var mBackgroundHandler: Handler? = null
     private var mImageReader: ImageReader? = null
-
     private var mCaptureSession: CameraCaptureSession? = null
 
     companion object {

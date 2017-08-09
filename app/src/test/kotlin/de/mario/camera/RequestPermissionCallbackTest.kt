@@ -36,7 +36,7 @@ object RequestPermissionCallbackTest : Spek({
         }
 
         it("should show error dialog") {
-            val code = classUnderTest.REQUEST_CAMERA_PERMISSION
+            val code = classUnderTest.cameraPermission
             val permissions = arrayOf<String>()
             val results = IntArray(1)
 
@@ -47,7 +47,7 @@ object RequestPermissionCallbackTest : Spek({
         }
 
         it("should not show the error dialog when permission was granted") {
-            val code = classUnderTest.REQUEST_CAMERA_PERMISSION
+            val code = classUnderTest.cameraPermission
             val permissions = arrayOf<String>()
             val results = IntArray(PackageManager.PERMISSION_GRANTED)
 

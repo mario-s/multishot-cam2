@@ -13,20 +13,20 @@ import de.mario.camera.widget.ErrorDialog
 class RequestPermissionCallback(val fragment: Fragment) : FragmentCompat.OnRequestPermissionsResultCallback {
 
     private val FRAGMENT_DIALOG = "dialog"
-    val REQUEST_CAMERA_PERMISSION = 1
-    val REQUEST_EXTERNAL_WRITE = 2
+    private val cameraPermission = R.string.request_camera_permission
+    private val writePermission = R.string.request_write_permission
 
     fun requestCameraPermission() {
-        requestPermission(Manifest.permission.CAMERA, REQUEST_CAMERA_PERMISSION)
+        requestPermission(cameraPermission, Manifest.permission.CAMERA)
     }
 
     fun requestWritePermission() {
-        requestPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, REQUEST_EXTERNAL_WRITE)
+        requestPermission(writePermission, Manifest.permission.WRITE_EXTERNAL_STORAGE)
     }
 
-    private fun requestPermission(permission: String, requestCode: Int) {
+    private fun requestPermission(requestCode: Int, permission: String) {
         if (FragmentCompat.shouldShowRequestPermissionRationale(fragment, permission)) {
-            ConfirmationDialog().show(fragment.childFragmentManager, FRAGMENT_DIALOG)
+            ConfirmationDialog(requestCode, permission).show(fragment.childFragmentManager, FRAGMENT_DIALOG)
         } else {
             FragmentCompat.requestPermissions(fragment, arrayOf(permission), requestCode)
         }
@@ -35,8 +35,7 @@ class RequestPermissionCallback(val fragment: Fragment) : FragmentCompat.OnReque
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
                                             results: IntArray) {
         when (requestCode) {
-            REQUEST_CAMERA_PERMISSION -> showDialogIfNotGranted(results, R.string.request_camera_permission)
-            REQUEST_EXTERNAL_WRITE -> showDialogIfNotGranted(results, R.string.request_write_permission)
+            cameraPermission, writePermission -> showDialogIfNotGranted(results, requestCode)
             else -> fragment.onRequestPermissionsResult(requestCode, permissions, results)
         }
     }
