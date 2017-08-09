@@ -8,12 +8,15 @@ import org.jetbrains.spek.api.dsl.it
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
 import android.media.Image
-import org.hamcrest.CoreMatchers.equalTo
-import org.junit.Assert.assertThat
-import org.junit.rules.TemporaryFolder
+import android.os.Handler
+import de.mario.camera.glue.CameraControlable
+import de.mario.camera.glue.MessageSendable
+import org.mockito.ArgumentMatchers.anyString
+import org.mockito.BDDMockito.anyInt
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.mock
-import java.nio.ByteBuffer
+import org.mockito.Mockito.verify
+
 
 /**
  *
@@ -23,30 +26,20 @@ object ImageSaverTest : Spek( {
 
     describe("the image saver") {
 
-        val tmp = TemporaryFolder()
+        val control = mock(CameraControlable::class.java)
+        val image = mock(Image::class.java)
+        val messageSendable = mock(MessageSendable::class.java)
 
         beforeEachTest {
-            tmp.create()
+            val handler = mock(Handler::class.java)
+            given(control.getMessageHandler()).willReturn(handler)
+            given(control.getString(anyInt())).willReturn("foo")
         }
 
-        afterEachTest {
-            tmp.delete()
-        }
-
-        it("should store an image") {
-
-            val file = tmp.newFile("test.jpg")
-            val image = mock(Image::class.java)
-            val plane = mock(Image.Plane::class.java)
-            val buffer = mock(ByteBuffer::class.java)
-
-            given(image.planes).willReturn(arrayOf(plane))
-            given(plane.buffer).willReturn(buffer)
-
-            val classUnderTest = ImageSaver(image, file)
+        it("run method should call message sender when done") {
+            val classUnderTest = ImageSaver(control, image, messageSendable)
             classUnderTest.run()
-
-            assertThat(file.exists(), equalTo(true))
+            verify(messageSendable).send(anyString())
         }
 
     }

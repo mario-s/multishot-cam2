@@ -1,10 +1,8 @@
 package de.mario.camera
 
-import android.Manifest
 import android.app.AlertDialog
 import android.app.Fragment
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.ImageFormat
 import android.graphics.Matrix
@@ -14,7 +12,6 @@ import android.media.ImageReader
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
-import android.support.v4.content.ContextCompat.checkSelfPermission
 import android.util.Log
 import android.util.Size
 import android.view.*
@@ -47,7 +44,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable {
     private val messageHandler = MessageHandler(this)
     private val cameraHandler = CameraHandler(this)
     private val previewSizeFactory = PreviewSizeFactory(this)
-    private val permissionCallback = RequestPermissionCallback(this)
+    private val permissionRequester = PermissionRequester(this)
 
     private val mCaptureCallback = CaptureCallback(camState, this::precaptureSequence, this::capturePicture)
 
@@ -204,11 +201,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable {
      * Opens the camera specified by [CameraFragment.mCameraId].
      */
     private fun openCamera(width: Int, height: Int) {
-        if (hasNoPermissions(Manifest.permission.CAMERA)) {
-            permissionCallback.requestCameraPermission()
-        } else if(hasNoPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            permissionCallback.requestWritePermission()
-        } else {
+        if (permissionRequester.hasPermissions()) {
             setUpCameraOutputs(width, height)
             configureTransform(width, height)
             try {
@@ -222,10 +215,6 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable {
                 throw IllegalStateException("Interrupted while trying to lock camera opening.", e)
             }
         }
-    }
-
-    private fun hasNoPermissions(permission: String): Boolean {
-        return checkSelfPermission(activity, permission) != PackageManager.PERMISSION_GRANTED
     }
 
     private fun closeCamera() {

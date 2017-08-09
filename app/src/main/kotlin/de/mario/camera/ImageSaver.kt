@@ -4,6 +4,7 @@ import android.media.Image
 import android.os.Environment
 import android.util.Log
 import de.mario.camera.glue.CameraControlable
+import de.mario.camera.glue.MessageSendable
 import de.mario.camera.message.MessageSender
 import java.io.File
 import java.io.FileOutputStream
@@ -11,9 +12,13 @@ import java.io.IOException
 
 /**
  */
-class ImageSaver(val control: CameraControlable, val image: Image) : Runnable {
+class ImageSaver(private val control: CameraControlable, private val image: Image) : Runnable {
     private val TAG = "ImageSaver"
-    private val sender = MessageSender(control.getMessageHandler())
+    private var sender: MessageSendable = MessageSender(control.getMessageHandler())
+
+    internal constructor(control: CameraControlable, image: Image, sender: MessageSendable) : this(control, image) {
+        this.sender = sender
+    }
 
     override fun run() {
         if(!isExternalStorageWritable()){
@@ -45,12 +50,9 @@ class ImageSaver(val control: CameraControlable, val image: Image) : Runnable {
         }
     }
 
-    fun isExternalStorageWritable(): Boolean {
+    private fun isExternalStorageWritable(): Boolean {
         val state = Environment.getExternalStorageState()
-        if (Environment.MEDIA_MOUNTED == state) {
-            return true
-        }
-        return false
+        return Environment.MEDIA_MOUNTED == state
     }
 
     private fun getFile(): File {

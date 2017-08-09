@@ -4,24 +4,38 @@ import android.Manifest
 import android.app.Fragment
 import android.content.pm.PackageManager
 import android.support.v13.app.FragmentCompat
+import android.support.v4.content.ContextCompat.checkSelfPermission
 import de.mario.camera.widget.ConfirmationDialog
 import de.mario.camera.widget.ErrorDialog
 
 /**
  *
  */
-class RequestPermissionCallback(val fragment: Fragment) : FragmentCompat.OnRequestPermissionsResultCallback {
+class PermissionRequester(private val fragment: Fragment) : FragmentCompat.OnRequestPermissionsResultCallback {
 
     private val FRAGMENT_DIALOG = "dialog"
     private val cameraPermission = R.string.request_camera_permission
     private val writePermission = R.string.request_write_permission
 
-    fun requestCameraPermission() {
-        requestPermission(cameraPermission, Manifest.permission.CAMERA)
+    /**
+     * This method requests the required permissions for this app.
+     * First it checks if it already has what the app needs, if not it show a dialog to the user.
+     * @returns true if all needed permissions are given.
+     */
+    fun hasPermissions(): Boolean {
+        var has = true
+        if (hasNoPermissions(Manifest.permission.CAMERA)) {
+            requestPermission(cameraPermission, Manifest.permission.CAMERA)
+            has = false
+        } else if(hasNoPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            requestPermission(writePermission, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            has = false
+        }
+        return has
     }
 
-    fun requestWritePermission() {
-        requestPermission(writePermission, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    private fun hasNoPermissions(permission: String): Boolean {
+        return checkSelfPermission(fragment.activity, permission) != PackageManager.PERMISSION_GRANTED
     }
 
     private fun requestPermission(requestCode: Int, permission: String) {
