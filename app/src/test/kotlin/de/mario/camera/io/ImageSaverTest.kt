@@ -11,6 +11,7 @@ import android.media.Image
 import android.os.Handler
 import de.mario.camera.glue.CameraControlable
 import de.mario.camera.glue.MessageSendable
+import org.junit.rules.TemporaryFolder
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.BDDMockito.anyInt
 import org.mockito.BDDMockito.given
@@ -27,15 +28,22 @@ object ImageSaverTest : Spek( {
 
     describe("the image saver") {
 
+        val tmp = TemporaryFolder()
         val control = mock(CameraControlable::class.java)
         val image = mock(Image::class.java)
         val messageSendable = mock(MessageSendable::class.java)
         val storageAccessable = mock(StorageAccessable::class.java)
 
         beforeEachTest {
+            tmp.create()
             val handler = mock(Handler::class.java)
             given(control.getMessageHandler()).willReturn(handler)
             given(control.getString(anyInt())).willReturn("foo")
+            given(storageAccessable.getStorageDirectory()).willReturn(tmp.newFile(("foo")))
+        }
+
+        afterEachTest {
+            tmp.delete()
         }
 
         it("run method should call message sender when done") {
