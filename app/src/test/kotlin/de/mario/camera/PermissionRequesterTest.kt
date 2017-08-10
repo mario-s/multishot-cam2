@@ -17,7 +17,6 @@ import org.junit.runner.RunWith
  */
 @RunWith(JUnitPlatform::class)
 object PermissionRequesterTest : Spek({
-    val ID = "foo"
 
     describe("the camera handler") {
 

@@ -20,6 +20,7 @@ import de.mario.camera.SizeHelper.findLargestSize
 import de.mario.camera.glue.CameraControlable
 import de.mario.camera.glue.SettingsAccessable
 import de.mario.camera.glue.ViewsOrientationListenable
+import de.mario.camera.io.ImageSaver
 import de.mario.camera.message.MessageHandler
 import de.mario.camera.orientation.ViewsOrientationListener
 import de.mario.camera.settings.SettingsAccess

@@ -1,8 +1,9 @@
-package de.mario.camera
+package de.mario.camera.io
 
 import android.media.Image
 import android.os.Environment
 import android.util.Log
+import de.mario.camera.R
 import de.mario.camera.glue.CameraControlable
 import de.mario.camera.glue.MessageSendable
 import de.mario.camera.message.MessageSender
@@ -14,11 +15,8 @@ import java.io.IOException
  */
 class ImageSaver(private val control: CameraControlable, private val image: Image) : Runnable {
     private val TAG = "ImageSaver"
-    private var sender: MessageSendable = MessageSender(control.getMessageHandler())
-
-    internal constructor(control: CameraControlable, image: Image, sender: MessageSendable) : this(control, image) {
-        this.sender = sender
-    }
+    private val sender: MessageSendable = MessageSender(control.getMessageHandler())
+    private val storageAccess: StorageAccessable = StorageAccess
 
     override fun run() {
         if(!isExternalStorageWritable()){
@@ -51,12 +49,12 @@ class ImageSaver(private val control: CameraControlable, private val image: Imag
     }
 
     private fun isExternalStorageWritable(): Boolean {
-        val state = Environment.getExternalStorageState()
+        val state = storageAccess.getStorageState()
         return Environment.MEDIA_MOUNTED == state
     }
 
     private fun getFile(): File {
-        val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
+        val dir = storageAccess.getStorageDirectory()
         return File(dir, "pic.jpg")
     }
 

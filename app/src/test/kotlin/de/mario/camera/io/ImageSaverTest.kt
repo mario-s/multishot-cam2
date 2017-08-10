@@ -1,4 +1,4 @@
-package de.mario.camera
+package de.mario.camera.io
 
 
 import org.jetbrains.spek.api.Spek
@@ -16,6 +16,7 @@ import org.mockito.BDDMockito.anyInt
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
+import org.springframework.test.util.ReflectionTestUtils
 
 
 /**
@@ -29,6 +30,7 @@ object ImageSaverTest : Spek( {
         val control = mock(CameraControlable::class.java)
         val image = mock(Image::class.java)
         val messageSendable = mock(MessageSendable::class.java)
+        val storageAccessable = mock(StorageAccessable::class.java)
 
         beforeEachTest {
             val handler = mock(Handler::class.java)
@@ -37,7 +39,10 @@ object ImageSaverTest : Spek( {
         }
 
         it("run method should call message sender when done") {
-            val classUnderTest = ImageSaver(control, image, messageSendable)
+            val classUnderTest = ImageSaver(control, image)
+            ReflectionTestUtils.setField(classUnderTest, "sender", messageSendable)
+            ReflectionTestUtils.setField(classUnderTest, "storageAccess", storageAccessable)
+
             classUnderTest.run()
             verify(messageSendable).send(anyString())
         }
