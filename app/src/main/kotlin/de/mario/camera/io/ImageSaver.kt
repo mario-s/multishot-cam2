@@ -74,7 +74,7 @@ class ImageSaver(private val control: CameraControlable, private val image: Imag
 
     private fun createFileName(date: Date, index: Int): String {
         val dateFormat = SimpleDateFormat(PATTERN)
-        return String.format("DSC_%s_%s.jpg", dateFormat.format(date), index)
+        return String.format("DSC_%s.jpg", dateFormat.format(date))
     }
 
     private fun sendMessage(msg: String) {
