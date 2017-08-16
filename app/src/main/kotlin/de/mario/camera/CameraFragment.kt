@@ -1,10 +1,8 @@
 package de.mario.camera
 
-import android.Manifest
 import android.app.AlertDialog
 import android.app.Fragment
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.ImageFormat
 import android.graphics.Matrix
@@ -14,56 +12,55 @@ import android.media.ImageReader
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
-import android.support.v4.content.ContextCompat.checkSelfPermission
 import android.util.Log
 import android.util.Size
 import android.view.*
 import android.view.View.OnClickListener
 import de.mario.camera.SizeHelper.findLargestSize
+import de.mario.camera.glue.CameraControlable
 import de.mario.camera.glue.SettingsAccessable
 import de.mario.camera.glue.ViewsOrientationListenable
+import de.mario.camera.io.ImageSaver
+import de.mario.camera.message.MessageHandler
 import de.mario.camera.orientation.ViewsOrientationListener
 import de.mario.camera.settings.SettingsAccess
 import de.mario.camera.settings.SettingsActivity
 import de.mario.camera.view.AbstractPaintView
 import de.mario.camera.view.AutoFitTextureView
-import de.mario.camera.view.GridView
-import java.io.File
+import de.mario.camera.widget.ErrorDialog
+import de.mario.camera.widget.Toaster
 import java.util.*
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 
 
-open class CameraFragment : Fragment(), OnClickListener {
+open class CameraFragment : Fragment(), OnClickListener, CameraControlable {
 
     private val orientations = SurfaceOrientation()
-    private val previewSizeFactory = PreviewSizeFactory(this)
-    private val cameraHandler = CameraHandler(this)
     private val camState = CameraState()
-    private val mCaptureCallback = CaptureCallback(camState, this::precaptureSequence, this::capturePicture)
-    private val cameraPermission = RequestPermissionCallback(this)
-
-    private val toaster = Toaster(this)
 
     private val mCameraOpenCloseLock = Semaphore(1)
 
-    private lateinit var viewsOrientationListener: ViewsOrientationListenable
-    private lateinit var settings: SettingsAccessable
-    private lateinit var mFile: File
+    private val toaster = Toaster(this)
+    private val messageHandler = MessageHandler(this)
+    private val cameraHandler = CameraHandler(this)
+    private val previewSizeFactory = PreviewSizeFactory(this)
+    private val permissionRequester = PermissionRequester(this)
 
-    private lateinit var mPreviewRequestBuilder: CaptureRequest.Builder
-    private lateinit var mPreviewRequest: CaptureRequest
+    private val mCaptureCallback = CaptureCallback(camState, this::precaptureSequence, this::capturePicture)
 
     private lateinit var mTextureView: AutoFitTextureView
+    private lateinit var mPreviewRequestBuilder: CaptureRequest.Builder
+    private lateinit var mPreviewRequest: CaptureRequest
+    private lateinit var settings: SettingsAccessable
     private lateinit var mPreviewSize: Size
+    private lateinit var viewsOrientationListener: ViewsOrientationListenable
 
     private var mCameraId: String? = null
     private var mCameraDevice: CameraDevice? = null
-
     private var mBackgroundThread: HandlerThread? = null
     private var mBackgroundHandler: Handler? = null
     private var mImageReader: ImageReader? = null
-
     private var mCaptureSession: CameraCaptureSession? = null
 
     companion object {
@@ -78,6 +75,10 @@ open class CameraFragment : Fragment(), OnClickListener {
         fun newInstance(): CameraFragment {
             return CameraFragment()
         }
+    }
+
+    override fun getMessageHandler(): Handler {
+        return messageHandler
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -102,7 +103,6 @@ open class CameraFragment : Fragment(), OnClickListener {
 
         viewsOrientationListener = ViewsOrientationListener(activity)
         settings = SettingsAccess(activity)
-        mFile = File(activity.getExternalFilesDir(null), "pic.jpg")
     }
 
     private fun toogleOrientationListener(enable: Boolean) {
@@ -202,9 +202,7 @@ open class CameraFragment : Fragment(), OnClickListener {
      * Opens the camera specified by [CameraFragment.mCameraId].
      */
     private fun openCamera(width: Int, height: Int) {
-        if (checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            cameraPermission.requestCameraPermission()
-        } else {
+        if (permissionRequester.hasPermissions()) {
             setUpCameraOutputs(width, height)
             configureTransform(width, height)
             try {
@@ -307,7 +305,7 @@ open class CameraFragment : Fragment(), OnClickListener {
 
                         override fun onConfigureFailed(
                                  cameraCaptureSession: CameraCaptureSession) {
-                            toaster.showToast("Failed")
+                            showToast("Failed")
                         }
                     }, null
             )
@@ -316,6 +314,9 @@ open class CameraFragment : Fragment(), OnClickListener {
         }
     }
 
+    override fun showToast(msg: String) {
+        toaster.showToast(msg)
+    }
 
     private fun configureTransform(viewWidth: Int, viewHeight: Int) {
         mTextureView.setTransform(createMatrix(viewWidth, viewHeight))
@@ -399,8 +400,6 @@ open class CameraFragment : Fragment(), OnClickListener {
                 override fun onCaptureCompleted( session: CameraCaptureSession,
                                                  request: CaptureRequest,
                                                  result: TotalCaptureResult) {
-                    toaster.showToast("Saved: " + mFile)
-                    Log.d(TAG, mFile.toString())
                     unlockFocus()
                 }
             }
@@ -431,7 +430,7 @@ open class CameraFragment : Fragment(), OnClickListener {
     }
 
     private val mOnImageAvailableListener = ImageReader.OnImageAvailableListener { reader ->
-        mBackgroundHandler?.post(ImageSaver(reader.acquireNextImage(), mFile))
+        mBackgroundHandler?.post(ImageSaver(this, reader.acquireNextImage()))
     }
 
     /**
