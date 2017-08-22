@@ -7,7 +7,7 @@ import android.hardware.camera2.TotalCaptureResult
 
 /**
  */
-class CaptureCallback(val camState: CameraState,  val precaptureSequence: () -> Unit, val capturePicture: () -> Unit) :
+class CaptureCallback(val camState: CameraState,  val capturable: Captureable) :
         CameraCaptureSession.CaptureCallback() {
 
     override fun onCaptureProgressed(session: CameraCaptureSession,
@@ -27,7 +27,7 @@ class CaptureCallback(val camState: CameraState,  val precaptureSequence: () -> 
             CameraState.STATE_WAITING_LOCK -> {
                 val afState = result.get(CaptureResult.CONTROL_AF_STATE)
                 if (afState == null) {
-                    capturePicture()
+                    capturable.capturePicture()
                 } else if (CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED == afState ||
                         CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED == afState) {
                     // CONTROL_AE_STATE can be null on some devices
@@ -35,9 +35,9 @@ class CaptureCallback(val camState: CameraState,  val precaptureSequence: () -> 
                     if (aeState == null ||
                             aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED) {
                         camState.currentState = CameraState.STATE_PICTURE_TAKEN
-                        capturePicture()
+                        capturable.capturePicture()
                     } else {
-                        precaptureSequence()
+                        capturable.precaptureSequence()
                     }
                 }
             }
@@ -55,7 +55,7 @@ class CaptureCallback(val camState: CameraState,  val precaptureSequence: () -> 
                 val aeState = result.get(CaptureResult.CONTROL_AE_STATE)
                 if (aeState == null || aeState != CaptureResult.CONTROL_AE_STATE_PRECAPTURE) {
                     camState.currentState = CameraState.STATE_PICTURE_TAKEN
-                    capturePicture()
+                    capturable.capturePicture()
                 }
             }
         }
