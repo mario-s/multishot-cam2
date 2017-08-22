@@ -34,7 +34,7 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 
 
-open class CameraFragment : Fragment(), OnClickListener, CameraControlable {
+open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureable {
 
     private val orientations = SurfaceOrientation()
     private val camState = CameraState()
@@ -46,8 +46,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable {
     private val cameraHandler = CameraHandler(this)
     private val previewSizeFactory = PreviewSizeFactory(this)
     private val permissionRequester = PermissionRequester(this)
-
-    private val mCaptureCallback = CaptureCallback(camState, this::precaptureSequence, this::capturePicture)
+    private val mCaptureCallback = CaptureCallback(camState, this)
 
     private lateinit var mTextureView: AutoFitTextureView
     private lateinit var mPreviewRequestBuilder: CaptureRequest.Builder
@@ -330,18 +329,9 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable {
 
     /**
      * Initiate a still image capture.
-     */
-    private fun takePicture() {
-        lockFocus()
-    }
-
-    private fun startSettings() = startActivity(Intent(activity, SettingsActivity::class.java))
-
-
-    /**
      * Lock the focus as the first step for a still image capture.
      */
-    private fun lockFocus() {
+    private fun takePicture() {
         try {
             // This is how to tell the camera to lock focus.
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
@@ -355,11 +345,13 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable {
         }
     }
 
+    private fun startSettings() = startActivity(Intent(activity, SettingsActivity::class.java))
+
     /**
-     * Run the precapture sequence for capturing a still image. This method should be called when
+     * This method should be called when
      * we get a response in [.mCaptureCallback] from [.lockFocus].
      */
-    private fun precaptureSequence() {
+    override fun precaptureSequence() {
         try {
             // This is how to tell the camera to trigger.
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER,
@@ -377,7 +369,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable {
      * Capture a still picture. This method should be called when we get a response in
      * {@link #mCaptureCallback} from both {@link #lockFocus()}.
      */
-    private fun capturePicture() {
+    override fun capturePicture() {
         try {
             // This is the CaptureRequest.Builder that we use to take a picture.
             val captureBuilder =
@@ -446,16 +438,18 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable {
         }
 
         override fun onDisconnected(cameraDevice: CameraDevice) {
-            mCameraOpenCloseLock.release()
-            cameraDevice.close()
-            mCameraDevice = null
+            releaseCamera(cameraDevice)
         }
 
         override fun onError(cameraDevice: CameraDevice, error: Int) {
+            releaseCamera(cameraDevice)
+            activity.finish()
+        }
+
+        private fun releaseCamera(cameraDevice: CameraDevice) {
             mCameraOpenCloseLock.release()
             cameraDevice.close()
             mCameraDevice = null
-            activity.finish()
         }
     }
 
@@ -476,7 +470,5 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable {
         override fun onSurfaceTextureUpdated(texture: SurfaceTexture) {}
 
     }
-
 }
-
 
