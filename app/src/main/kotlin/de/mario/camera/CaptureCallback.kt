@@ -37,7 +37,7 @@ class CaptureCallback(val camState: CameraState,  val capturable: Captureable) :
                         camState.currentState = CameraState.STATE_PICTURE_TAKEN
                         capturable.capturePicture()
                     } else {
-                        capturable.precaptureSequence()
+                        capturable.prepareCapturing()
                     }
                 }
             }

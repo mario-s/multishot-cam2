@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.ImageFormat
 import android.graphics.Matrix
-import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
 import android.media.ImageReader
 import android.os.Bundle
@@ -14,10 +13,13 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
 import android.util.Size
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Surface
+import android.view.View
 import android.view.View.OnClickListener
+import android.view.ViewGroup
 import de.mario.camera.SizeHelper.findLargestSize
-import de.mario.camera.glue.CameraControlable
+import de.mario.camera.glue.CameraControllable
 import de.mario.camera.glue.SettingsAccessable
 import de.mario.camera.glue.ViewsOrientationListenable
 import de.mario.camera.io.ImageSaver
@@ -34,7 +36,7 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 
 
-open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureable {
+open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Captureable {
 
     private val orientations = SurfaceOrientation()
     private val camState = CameraState()
@@ -47,6 +49,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
     private val previewSizeFactory = PreviewSizeFactory(this)
     private val permissionRequester = PermissionRequester(this)
     private val mCaptureCallback = CaptureCallback(camState, this)
+    private val mSurfaceTextureListener = TextureViewSurfaceListener(this)
 
     private lateinit var mTextureView: AutoFitTextureView
     private lateinit var mPreviewRequestBuilder: CaptureRequest.Builder
@@ -104,7 +107,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
         settings = SettingsAccess(activity)
     }
 
-    private fun toogleOrientationListener(enable: Boolean) {
+    private fun toggleOrientationListener(enable: Boolean) {
         if(enable) {
             BUTTONS.forEach {viewsOrientationListener.addView(activity.findViewById(it))}
             viewsOrientationListener.enable()
@@ -118,7 +121,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
         super.onResume()
 
         toggleViews(view)
-        toogleOrientationListener(true)
+        toggleOrientationListener(true)
         startBackgroundThread()
 
         // When the screen is turned off and turned back on, the SurfaceTexture is already
@@ -135,7 +138,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
     override fun onPause() {
         closeCamera()
         stopBackgroundThread()
-        toogleOrientationListener(false)
+        toggleOrientationListener(false)
         super.onPause()
     }
 
@@ -200,10 +203,10 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
     /**
      * Opens the camera specified by [CameraFragment.mCameraId].
      */
-    private fun openCamera(width: Int, height: Int) {
+    override fun openCamera(width: Int, height: Int) {
         if (permissionRequester.hasPermissions()) {
             setUpCameraOutputs(width, height)
-            configureTransform(width, height)
+            updateTransform(width, height)
             try {
                 if (!mCameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
                     throw IllegalStateException("Time out waiting to lock camera opening.")
@@ -317,15 +320,16 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
         toaster.showToast(msg)
     }
 
-    private fun configureTransform(viewWidth: Int, viewHeight: Int) {
+    override fun updateTransform(viewWidth: Int, viewHeight: Int) {
         mTextureView.setTransform(createMatrix(viewWidth, viewHeight))
     }
 
     private fun createMatrix(viewWidth: Int, viewHeight: Int): Matrix {
         val viewSize = Size(viewWidth, viewHeight)
-        val rotation = activity.windowManager.defaultDisplay.rotation
-        return MatrixFactory.create(mPreviewSize, viewSize, rotation)
+        return MatrixFactory.create(mPreviewSize, viewSize, displayRotation())
     }
+
+    private fun displayRotation(): Int = activity.windowManager.defaultDisplay.rotation
 
     /**
      * Initiate a still image capture.
@@ -351,7 +355,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
      * This method should be called when
      * we get a response in [.mCaptureCallback] from [.lockFocus].
      */
-    override fun precaptureSequence() {
+    override fun prepareCapturing() {
         try {
             // This is how to tell the camera to trigger.
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER,
@@ -383,8 +387,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
                     CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH)
 
             // Orientation
-            val rotation = activity.windowManager.defaultDisplay.rotation
-            captureBuilder?.set(CaptureRequest.JPEG_ORIENTATION, orientations.get(rotation))
+            captureBuilder?.set(CaptureRequest.JPEG_ORIENTATION, orientations.get(displayRotation()))
 
             val captureCallback
                     = object : CameraCaptureSession.CaptureCallback() {
@@ -452,23 +455,4 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
             mCameraDevice = null
         }
     }
-
-    private val mSurfaceTextureListener = object : TextureView.SurfaceTextureListener {
-
-        override fun onSurfaceTextureAvailable(texture: SurfaceTexture, width: Int, height: Int) {
-            openCamera(width, height)
-        }
-
-        override fun onSurfaceTextureSizeChanged(texture: SurfaceTexture, width: Int, height: Int) {
-            configureTransform(width, height)
-        }
-
-        override fun onSurfaceTextureDestroyed(texture: SurfaceTexture): Boolean {
-            return true
-        }
-
-        override fun onSurfaceTextureUpdated(texture: SurfaceTexture) {}
-
-    }
 }
-

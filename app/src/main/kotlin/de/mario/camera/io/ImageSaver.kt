@@ -4,7 +4,7 @@ import android.media.Image
 import android.os.Environment
 import android.util.Log
 import de.mario.camera.R
-import de.mario.camera.glue.CameraControlable
+import de.mario.camera.glue.CameraControllable
 import de.mario.camera.glue.MessageSendable
 import de.mario.camera.message.MessageSender
 import java.io.File
@@ -16,7 +16,7 @@ import java.util.*
 
 /**
  */
-class ImageSaver(private val control: CameraControlable, private val image: Image) : Runnable {
+class ImageSaver(private val control: CameraControllable, private val image: Image) : Runnable {
     private val sender: MessageSendable = MessageSender(control.getMessageHandler())
     private val storageAccess: StorageAccessable = StorageAccess
     private val folder:File by lazy {
@@ -49,7 +49,7 @@ class ImageSaver(private val control: CameraControlable, private val image: Imag
         try {
             val file = getFile()
             output = FileOutputStream(file)
-            output?.write(bytes)
+            output.write(bytes)
             sendMessage(control.getString(R.string.photos_saved).format(1, file))
         } catch (e: IOException) {
             Log.w(TAG, e.message, e)

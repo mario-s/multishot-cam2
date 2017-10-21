@@ -4,15 +4,14 @@ package de.mario.camera.message
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import de.mario.camera.CameraFragment
 import de.mario.camera.R
-import de.mario.camera.glue.CameraControlable
+import de.mario.camera.glue.CameraControllable
 
 
 /**
  * This class handles incoming messages from the sub parts.
  */
-class MessageHandler(val control: CameraControlable) : Handler(Looper.getMainLooper()) {
+class MessageHandler(val control: CameraControllable) : Handler(Looper.getMainLooper()) {
 
     override fun handleMessage(message: Message) {
         control.showToast(message.obj.toString())
