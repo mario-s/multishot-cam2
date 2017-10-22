@@ -24,9 +24,11 @@ import de.mario.camera.glue.SettingsAccessable
 import de.mario.camera.glue.ViewsMediatable
 import de.mario.camera.io.ImageSaver
 import de.mario.camera.message.MessageHandler
+import de.mario.camera.orientation.ViewsOrientationListener
 import de.mario.camera.settings.SettingsAccess
 import de.mario.camera.settings.SettingsActivity
 import de.mario.camera.view.AutoFitTextureView
+import de.mario.camera.view.ViewsMediator
 import de.mario.camera.widget.ErrorDialog
 import de.mario.camera.widget.Toaster
 import java.util.*
@@ -84,7 +86,6 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        ViewsMediatable.BUTTONS.forEach { view.findViewById(it).setOnClickListener(this) }
         mTextureView = view.findViewById(R.id.texture) as AutoFitTextureView
     }
 
@@ -92,14 +93,15 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
         super.onActivityCreated(savedInstanceState)
 
         settings = SettingsAccess(activity)
-        viewsMediator = ViewsMediator(activity)
+        val viewsOrientationListener = ViewsOrientationListener(activity)
+        viewsMediator = ViewsMediator(activity, settings, viewsOrientationListener)
+        viewsMediator.setOnClickListener(this)
     }
 
     override fun onResume() {
         super.onResume()
 
-        viewsMediator.toggleViews(view)
-        viewsMediator.toggleOrientationListener(true)
+        viewsMediator.onResume()
         startBackgroundThread()
 
         if (mTextureView.isAvailable) {
@@ -112,7 +114,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
     override fun onPause() {
         closeCamera()
         stopBackgroundThread()
-        viewsMediator.toggleOrientationListener(false)
+        viewsMediator.onPause()
         super.onPause()
     }
 

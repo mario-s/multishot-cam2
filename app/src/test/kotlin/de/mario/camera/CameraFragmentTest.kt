@@ -76,9 +76,7 @@ object CameraFragmentTest : Spek({
 
             instance.onResume()
 
-            val order = inOrder(viewsMediator)
-            order.verify(viewsMediator, atLeastOnce()).toggleViews(view)
-            order.verify(viewsMediator, atLeastOnce()).toggleOrientationListener(true)
+            verify(viewsMediator, atLeastOnce()).onResume()
         }
 
     }
