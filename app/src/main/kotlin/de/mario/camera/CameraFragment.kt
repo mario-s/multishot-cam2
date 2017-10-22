@@ -21,13 +21,11 @@ import android.view.ViewGroup
 import de.mario.camera.SizeHelper.findLargestSize
 import de.mario.camera.glue.CameraControllable
 import de.mario.camera.glue.SettingsAccessable
-import de.mario.camera.glue.ViewsOrientationListenable
+import de.mario.camera.glue.ViewsMediatable
 import de.mario.camera.io.ImageSaver
 import de.mario.camera.message.MessageHandler
-import de.mario.camera.orientation.ViewsOrientationListener
 import de.mario.camera.settings.SettingsAccess
 import de.mario.camera.settings.SettingsActivity
-import de.mario.camera.view.AbstractPaintView
 import de.mario.camera.view.AutoFitTextureView
 import de.mario.camera.widget.ErrorDialog
 import de.mario.camera.widget.Toaster
@@ -55,8 +53,8 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
     private lateinit var mPreviewRequestBuilder: CaptureRequest.Builder
     private lateinit var mPreviewRequest: CaptureRequest
     private lateinit var settings: SettingsAccessable
+    private lateinit var viewsMediator: ViewsMediatable
     private lateinit var mPreviewSize: Size
-    private lateinit var viewsOrientationListener: ViewsOrientationListenable
 
     private var mCameraId: String? = null
     private var mCameraDevice: CameraDevice? = null
@@ -70,9 +68,6 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
         private val TAG = "CameraFragment"
 
         private val FRAGMENT_DIALOG = "dialog"
-
-        //the ids of the buttons
-        private val BUTTONS = arrayOf(R.id.picture, R.id.settings, R.id.info)
 
         fun newInstance(): CameraFragment {
             return CameraFragment()
@@ -89,39 +84,22 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        BUTTONS.forEach { view.findViewById(it).setOnClickListener(this) }
+        ViewsMediatable.BUTTONS.forEach { view.findViewById(it).setOnClickListener(this) }
         mTextureView = view.findViewById(R.id.texture) as AutoFitTextureView
-    }
-
-    private fun toggleViews(view: View) {
-        fun findView(id: Int): AbstractPaintView = view.findViewById(id) as AbstractPaintView
-
-        findView(R.id.grid).enable(settings.isEnabled(R.string.grid))
-        findView(R.id.level).enable(settings.isEnabled(R.string.level))
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        viewsOrientationListener = ViewsOrientationListener(activity)
         settings = SettingsAccess(activity)
-    }
-
-    private fun toggleOrientationListener(enable: Boolean) {
-        if(enable) {
-            BUTTONS.forEach {viewsOrientationListener.addView(activity.findViewById(it))}
-            viewsOrientationListener.enable()
-        } else {
-            viewsOrientationListener.disable()
-            BUTTONS.forEach {viewsOrientationListener.removeView(activity.findViewById(it))}
-        }
+        viewsMediator = ViewsMediator(activity)
     }
 
     override fun onResume() {
         super.onResume()
 
-        toggleViews(view)
-        toggleOrientationListener(true)
+        viewsMediator.toggleViews(view)
+        viewsMediator.toggleOrientationListener(true)
         startBackgroundThread()
 
         if (mTextureView.isAvailable) {
@@ -134,7 +112,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
     override fun onPause() {
         closeCamera()
         stopBackgroundThread()
-        toggleOrientationListener(false)
+        viewsMediator.toggleOrientationListener(false)
         super.onPause()
     }
 

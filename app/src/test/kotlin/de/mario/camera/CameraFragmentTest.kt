@@ -3,9 +3,7 @@ package de.mario.camera
 
 import android.app.Activity
 import android.view.View
-import de.mario.camera.glue.SettingsAccessable
-import de.mario.camera.glue.ViewsOrientationListenable
-import de.mario.camera.view.AbstractPaintView
+import de.mario.camera.glue.ViewsMediatable
 import de.mario.camera.view.AutoFitTextureView
 import org.hamcrest.CoreMatchers.notNullValue
 import org.jetbrains.spek.api.Spek
@@ -65,27 +63,22 @@ object CameraFragmentTest : Spek({
 
         it("onResume should toogle views") {
             val instance = spy(CameraFragment())
-            val paintView = mock(AbstractPaintView::class.java)
             val view = mock(View::class.java)
             val textureView = mock(AutoFitTextureView::class.java)
-            val settings = mock(SettingsAccessable::class.java)
-            val viewsOrientationListener = mock(ViewsOrientationListenable::class.java)
+            val viewsMediator = mock(ViewsMediatable::class.java)
             val activity = mock(Activity::class.java)
 
             ReflectionTestUtils.setField(instance, "mTextureView", textureView)
-            ReflectionTestUtils.setField(instance, "settings", settings)
-            ReflectionTestUtils.setField(instance, "viewsOrientationListener", viewsOrientationListener)
+            ReflectionTestUtils.setField(instance, "viewsMediator", viewsMediator)
 
             given(instance.activity).willReturn(activity)
             given(instance.view).willReturn(view)
-            given(activity.findViewById(anyInt())).willReturn(view)
-            given(view.findViewById(anyInt())).willReturn(paintView)
 
             instance.onResume()
 
-            val order = inOrder(view, settings)
-            order.verify(view, atLeastOnce()).findViewById(anyInt())
-            order.verify(settings, atLeastOnce()).isEnabled(anyInt())
+            val order = inOrder(viewsMediator)
+            order.verify(viewsMediator, atLeastOnce()).toggleViews(view)
+            order.verify(viewsMediator, atLeastOnce()).toggleOrientationListener(true)
         }
 
     }
