@@ -124,10 +124,6 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
         toggleOrientationListener(true)
         startBackgroundThread()
 
-        // When the screen is turned off and turned back on, the SurfaceTexture is already
-        // available, and "onSurfaceTextureAvailable" will not be called. In that case, we can open
-        // a camera and start preview from here (otherwise, we wait until the surface is ready in
-        // the SurfaceTextureListener).
         if (mTextureView.isAvailable) {
             openCamera(mTextureView.width, mTextureView.height)
         } else {
@@ -259,6 +255,21 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
         }
     }
 
+    //set up a CaptureRequest.Builder with the output Surface.
+    private fun createPreviewRequestBuilder(surface: Surface): CaptureRequest.Builder {
+        val builder = mCameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)!!
+        builder.addTarget(surface)
+        setAuto(builder)
+        return builder
+    }
+
+    private fun setAuto(builder: CaptureRequest.Builder) {
+        // Auto focus should be continuous for camera preview.
+        builder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
+        // Flash is automatically enabled when necessary.
+        builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH)
+    }
+
     /**
      * Creates a new {@link CameraCaptureSession} for camera preview.
      */
@@ -272,9 +283,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
             // This is the output Surface we need to start preview.
             val surface = Surface(texture)
 
-            // We set up a CaptureRequest.Builder with the output Surface.
-            mPreviewRequestBuilder = mCameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)!!
-            mPreviewRequestBuilder.addTarget(surface)
+            mPreviewRequestBuilder = createPreviewRequestBuilder(surface)
 
             // Here, we create a CameraCaptureSession for camera preview.
             mCameraDevice?.createCaptureSession(Arrays.asList(surface, mImageReader?.surface),
@@ -289,13 +298,6 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
                             // When the session is ready, we start displaying the preview.
                             mCaptureSession = cameraCaptureSession
                             try {
-                                // Auto focus should be continuous for camera preview.
-                                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE,
-                                        CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
-                                // Flash is automatically enabled when necessary.
-                                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
-                                        CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH)
-
                                 // Finally, we start displaying the camera preview.
                                 mPreviewRequest = mPreviewRequestBuilder.build()
                                 mCaptureSession?.setRepeatingRequest(mPreviewRequest,
@@ -381,13 +383,10 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
             captureBuilder?.addTarget(mImageReader?.surface)
 
             // Use the same AE and AF modes as the preview.
-            captureBuilder?.set(CaptureRequest.CONTROL_AF_MODE,
-                    CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
-            captureBuilder?.set(CaptureRequest.CONTROL_AE_MODE,
-                    CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH)
+            setAuto(captureBuilder!!)
 
             // Orientation
-            captureBuilder?.set(CaptureRequest.JPEG_ORIENTATION, orientations.get(displayRotation()))
+            captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, orientations.get(displayRotation()))
 
             val captureCallback
                     = object : CameraCaptureSession.CaptureCallback() {
@@ -400,7 +399,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
             }
 
             mCaptureSession?.stopRepeating()
-            mCaptureSession!!.capture(captureBuilder?.build(), captureCallback, null)
+            mCaptureSession!!.capture(captureBuilder.build(), captureCallback, null)
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
         }
