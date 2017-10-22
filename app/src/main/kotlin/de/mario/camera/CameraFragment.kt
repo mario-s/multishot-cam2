@@ -71,14 +71,10 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
 
         private val FRAGMENT_DIALOG = "dialog"
 
-        fun newInstance(): CameraFragment {
-            return CameraFragment()
-        }
+        fun newInstance(): CameraFragment = CameraFragment()
     }
 
-    override fun getMessageHandler(): Handler {
-        return messageHandler
-    }
+    override fun getMessageHandler(): Handler = messageHandler
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -133,7 +129,6 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
      * Sets up member variables related to camera.
 
      * @param width  The width of available size for camera preview
-     * *
      * @param height The height of available size for camera preview
      */
     private fun setUpCameraOutputs(width: Int, height: Int) {
@@ -298,13 +293,9 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
         }
     }
 
-    override fun showToast(msg: String) {
-        toaster.showToast(msg)
-    }
+    override fun showToast(msg: String) = toaster.showToast(msg)
 
-    override fun updateTransform(viewWidth: Int, viewHeight: Int) {
-        mTextureView.setTransform(createMatrix(viewWidth, viewHeight))
-    }
+    override fun updateTransform(viewWidth: Int, viewHeight: Int) = mTextureView.setTransform(createMatrix(viewWidth, viewHeight))
 
     private fun createMatrix(viewWidth: Int, viewHeight: Int): Matrix {
         val viewSize = Size(viewWidth, viewHeight)
@@ -419,14 +410,12 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
             createCameraPreviewSession()
         }
 
-        override fun onDisconnected(cameraDevice: CameraDevice) {
-            releaseCamera(cameraDevice)
-        }
-
         override fun onError(cameraDevice: CameraDevice, error: Int) {
             releaseCamera(cameraDevice)
             activity.finish()
         }
+
+        override fun onDisconnected(cameraDevice: CameraDevice) = releaseCamera(cameraDevice)
 
         private fun releaseCamera(cameraDevice: CameraDevice) {
             mCameraOpenCloseLock.release()

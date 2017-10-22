@@ -25,6 +25,8 @@ object CameraFragmentTest : Spek({
 
     describe("the camera fragment") {
 
+        val view = mock(View::class.java)
+        val activity = mock(Activity::class.java)
         val tmp = TemporaryFolder()
 
         beforeEachTest {
@@ -42,31 +44,28 @@ object CameraFragmentTest : Spek({
 
         it("onViewCreated should request texture view") {
             val instance = CameraFragment.newInstance()
-            val view = mock(View::class.java)
             val other = mock(View::class.java)
             val textureView = mock(AutoFitTextureView::class.java)
             given(view.findViewById(anyInt())).willReturn(other)
             given(view.findViewById(R.id.texture)).willReturn(textureView)
 
             instance.onViewCreated(view, null)
-            verify(view, times(4)).findViewById(anyInt())
+            verify(view).findViewById(anyInt())
         }
 
         it("onActivityCreated should complete without error") {
             val instance = spy(CameraFragment())
-            val activity = mock(Activity::class.java)
 
             given(instance.activity).willReturn(activity)
+            given(activity.findViewById(anyInt())).willReturn(view)
 
             instance.onActivityCreated(null)
         }
 
         it("onResume should toogle views") {
             val instance = spy(CameraFragment())
-            val view = mock(View::class.java)
             val textureView = mock(AutoFitTextureView::class.java)
             val viewsMediator = mock(ViewsMediatable::class.java)
-            val activity = mock(Activity::class.java)
 
             ReflectionTestUtils.setField(instance, "mTextureView", textureView)
             ReflectionTestUtils.setField(instance, "viewsMediator", viewsMediator)
