@@ -3,7 +3,6 @@ package de.mario.camera
 import android.app.AlertDialog
 import android.app.Fragment
 import android.content.Intent
-import android.content.res.Configuration
 import android.graphics.ImageFormat
 import android.graphics.Matrix
 import android.hardware.camera2.*
@@ -139,13 +138,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
 
             // We fit the aspect ratio of TextureView to the size of preview we picked.
             val orientation = resources.configuration.orientation
-            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                mTextureView.setAspectRatio(
-                        mPreviewSize.width, mPreviewSize.height)
-            } else {
-                mTextureView.setAspectRatio(
-                        mPreviewSize.height, mPreviewSize.width)
-            }
+            mTextureView.setAspectRatio(mPreviewSize, orientation)
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
         } catch (e: NullPointerException) {

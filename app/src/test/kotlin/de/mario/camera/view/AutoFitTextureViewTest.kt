@@ -7,13 +7,11 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
-
+import org.junit.Assert.assertThat
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
-
-import org.junit.Assert.assertThat
 import org.mockito.BDDMockito.given
-import org.mockito.Mockito.*
+import org.mockito.Mockito.mock
 
 /**
  */
@@ -43,7 +41,7 @@ object AutoFitTextureViewTest : Spek({
             val size = mock(Size::class.java)
             given(size.width).willReturn(2)
             given(size.height).willReturn(3)
-            classUnderTest.setAspectRatio(size)
+            classUnderTest.setAspectRatio(size, 0)
         }
 
         it("should override onMeasure") {
