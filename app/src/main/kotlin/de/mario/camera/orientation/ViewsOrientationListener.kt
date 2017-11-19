@@ -3,8 +3,7 @@ package de.mario.camera.orientation
 import android.content.Context
 import android.view.View
 import de.mario.camera.glue.ViewsOrientationListenable
-
-import java.util.ArrayList
+import java.util.*
 
 /**
  * Orientation listener to update the rotation of views.
@@ -17,12 +16,6 @@ class ViewsOrientationListener(context: Context) : AbstractOrientationListener(c
         val angle = 360 - orientation
         for (view in views) {
             view.rotation = angle.toFloat()
-        }
-    }
-
-    override fun enable() {
-        if (canDetectOrientation()) {
-            super.enable()
         }
     }
 
