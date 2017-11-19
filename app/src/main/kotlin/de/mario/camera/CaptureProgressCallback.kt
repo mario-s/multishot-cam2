@@ -7,7 +7,7 @@ import android.hardware.camera2.TotalCaptureResult
 
 /**
  */
-class CaptureCallback(val camState: CameraState,  val capturable: Captureable) :
+class CaptureProgressCallback(val camState: CameraState, val capturable: Captureable) :
         CameraCaptureSession.CaptureCallback() {
 
     override fun onCaptureProgressed(session: CameraCaptureSession,

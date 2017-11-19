@@ -47,7 +47,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
     private val cameraHandler = CameraHandler(this)
     private val previewSizeFactory = PreviewSizeFactory(this)
     private val permissionRequester = PermissionRequester(this)
-    private val mCaptureCallback = CaptureCallback(camState, this)
+    private val captureProgressCallback = CaptureProgressCallback(camState, this)
     private val mSurfaceTextureListener = TextureViewSurfaceListener(this)
 
     private lateinit var mTextureView: AutoFitTextureView
@@ -269,7 +269,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
                                 // Finally, we start displaying the camera preview.
                                 mPreviewRequest = mPreviewRequestBuilder.build()
                                 mCaptureSession?.setRepeatingRequest(mPreviewRequest,
-                                        mCaptureCallback, mBackgroundHandler)
+                                        captureProgressCallback, mBackgroundHandler)
                             } catch (e: CameraAccessException) {
                                 Log.w(TAG, e.message, e)
                             }
@@ -306,9 +306,9 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
             // This is how to tell the camera to lock focus.
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
                     CameraMetadata.CONTROL_AF_TRIGGER_START)
-            // Tell #mCaptureCallback to wait for the lock.
+            // Tell #captureProgressCallback to wait for the lock.
             camState.currentState = CameraState.STATE_WAITING_LOCK
-            mCaptureSession?.capture(mPreviewRequestBuilder.build(), mCaptureCallback,
+            mCaptureSession?.capture(mPreviewRequestBuilder.build(), captureProgressCallback,
                     mBackgroundHandler!!)
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
@@ -319,25 +319,25 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
 
     /**
      * This method should be called when
-     * we get a response in [.mCaptureCallback] from [.lockFocus].
+     * we get a response in [.captureProgressCallback] from [.lockFocus].
      */
     override fun prepareCapturing() {
         try {
             // This is how to tell the camera to trigger.
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER,
                     CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START)
-            // Tell #mCaptureCallback to wait for the precapture sequence to be set.
+            // Tell #captureProgressCallback to wait for the precapture sequence to be set.
             camState.currentState = CameraState.STATE_WAITING_PRECAPTURE
-            mCaptureSession?.capture(mPreviewRequestBuilder.build(), mCaptureCallback,
+            mCaptureSession?.capture(mPreviewRequestBuilder.build(), captureProgressCallback,
                     mBackgroundHandler)
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
         }
     }
 
-      /**
+    /**
      * Capture a still picture. This method should be called when we get a response in
-     * {@link #mCaptureCallback} from both {@link #lockFocus()}.
+     * {@link #captureProgressCallback} from both {@link #lockFocus()}.
      */
     override fun capturePicture() {
         try {
@@ -352,43 +352,35 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
             // Orientation
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, orientations.get(displayRotation()))
 
-            val captureCallback
-                    = object : CameraCaptureSession.CaptureCallback() {
-
-                override fun onCaptureCompleted( session: CameraCaptureSession,
-                                                 request: CaptureRequest,
-                                                 result: TotalCaptureResult) {
-                    unlockFocus()
-                }
-            }
-
             mCaptureSession?.stopRepeating()
-            mCaptureSession!!.capture(captureBuilder.build(), captureCallback, null)
+            mCaptureSession!!.capture(captureBuilder.build(), captureImageCallback, null)
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
         }
     }
 
-    /**
-     * Unlock the focus. This method should be called when still image capture sequence is
-     * finished.
-     */
-    private fun unlockFocus() {
-        // Reset the auto-focus trigger
-        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
-                CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
-        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
-                CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH)
-        mCaptureSession?.capture(mPreviewRequestBuilder.build(), mCaptureCallback,
-                mBackgroundHandler)
-        // After this, the camera will go back to the normal state of preview.
-        camState.currentState = CameraState.STATE_PREVIEW
-        mCaptureSession?.setRepeatingRequest(mPreviewRequest, mCaptureCallback,
-                mBackgroundHandler)
-    }
-
     private val mOnImageAvailableListener = ImageReader.OnImageAvailableListener { reader ->
         mBackgroundHandler?.post(ImageSaver(this, reader.acquireNextImage()))
+    }
+
+    private val captureImageCallback
+            = object : CameraCaptureSession.CaptureCallback() {
+
+        override fun onCaptureCompleted(session: CameraCaptureSession,
+                                        request: CaptureRequest,
+                                        result: TotalCaptureResult) {
+            // Reset the auto-focus trigger
+            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
+                    CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
+            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
+                    CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH)
+            mCaptureSession?.capture(mPreviewRequestBuilder.build(), captureProgressCallback,
+                    mBackgroundHandler)
+            // After this, the camera will go back to the normal state of preview.
+            camState.currentState = CameraState.STATE_PREVIEW
+            mCaptureSession?.setRepeatingRequest(mPreviewRequest, captureProgressCallback,
+                    mBackgroundHandler)
+        }
     }
 
     /**
