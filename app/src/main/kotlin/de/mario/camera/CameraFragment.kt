@@ -360,7 +360,8 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
     }
 
     private val mOnImageAvailableListener = ImageReader.OnImageAvailableListener { reader ->
-        mBackgroundHandler?.post(ImageSaver(this, reader.acquireNextImage()))
+        {}
+        mBackgroundHandler?.post(ImageSaver(this, reader))
     }
 
     private val captureImageCallback
