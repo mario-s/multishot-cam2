@@ -44,7 +44,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
 
     private val toaster = Toaster(this)
     private val messageHandler = MessageHandler(this)
-    private val cameraHandler = CameraHandler(this)
+    private val cameraLookup = CameraLookup(this)
     private val previewSizeFactory = PreviewSizeFactory(this)
     private val permissionRequester = PermissionRequester(this)
     private val captureProgressCallback = CaptureProgressCallback(camState, this)
@@ -131,7 +131,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
      */
     private fun setUpCameraOutputs(width: Int, height: Int) {
         try {
-            mCameraId = cameraHandler.findCameraId()
+            mCameraId = cameraLookup.findCameraId()
 
             mPreviewSize = createPreviewSize(mCameraId!!, Size(width, height))
 
@@ -150,7 +150,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
     }
 
     private fun createPreviewSize(cameraId: String, origin: Size): Size {
-        val characteristics = cameraHandler.getCameraCharacteristics(cameraId)
+        val characteristics = cameraLookup.getCameraCharacteristics(cameraId)
         setupImageReader(findLargestSize(characteristics))
 
         return previewSizeFactory.createPreviewSize(characteristics, origin)
@@ -174,7 +174,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
                 if (!mCameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
                     throw IllegalStateException("Time out waiting to lock camera opening.")
                 }
-                cameraHandler.openCamera(mCameraId!!, mStateCallback, mBackgroundHandler!!)
+                cameraLookup.openCamera(mCameraId!!, mStateCallback, mBackgroundHandler!!)
             } catch (e: CameraAccessException) {
                 Log.w(TAG, e.message, e)
             } catch (e: InterruptedException) {

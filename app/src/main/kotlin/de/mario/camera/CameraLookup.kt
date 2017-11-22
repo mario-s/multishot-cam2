@@ -9,7 +9,7 @@ import android.os.Handler
 
 /**
  */
-class CameraHandler(val fragment: Fragment) {
+class CameraLookup(val fragment: Fragment) {
 
     private fun cameraManager() = fragment.activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
 
