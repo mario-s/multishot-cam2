@@ -35,11 +35,11 @@ class ImageSaver(private val control: CameraControllable, private val reader: Im
 
     override fun run() {
         if (!isExternalStorageWritable()) {
-            sendMessage(control.getString(R.string.no_storage))
+            sendMessage(getString(R.string.no_storage))
         } else {
             val max = reader.maxImages
             for (i in 0 until max) {
-                val img: Image? = reader.acquireLatestImage()
+                val img: Image? = reader.acquireNextImage()
                 if (img != null) {
                     save(img, i, max)
                 }
@@ -58,7 +58,7 @@ class ImageSaver(private val control: CameraControllable, private val reader: Im
             output = FileOutputStream(file)
             output.write(bytes)
 
-            sendFileSavedInfo(file,max)
+            sendFileSavedInfo(max)
         } catch (e: IOException) {
             Log.w(TAG, e.message, e)
         } finally {
@@ -71,9 +71,8 @@ class ImageSaver(private val control: CameraControllable, private val reader: Im
         }
     }
 
-    private fun sendFileSavedInfo(file: File, max: Int) {
-        val path = file.parent
-        sendMessage(control.getString(R.string.photos_saved).format(max, path))
+    private fun sendFileSavedInfo(max: Int) {
+        sendMessage(getString(R.string.photos_saved).format(max, folder))
     }
 
     private fun isExternalStorageWritable(): Boolean {
@@ -88,6 +87,10 @@ class ImageSaver(private val control: CameraControllable, private val reader: Im
     private fun createFileName(date: Date, index: Int): String {
         val dateFormat = SimpleDateFormat(PATTERN)
         return String.format("DSC_%s_%s.jpg", dateFormat.format(date), index)
+    }
+
+    private fun getString(key: Int): String {
+        return control.getString(key)
     }
 
     private fun sendMessage(msg: String) {
