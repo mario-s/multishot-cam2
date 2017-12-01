@@ -20,9 +20,9 @@ import java.util.*
 class ImageSaver(private val control: CameraControllable, private val reader: ImageReader) : Runnable {
     private val sender: MessageSendable = MessageSender(control.getMessageHandler())
     private val storageAccess: StorageAccessable = StorageAccess
-    private val folder:File by lazy {
+    private val folder: File by lazy {
         val f = File(storageAccess.getStorageDirectory(), "100_MULTI")
-        if(!f.exists()){
+        if (!f.exists()) {
             f.mkdir()
         }
         f
@@ -34,20 +34,20 @@ class ImageSaver(private val control: CameraControllable, private val reader: Im
     }
 
     override fun run() {
-        if(!isExternalStorageWritable()){
+        if (!isExternalStorageWritable()) {
             sendMessage(control.getString(R.string.no_storage))
-        }else {
+        } else {
             val max = reader.maxImages
             for (i in 0 until max) {
                 val img: Image? = reader.acquireLatestImage()
                 if (img != null) {
-                    save(img, i)
+                    save(img, i, max)
                 }
             }
         }
     }
 
-    private fun save(image: Image, index: Int) {
+    private fun save(image: Image, index: Int, max: Int) {
         val plane = image.planes[0]
         val buffer = plane.buffer
         val bytes = ByteArray(buffer.remaining())
@@ -57,7 +57,8 @@ class ImageSaver(private val control: CameraControllable, private val reader: Im
             val file = getFile(index)
             output = FileOutputStream(file)
             output.write(bytes)
-            sendMessage(control.getString(R.string.photos_saved).format(1, file))
+
+            sendFileSavedInfo(file,max)
         } catch (e: IOException) {
             Log.w(TAG, e.message, e)
         } finally {
@@ -68,6 +69,11 @@ class ImageSaver(private val control: CameraControllable, private val reader: Im
                 Log.w(TAG, e.message, e)
             }
         }
+    }
+
+    private fun sendFileSavedInfo(file: File, max: Int) {
+        val path = file.parent
+        sendMessage(control.getString(R.string.photos_saved).format(max, path))
     }
 
     private fun isExternalStorageWritable(): Boolean {

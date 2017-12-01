@@ -297,6 +297,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
                     CameraMetadata.CONTROL_AF_TRIGGER_START)
             // Tell #captureProgressCallback to wait for the lock.
             camState.currentState = CameraState.STATE_WAITING_LOCK
+
             mCaptureSession?.capture(mPreviewRequestBuilder.build(), captureProgressCallback,
                     mBackgroundHandler!!)
         } catch (e: CameraAccessException) {
@@ -330,17 +331,23 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
      */
     override fun capturePicture() {
         try {
-            // This is the CaptureRequest.Builder that we use to take a picture.
-            val captureBuilder = cameraDeviceProxy.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE, mImageReader!!.surface)
 
-            // Orientation
-            captureBuilder?.set(CaptureRequest.JPEG_ORIENTATION, orientations.get(displayRotation()))
-
+            val requests = createRequests()
             mCaptureSession?.stopRepeating()
-            mCaptureSession!!.capture(captureBuilder?.build(), captureImageCallback, null)
+            mCaptureSession?.captureBurst(requests, captureImageCallback, null)
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
         }
+    }
+
+    private fun createRequests(): List<CaptureRequest> {
+        // This is the CaptureRequest.Builder that we use to take a picture.
+        val captureBuilder = cameraDeviceProxy.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE, mImageReader!!.surface)
+
+        // Orientation
+        captureBuilder!!.set(CaptureRequest.JPEG_ORIENTATION, orientations.get(displayRotation()))
+
+        return listOf(captureBuilder.build(), captureBuilder.build())
     }
 
     private val mOnImageAvailableListener = ImageReader.OnImageAvailableListener { reader ->
