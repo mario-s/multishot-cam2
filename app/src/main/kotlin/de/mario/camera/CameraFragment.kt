@@ -332,22 +332,12 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
     override fun capturePicture() {
         try {
 
-            val requests = createRequests()
+            val requests = cameraDeviceProxy.createBurstRequests(orientations.get(displayRotation()), mImageReader!!.surface)
             mCaptureSession?.stopRepeating()
             mCaptureSession?.captureBurst(requests, captureImageCallback, null)
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
         }
-    }
-
-    private fun createRequests(): List<CaptureRequest> {
-        // This is the CaptureRequest.Builder that we use to take a picture.
-        val captureBuilder = cameraDeviceProxy.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE, mImageReader!!.surface)
-
-        // Orientation
-        captureBuilder!!.set(CaptureRequest.JPEG_ORIENTATION, orientations.get(displayRotation()))
-
-        return listOf(captureBuilder.build(), captureBuilder.build())
     }
 
     private val mOnImageAvailableListener = ImageReader.OnImageAvailableListener { reader ->

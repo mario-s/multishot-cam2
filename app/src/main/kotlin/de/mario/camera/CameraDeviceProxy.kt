@@ -19,10 +19,21 @@ class CameraDeviceProxy {
     }
 
     fun createCaptureRequest(templateType: Int, target: Surface): CaptureRequest.Builder? {
-        val builder = cameraDevice?.createCaptureRequest(templateType)
-        builder?.addTarget(target)
+        val builder = captureRequest(templateType, target)
         setAuto(builder)
         return builder
+    }
+
+    private fun captureRequest(templateType: Int, target: Surface): CaptureRequest.Builder? {
+        val builder = cameraDevice?.createCaptureRequest(templateType)
+        builder?.addTarget(target)
+        return builder
+    }
+
+    fun createBurstRequests(orientation: Int, target: Surface): List<CaptureRequest> {
+        val builder = captureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE, target)
+        builder!!.set(CaptureRequest.JPEG_ORIENTATION, orientation)
+        return listOf(builder.build(), builder.build())
     }
 
     private fun setAuto(builder: CaptureRequest.Builder?) {
