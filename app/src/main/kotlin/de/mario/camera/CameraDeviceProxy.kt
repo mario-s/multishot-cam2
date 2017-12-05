@@ -1,13 +1,19 @@
 package de.mario.camera
 
+import android.app.Fragment
 import android.hardware.camera2.CameraCaptureSession.StateCallback
 import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CaptureRequest
 import android.os.Handler
 import android.view.Surface
 
-class CameraDeviceProxy {
+class CameraDeviceProxy(fragment: Fragment) : CameraManagerSupply(fragment) {
     internal var cameraDevice: CameraDevice? = null
+    internal var cameraId: String? = null
+
+    fun openCamera(callback: CameraDevice.StateCallback, handler: Handler)  {
+        cameraManager().openCamera(cameraId, callback, handler)
+    }
 
     fun close() {
         cameraDevice?.close()
@@ -33,6 +39,7 @@ class CameraDeviceProxy {
     fun createBurstRequests(orientation: Int, target: Surface): List<CaptureRequest> {
         val builder = captureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE, target)
         builder!!.set(CaptureRequest.JPEG_ORIENTATION, orientation)
+
         return listOf(builder.build(), builder.build())
     }
 

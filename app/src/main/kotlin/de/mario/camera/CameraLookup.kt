@@ -9,11 +9,7 @@ import android.os.Handler
 
 /**
  */
-class CameraLookup(val fragment: Fragment) {
-
-    private fun cameraManager() = fragment.activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-
-    fun getCameraCharacteristics(cameraId: String): CameraCharacteristics = cameraManager().getCameraCharacteristics(cameraId)
+class CameraLookup(fragment: Fragment) : CameraManagerSupply(fragment) {
 
     fun findCameraId(): String? {
         var id: String? = null
@@ -29,9 +25,5 @@ class CameraLookup(val fragment: Fragment) {
             id = cameraId
         }
         return id
-    }
-
-    fun openCamera(cameraId: String, callback: CameraDevice.StateCallback, handler: Handler)  {
-        cameraManager().openCamera(cameraId, callback, handler)
     }
 }

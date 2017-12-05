@@ -38,7 +38,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
 
     private val orientations = SurfaceOrientation()
     private val camState = CameraState()
-    private val cameraDeviceProxy = CameraDeviceProxy()
+    private val cameraDeviceProxy = CameraDeviceProxy(this)
 
     private val mCameraOpenCloseLock = Semaphore(1)
 
@@ -57,7 +57,6 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
     private lateinit var viewsMediator: ViewsMediatable
     private lateinit var mPreviewSize: Size
 
-    private var mCameraId: String? = null
     private var mBackgroundThread: HandlerThread? = null
     private var mBackgroundHandler: Handler? = null
     private var mImageReader: ImageReader? = null
@@ -131,9 +130,9 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
      */
     private fun setUpCameraOutputs(width: Int, height: Int) {
         try {
-            mCameraId = cameraLookup.findCameraId()
+            cameraDeviceProxy.cameraId = cameraLookup.findCameraId()
 
-            mPreviewSize = createPreviewSize(mCameraId!!, Size(width, height))
+            mPreviewSize = createPreviewSize(cameraDeviceProxy.cameraId!!, Size(width, height))
 
             // We fit the aspect ratio of TextureView to the size of preview we picked.
             val orientation = resources.configuration.orientation
@@ -150,7 +149,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
     }
 
     private fun createPreviewSize(cameraId: String, origin: Size): Size {
-        val characteristics = cameraLookup.getCameraCharacteristics(cameraId)
+        val characteristics = cameraDeviceProxy.getCameraCharacteristics(cameraId)
         setupImageReader(findLargestSize(characteristics))
 
         return previewSizeFactory.createPreviewSize(characteristics, origin)
@@ -164,7 +163,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
     }
 
     /**
-     * Opens the camera specified by [CameraFragment.mCameraId].
+     * Opens the camera specified by [CameraDeviceProxy.cameraId].
      */
     override fun openCamera(width: Int, height: Int) {
         if (permissionRequester.hasPermissions()) {
@@ -174,7 +173,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
                 if (!mCameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
                     throw IllegalStateException("Time out waiting to lock camera opening.")
                 }
-                cameraLookup.openCamera(mCameraId!!, mStateCallback, mBackgroundHandler!!)
+                cameraDeviceProxy.openCamera(mStateCallback, mBackgroundHandler!!)
             } catch (e: CameraAccessException) {
                 Log.w(TAG, e.message, e)
             } catch (e: InterruptedException) {

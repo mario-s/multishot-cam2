@@ -47,12 +47,5 @@ object CameraLookupTest : Spek({
             val camId = classUnderTest?.findCameraId()
             assertThat(camId, equalTo(ID))
         }
-
-        it("should forward open camera call") {
-            val callBack = mock(CameraDevice.StateCallback::class.java)
-            val handler = mock(Handler::class.java)
-            classUnderTest?.openCamera(ID, callBack, handler)
-            verify(cameraManager!!).openCamera(ID, callBack, handler)
-        }
     }
 })
