@@ -9,13 +9,15 @@ import android.os.Handler
 
 /**
  */
-class CameraLookup(fragment: Fragment) : CameraManagerSupply(fragment) {
+class CameraLookup(val fragment: Fragment) {
+
+    private val cameraManagerSupply = CameraManagerSupply(fragment)
 
     fun findCameraId(): String? {
         var id: String? = null
-        val manager = cameraManager()
+        val manager = cameraManagerSupply.cameraManager()
         for (cameraId in manager.cameraIdList) {
-            val characteristics = getCameraCharacteristics(cameraId)
+            val characteristics = cameraManagerSupply.getCameraCharacteristics(cameraId)
 
             // We don't use a front facing camera in this sample.
             val facing = characteristics.get(CameraCharacteristics.LENS_FACING)
