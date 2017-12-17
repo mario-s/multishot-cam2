@@ -62,6 +62,8 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
     private var mImageReader: ImageReader? = null
     private var mCaptureSession: CameraCaptureSession? = null
 
+    private var imageCounter = 0
+
     companion object {
 
         private val TAG = "CameraFragment"
@@ -157,7 +159,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
 
     private fun setupImageReader(largest: Size) {
         mImageReader = ImageReader.newInstance(largest.width, largest.height,
-                ImageFormat.JPEG, /*maxImages*/2)
+                ImageFormat.JPEG, /*maxImages*/3)
         mImageReader?.setOnImageAvailableListener(
                 mOnImageAvailableListener, mBackgroundHandler)
     }
@@ -341,26 +343,27 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
 
     private val mOnImageAvailableListener = ImageReader.OnImageAvailableListener { reader ->
         {}
-        mBackgroundHandler?.post(ImageSaver(this, reader))
+        imageCounter++
+        mBackgroundHandler?.post(ImageSaver(this, reader, imageCounter))
     }
 
     private val captureImageCallback
             = object : CameraCaptureSession.CaptureCallback() {
 
-        override fun onCaptureCompleted(session: CameraCaptureSession,
-                                        request: CaptureRequest,
-                                        result: TotalCaptureResult) {
+        override fun onCaptureSequenceCompleted(session: CameraCaptureSession?, sequenceId: Int, frameNumber: Long) {
+
             // Reset the auto-focus trigger
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
-                    CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
+            CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
-                    CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH)
-            mCaptureSession?.capture(mPreviewRequestBuilder.build(), captureProgressCallback,
-                    mBackgroundHandler)
+            CaptureRequest.CONTROL_AE_MODE_ON)
+
             // After this, the camera will go back to the normal state of preview.
             camState.currentState = CameraState.STATE_PREVIEW
             mCaptureSession?.setRepeatingRequest(mPreviewRequest, captureProgressCallback,
                     mBackgroundHandler)
+
+            imageCounter = 0
         }
     }
 

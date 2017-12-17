@@ -17,7 +17,7 @@ import java.util.*
 
 /**
  */
-class ImageSaver(private val control: CameraControllable, private val reader: ImageReader) : Runnable {
+class ImageSaver(private val control: CameraControllable, private val reader: ImageReader, private val counter: Int) : Runnable {
     private val sender: MessageSendable = MessageSender(control.getMessageHandler())
     private val storageAccess: StorageAccessable = StorageAccess
     private val folder: File by lazy {
@@ -38,11 +38,10 @@ class ImageSaver(private val control: CameraControllable, private val reader: Im
             sendMessage(getString(R.string.no_storage))
         } else {
             val max = reader.maxImages
-            for (i in 0 until max) {
-                val img: Image? = reader.acquireNextImage()
-                if (img != null) {
-                    save(img, i, max)
-                }
+            val img: Image? = reader.acquireNextImage()
+            if (img != null) {
+                Log.d(TAG, "image timestamp: " + img.timestamp)
+                save(img, counter, max)
             }
         }
     }
