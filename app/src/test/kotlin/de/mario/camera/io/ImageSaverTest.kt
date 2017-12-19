@@ -43,7 +43,7 @@ object ImageSaverTest : Spek( {
             given(control.getMessageHandler()).willReturn(handler)
             given(control.getString(anyInt())).willReturn("foo")
             given(storageAccessable.getStorageDirectory()).willReturn(tmp.newFile(("foo")))
-            classUnderTest = ImageSaver(control, reader)
+            classUnderTest = ImageSaver(control, reader, 0)
             ReflectionTestUtils.setField(classUnderTest, "sender", messageSendable)
             ReflectionTestUtils.setField(classUnderTest, "storageAccess", storageAccessable)
         }
