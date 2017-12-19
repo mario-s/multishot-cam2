@@ -66,9 +66,9 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
 
     companion object {
 
-        private val TAG = "CameraFragment"
+        const val TAG = "CameraFragment"
 
-        private val FRAGMENT_DIALOG = "dialog"
+        const val FRAGMENT_DIALOG = "dialog"
 
         fun newInstance(): CameraFragment = CameraFragment()
     }
@@ -352,11 +352,15 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
 
         override fun onCaptureSequenceCompleted(session: CameraCaptureSession?, sequenceId: Int, frameNumber: Long) {
 
+            reset()
+        }
+
+        private fun reset() {
             // Reset the auto-focus trigger
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
-            CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
+                    CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
-            CaptureRequest.CONTROL_AE_MODE_ON)
+                    CaptureRequest.CONTROL_AE_MODE_ON)
 
             // After this, the camera will go back to the normal state of preview.
             camState.currentState = CameraState.STATE_PREVIEW

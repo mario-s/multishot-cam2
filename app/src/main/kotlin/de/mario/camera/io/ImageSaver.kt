@@ -71,7 +71,9 @@ class ImageSaver(private val control: CameraControllable, private val reader: Im
     }
 
     private fun sendFileSavedInfo(max: Int) {
-        sendMessage(getString(R.string.photos_saved).format(max, folder))
+        if(counter == max) {
+            sendMessage(getString(R.string.photos_saved).format(max, folder))
+        }
     }
 
     private fun isExternalStorageWritable(): Boolean {

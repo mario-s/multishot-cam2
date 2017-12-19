@@ -6,12 +6,18 @@ import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CaptureRequest
 import android.os.Handler
+import android.util.Log
 import android.util.Range
 import android.view.Surface
 
 class CameraDeviceProxy(fragment: Fragment) : CameraManagerSupply(fragment) {
     internal var cameraDevice: CameraDevice? = null
     internal var cameraId: String? = null
+
+    companion object {
+        const val TAG = "CameraDeviceProxy"
+    }
+
 
     fun openCamera(callback: CameraDevice.StateCallback, handler: Handler)  {
         cameraManager().openCamera(cameraId, callback, handler)
@@ -43,25 +49,26 @@ class CameraDeviceProxy(fragment: Fragment) : CameraManagerSupply(fragment) {
     }
 
     fun createBurstRequests(orientation: Int, target: Surface): List<CaptureRequest> {
-        val range = aeCompensationRange()
-        val elvs = arrayOf(0, range.lower, range.upper)
+        val range = exposureCompensationRange()
+        val evs = arrayOf(0, range.lower, range.upper)
+
+        Log.d(TAG, "ev: " + evs)
 
         val builder = captureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE, target)
-        builder?.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
-        builder?.set(CaptureRequest.JPEG_ORIENTATION, orientation)
+        setAuto(builder!!)
+        builder.set(CaptureRequest.JPEG_ORIENTATION, orientation)
 
-        return buildRequests(builder!!, elvs)
+        return buildRequests(builder, evs)
     }
 
-    private fun buildRequests(builder:  CaptureRequest.Builder, elvs: Array<Int>): List<CaptureRequest> {
-        return elvs.map { elv ->
-            builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_OFF)
-            builder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, elv)
+    private fun buildRequests(builder:  CaptureRequest.Builder, evs: Array<Int>): List<CaptureRequest> {
+        return evs.map { ev ->
+            builder.set(CaptureRequest.CONTROL_AE_EXPOSURE_COMPENSATION, ev)
             builder.build()
         }
     }
 
-    private fun aeCompensationRange(): Range<Int>
+    private fun exposureCompensationRange(): Range<Int>
         = getCameraCharacteristics(cameraId!!).get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE)
 
 
