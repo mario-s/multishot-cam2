@@ -5,7 +5,7 @@ import android.media.Image
 import android.media.ImageReader
 import android.os.Environment
 import android.os.Handler
-import de.mario.camera.glue.CameraControllable
+import de.mario.camera.glue.CameraControlable
 import de.mario.camera.glue.MessageSendable
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
@@ -30,7 +30,7 @@ object ImageSaverTest : Spek( {
     describe("the image saver") {
 
         val tmp = TemporaryFolder()
-        val control = mock(CameraControllable::class.java)
+        val control = mock(CameraControlable::class.java)
         val image = mock(Image::class.java)
         val reader = mock(ImageReader::class.java)
         val messageSendable = mock(MessageSendable::class.java)
@@ -43,7 +43,7 @@ object ImageSaverTest : Spek( {
             given(control.getMessageHandler()).willReturn(handler)
             given(control.getString(anyInt())).willReturn("foo")
             given(storageAccessable.getStorageDirectory()).willReturn(tmp.newFile(("foo")))
-            classUnderTest = ImageSaver(control, reader, 0)
+            classUnderTest = ImageSaver(control, reader)
             ReflectionTestUtils.setField(classUnderTest, "sender", messageSendable)
             ReflectionTestUtils.setField(classUnderTest, "storageAccess", storageAccessable)
         }
@@ -57,10 +57,10 @@ object ImageSaverTest : Spek( {
             verify(messageSendable).send(anyString())
         }
 
-        it("run method should read max number of images from reader") {
+        it("run method should read next image from reader") {
             given(storageAccessable.getStorageState()).willReturn(Environment.MEDIA_MOUNTED)
             classUnderTest?.run()
-            verify(reader).maxImages
+            verify(reader).acquireNextImage()
         }
 
     }

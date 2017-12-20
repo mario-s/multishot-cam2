@@ -18,7 +18,7 @@ import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
 import de.mario.camera.SizeHelper.findLargestSize
-import de.mario.camera.glue.CameraControllable
+import de.mario.camera.glue.CameraControlable
 import de.mario.camera.glue.SettingsAccessable
 import de.mario.camera.glue.ViewsMediatable
 import de.mario.camera.io.ImageSaver
@@ -34,7 +34,7 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 
 
-open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Captureable {
+open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureable {
 
     private val orientations = SurfaceOrientation()
     private val camState = CameraState()
@@ -61,8 +61,6 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
     private var mBackgroundHandler: Handler? = null
     private var mImageReader: ImageReader? = null
     private var mCaptureSession: CameraCaptureSession? = null
-
-    private var imageCounter = 0
 
     companion object {
 
@@ -280,6 +278,11 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
 
     override fun updateTransform(viewWidth: Int, viewHeight: Int) = mTextureView.setTransform(createMatrix(viewWidth, viewHeight))
 
+    override fun appendSavedImage(filename: String) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        showToast(filename)
+    }
+
     private fun createMatrix(viewWidth: Int, viewHeight: Int): Matrix {
         val viewSize = Size(viewWidth, viewHeight)
         return MatrixFactory.create(mPreviewSize, viewSize, displayRotation())
@@ -343,8 +346,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
 
     private val mOnImageAvailableListener = ImageReader.OnImageAvailableListener { reader ->
         {}
-        imageCounter++
-        mBackgroundHandler?.post(ImageSaver(this, reader, imageCounter))
+        mBackgroundHandler?.post(ImageSaver(this, reader))
     }
 
     private val captureImageCallback
@@ -366,8 +368,6 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControllable, Cap
             camState.currentState = CameraState.STATE_PREVIEW
             mCaptureSession?.setRepeatingRequest(mPreviewRequest, captureProgressCallback,
                     mBackgroundHandler)
-
-            imageCounter = 0
         }
     }
 

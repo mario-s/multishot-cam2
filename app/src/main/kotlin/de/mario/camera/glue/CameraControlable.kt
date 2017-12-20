@@ -2,9 +2,9 @@ package de.mario.camera.glue
 
 import android.os.Handler
 
-/**
- */
-interface CameraControllable {
+
+interface CameraControlable {
+
     fun getMessageHandler(): Handler
 
     fun showToast(msg: String)
@@ -14,4 +14,6 @@ interface CameraControllable {
     fun openCamera(width: Int, height: Int)
 
     fun updateTransform(viewWidth: Int, viewHeight: Int)
+
+    fun appendSavedImage(filename: String)
 }
