@@ -15,5 +15,4 @@ interface CameraControlable {
 
     fun updateTransform(viewWidth: Int, viewHeight: Int)
 
-    fun appendSavedImage(filename: String)
 }

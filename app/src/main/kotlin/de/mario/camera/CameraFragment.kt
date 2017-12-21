@@ -22,7 +22,6 @@ import de.mario.camera.glue.CameraControlable
 import de.mario.camera.glue.SettingsAccessable
 import de.mario.camera.glue.ViewsMediatable
 import de.mario.camera.io.ImageSaver
-import de.mario.camera.message.MessageHandler
 import de.mario.camera.orientation.ViewsOrientationListener
 import de.mario.camera.settings.SettingsAccess
 import de.mario.camera.settings.SettingsActivity
@@ -30,6 +29,8 @@ import de.mario.camera.view.AutoFitTextureView
 import de.mario.camera.view.ViewsMediator
 import de.mario.camera.widget.ErrorDialog
 import de.mario.camera.widget.Toaster
+import java.io.File
+import java.util.*
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 
@@ -41,6 +42,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
     private val cameraDeviceProxy = CameraDeviceProxy(this)
 
     private val mCameraOpenCloseLock = Semaphore(1)
+    private val fileNameStack = LinkedList<String>()
 
     private val toaster = Toaster(this)
     private val messageHandler = MessageHandler(this)
@@ -67,6 +69,8 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
         const val TAG = "CameraFragment"
 
         const val FRAGMENT_DIALOG = "dialog"
+
+        private const val MAX_IMG = 3
 
         fun newInstance(): CameraFragment = CameraFragment()
     }
@@ -157,7 +161,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
 
     private fun setupImageReader(largest: Size) {
         mImageReader = ImageReader.newInstance(largest.width, largest.height,
-                ImageFormat.JPEG, /*maxImages*/3)
+                ImageFormat.JPEG, MAX_IMG)
         mImageReader?.setOnImageAvailableListener(
                 mOnImageAvailableListener, mBackgroundHandler)
     }
@@ -278,9 +282,14 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
 
     override fun updateTransform(viewWidth: Int, viewHeight: Int) = mTextureView.setTransform(createMatrix(viewWidth, viewHeight))
 
-    override fun appendSavedImage(filename: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        showToast(filename)
+    internal fun appendSavedFile(name: String) {
+        fileNameStack.push(name)
+
+        val size = fileNameStack.size
+        if(size >= MAX_IMG) {
+            val folder = File(name).parent
+            showToast(getString(R.string.photos_saved).format(size, folder))
+        }
     }
 
     private fun createMatrix(viewWidth: Int, viewHeight: Int): Matrix {
@@ -335,7 +344,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
      */
     override fun capturePicture() {
         try {
-
+            fileNameStack.clear()
             val requests = cameraDeviceProxy.createBurstRequests(orientations.get(displayRotation()), mImageReader!!.surface)
             mCaptureSession?.stopRepeating()
             mCaptureSession?.captureBurst(requests, captureImageCallback, null)
