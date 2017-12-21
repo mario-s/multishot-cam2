@@ -23,6 +23,8 @@ class CameraDeviceProxy(fragment: Fragment) : CameraManagerSupply(fragment) {
         cameraManager().openCamera(cameraId, callback, handler)
     }
 
+    fun getCameraCharacteristics(): CameraCharacteristics = getCameraCharacteristics(cameraId!!)
+
     fun close() {
         cameraDevice?.close()
         cameraDevice = null
