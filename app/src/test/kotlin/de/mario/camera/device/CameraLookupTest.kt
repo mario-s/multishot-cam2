@@ -1,12 +1,10 @@
-package de.mario.camera
+package de.mario.camera.device
 
 import android.app.Activity
 import android.app.Fragment
 import android.content.Context
 import android.hardware.camera2.CameraCharacteristics
-import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CameraManager
-import android.os.Handler
 import org.hamcrest.CoreMatchers.equalTo
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
@@ -16,7 +14,6 @@ import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.verify
 
 /**
  */

@@ -1,4 +1,4 @@
-package de.mario.camera
+package de.mario.camera.device
 
 import android.app.Fragment
 import android.hardware.camera2.CameraCaptureSession.StateCallback
@@ -10,7 +10,8 @@ import android.util.Log
 import android.util.Range
 import android.view.Surface
 
-class CameraDeviceProxy(fragment: Fragment) : CameraManagerSupply(fragment) {
+class CameraDeviceProxy(fragment: Fragment) {
+    private val managerSupply = CameraManagerSupply(fragment)
     internal var cameraDevice: CameraDevice? = null
     internal var cameraId: String? = null
 
@@ -20,10 +21,10 @@ class CameraDeviceProxy(fragment: Fragment) : CameraManagerSupply(fragment) {
 
 
     fun openCamera(callback: CameraDevice.StateCallback, handler: Handler)  {
-        cameraManager().openCamera(cameraId, callback, handler)
+        managerSupply.cameraManager().openCamera(cameraId, callback, handler)
     }
 
-    fun getCameraCharacteristics(): CameraCharacteristics = getCameraCharacteristics(cameraId!!)
+    fun getCameraCharacteristics(): CameraCharacteristics = managerSupply.cameraCharacteristics(cameraId!!)
 
     fun close() {
         cameraDevice?.close()
@@ -71,7 +72,7 @@ class CameraDeviceProxy(fragment: Fragment) : CameraManagerSupply(fragment) {
     }
 
     private fun exposureCompensationRange(): Range<Int>
-        = getCameraCharacteristics(cameraId!!).get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE)
+            = getCameraCharacteristics().get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE)
 
 
     private fun setAuto(builder: CaptureRequest.Builder?) {

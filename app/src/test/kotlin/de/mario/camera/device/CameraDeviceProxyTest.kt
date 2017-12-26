@@ -1,4 +1,4 @@
-package de.mario.camera
+package de.mario.camera.device
 
 import android.app.Activity
 import android.app.Fragment
@@ -10,7 +10,6 @@ import android.hardware.camera2.CaptureRequest.Builder
 import android.os.Handler
 import android.util.Range
 import android.view.Surface
-import com.nhaarman.mockito_kotlin.mock
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.notNullValue
 import org.jetbrains.spek.api.Spek

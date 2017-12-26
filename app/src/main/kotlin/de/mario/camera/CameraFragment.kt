@@ -18,6 +18,8 @@ import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
 import de.mario.camera.SizeHelper.findLargestSize
+import de.mario.camera.device.CameraDeviceProxy
+import de.mario.camera.device.CameraLookup
 import de.mario.camera.glue.CameraControlable
 import de.mario.camera.glue.SettingsAccessable
 import de.mario.camera.glue.ViewsMediatable
@@ -51,6 +53,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
     private val permissionRequester = PermissionRequester(this)
     private val captureProgressCallback = CaptureProgressCallback(camState, this)
     private val mSurfaceTextureListener = TextureViewSurfaceListener(this)
+    private val mediaUpdater = MediaUpdater(this.context)
 
     private lateinit var mTextureView: AutoFitTextureView
     private lateinit var mPreviewRequestBuilder: CaptureRequest.Builder
@@ -136,7 +139,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
         try {
             cameraDeviceProxy.cameraId = cameraLookup.findCameraId()
 
-            mPreviewSize = createPreviewSize(cameraDeviceProxy.cameraId!!, Size(width, height))
+            mPreviewSize = createPreviewSize(Size(width, height))
 
             // We fit the aspect ratio of TextureView to the size of preview we picked.
             val orientation = resources.configuration.orientation
@@ -152,7 +155,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
         }
     }
 
-    private fun createPreviewSize(cameraId: String, origin: Size): Size {
+    private fun createPreviewSize(origin: Size): Size {
         val characteristics = cameraDeviceProxy.getCameraCharacteristics()
         setupImageReader(findLargestSize(characteristics))
 
@@ -288,6 +291,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
         val size = fileNameStack.size
         if(size >= MAX_IMG) {
             val folder = File(name).parent
+            mediaUpdater.sendUpdate(folder)
             showToast(getString(R.string.photos_saved).format(size, folder))
         }
     }
