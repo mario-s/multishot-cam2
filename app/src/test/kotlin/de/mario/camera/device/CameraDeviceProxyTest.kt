@@ -21,6 +21,7 @@ import org.junit.runner.RunWith
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
+import com.nhaarman.mockito_kotlin.mock as kmock
 
 
 /**
@@ -70,7 +71,7 @@ object CameraDeviceProxyTest : Spek({
         }
 
         it("should create a collection of capture requests") {
-            val range:Range<Int> = mock()
+            val range:Range<Int> = kmock()
             given(range.lower).willReturn(-4)
             given(range.upper).willReturn(4)
 

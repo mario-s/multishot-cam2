@@ -7,6 +7,7 @@ import android.graphics.ImageFormat
 import android.graphics.Matrix
 import android.hardware.camera2.*
 import android.media.ImageReader
+import android.media.MediaScannerConnection
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
@@ -53,7 +54,6 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
     private val permissionRequester = PermissionRequester(this)
     private val captureProgressCallback = CaptureProgressCallback(camState, this)
     private val mSurfaceTextureListener = TextureViewSurfaceListener(this)
-    private val mediaUpdater = MediaUpdater(this.context)
 
     private lateinit var mTextureView: AutoFitTextureView
     private lateinit var mPreviewRequestBuilder: CaptureRequest.Builder
@@ -287,13 +287,17 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
 
     internal fun appendSavedFile(name: String) {
         fileNameStack.push(name)
-
         val size = fileNameStack.size
         if(size >= MAX_IMG) {
+            forceScan()
             val folder = File(name).parent
-            mediaUpdater.sendUpdate(folder)
             showToast(getString(R.string.photos_saved).format(size, folder))
         }
+    }
+
+    private fun forceScan() {
+        val names = fileNameStack.toTypedArray()
+        MediaScannerConnection.scanFile(activity, names, null, null)
     }
 
     private fun createMatrix(viewWidth: Int, viewHeight: Int): Matrix {
