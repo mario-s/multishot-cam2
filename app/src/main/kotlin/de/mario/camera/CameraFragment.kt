@@ -307,40 +307,41 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
 
     private fun displayRotation(): Int = activity.windowManager.defaultDisplay.rotation
 
+    private fun startSettings() = startActivity(Intent(activity, SettingsActivity::class.java))
+
     /**
      * Initiate a still image capture.
      * Lock the focus as the first step for a still image capture.
      */
     private fun takePicture() {
-        try {
+        prepareSession({
             // This is how to tell the camera to lock focus.
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
                     CameraMetadata.CONTROL_AF_TRIGGER_START)
             // Tell #captureProgressCallback to wait for the lock.
             camState.currentState = CameraState.STATE_WAITING_LOCK
-
-            mCaptureSession?.capture(mPreviewRequestBuilder.build(), captureProgressCallback,
-                    mBackgroundHandler!!)
-        } catch (e: CameraAccessException) {
-            Log.w(TAG, e.message, e)
-        }
+        })
     }
-
-    private fun startSettings() = startActivity(Intent(activity, SettingsActivity::class.java))
 
     /**
      * This method should be called when
      * we get a response in [.captureProgressCallback] from [.lockFocus].
      */
     override fun prepareCapturing() {
-        try {
+        prepareSession({
             // This is how to tell the camera to trigger.
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER,
                     CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START)
             // Tell #captureProgressCallback to wait for the precapture sequence to be set.
             camState.currentState = CameraState.STATE_WAITING_PRECAPTURE
+        })
+    }
+
+    private fun prepareSession(before: () -> Unit) {
+        try {
+            before()
             mCaptureSession?.capture(mPreviewRequestBuilder.build(), captureProgressCallback,
-                    mBackgroundHandler)
+                mBackgroundHandler!!)
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
         }
@@ -362,17 +363,13 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
     }
 
     private val mOnImageAvailableListener = ImageReader.OnImageAvailableListener { reader ->
-        {}
         mBackgroundHandler?.post(ImageSaver(this, reader))
     }
 
     private val captureImageCallback
             = object : CameraCaptureSession.CaptureCallback() {
 
-        override fun onCaptureSequenceCompleted(session: CameraCaptureSession?, sequenceId: Int, frameNumber: Long) {
-
-            reset()
-        }
+        override fun onCaptureSequenceCompleted(session: CameraCaptureSession?, sequenceId: Int, frameNumber: Long) = reset()
 
         private fun reset() {
             // Reset the auto-focus trigger
