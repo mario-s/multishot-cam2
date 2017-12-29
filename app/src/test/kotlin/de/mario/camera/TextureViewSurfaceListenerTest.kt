@@ -1,7 +1,7 @@
 package de.mario.camera
 
 import android.graphics.SurfaceTexture
-import de.mario.camera.glue.CameraControllable
+import de.mario.camera.glue.CameraControlable
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
@@ -15,7 +15,7 @@ object TextureViewSurfaceListenerTest : Spek({
 
     describe("the surface listener") {
 
-        val control = mock(CameraControllable::class.java)
+        val control = mock(CameraControlable::class.java)
         val texture = mock(SurfaceTexture::class.java)
         val classUnderTest = TextureViewSurfaceListener(control)
 

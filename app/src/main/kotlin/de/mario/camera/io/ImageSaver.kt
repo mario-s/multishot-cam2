@@ -1,12 +1,15 @@
 package de.mario.camera.io
 
 import android.media.Image
+import android.media.ImageReader
 import android.os.Environment
+import android.os.Message
 import android.util.Log
 import de.mario.camera.R
-import de.mario.camera.glue.CameraControllable
+import de.mario.camera.glue.CameraControlable
 import de.mario.camera.glue.MessageSendable
-import de.mario.camera.message.MessageSender
+import de.mario.camera.glue.MessageType
+import de.mario.camera.glue.MessageSender
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -16,12 +19,12 @@ import java.util.*
 
 /**
  */
-class ImageSaver(private val control: CameraControllable, private val image: Image) : Runnable {
+class ImageSaver(private val control: CameraControlable, private val reader: ImageReader) : Runnable {
     private val sender: MessageSendable = MessageSender(control.getMessageHandler())
     private val storageAccess: StorageAccessable = StorageAccess
-    private val folder:File by lazy {
+    private val folder: File by lazy {
         val f = File(storageAccess.getStorageDirectory(), "100_MULTI")
-        if(!f.exists()){
+        if (!f.exists()) {
             f.mkdir()
         }
         f
@@ -29,28 +32,33 @@ class ImageSaver(private val control: CameraControllable, private val image: Ima
 
     private companion object {
         val TAG = "ImageSaver"
-        val PATTERN = "yyyy-MM-dd_HH:mm:ss"
+        val PATTERN = "yyyy-MM-dd_HH:mm:ss.SSS"
     }
 
     override fun run() {
-        if(!isExternalStorageWritable()){
-            sendMessage(control.getString(R.string.no_storage))
-        }else {
-            save()
+        if (!isExternalStorageWritable()) {
+            sender.send(getString(R.string.no_storage))
+        } else {
+            val img: Image? = reader.acquireLatestImage()
+            if (img != null) {
+                Log.d(TAG, "image timestamp: " + img.timestamp)
+                save(img)
+            }
         }
     }
 
-    private fun save() {
+    private fun save(image: Image) {
         val plane = image.planes[0]
         val buffer = plane.buffer
         val bytes = ByteArray(buffer.remaining())
         buffer.get(bytes)
         var output: FileOutputStream? = null
         try {
-            val file = getFile()
+            val file = newFile()
             output = FileOutputStream(file)
             output.write(bytes)
-            sendMessage(control.getString(R.string.photos_saved).format(1, file))
+
+            sendImageSavedMessage(file)
         } catch (e: IOException) {
             Log.w(TAG, e.message, e)
         } finally {
@@ -68,16 +76,23 @@ class ImageSaver(private val control: CameraControllable, private val image: Ima
         return Environment.MEDIA_MOUNTED == state
     }
 
-    private fun getFile(): File {
-        return File(folder, createFileName(Date(), 0))
+    private fun newFile(): File {
+        return File(folder, createFileName(Date()))
     }
 
-    private fun createFileName(date: Date, index: Int): String {
+    private fun createFileName(date: Date): String {
         val dateFormat = SimpleDateFormat(PATTERN)
         return String.format("DSC_%s.jpg", dateFormat.format(date))
     }
 
-    private fun sendMessage(msg: String) {
+    private fun getString(key: Int): String {
+        return control.getString(key)
+    }
+
+    private fun sendImageSavedMessage(file: File) {
+        val msg = Message.obtain(control.getMessageHandler())
+        msg.what = MessageType.IMAGE_SAVED
+        msg.data.putString("File", file.absolutePath)
         sender.send(msg)
     }
 }

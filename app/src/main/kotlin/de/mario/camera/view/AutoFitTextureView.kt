@@ -1,6 +1,7 @@
 package de.mario.camera.view
 
 import android.content.Context
+import android.content.res.Configuration
 import android.util.AttributeSet
 import android.util.Size
 import android.view.TextureView
@@ -26,8 +27,14 @@ open class AutoFitTextureView : TextureView {
 
      * @param size  Relative size
      */
-    fun setAspectRatio(size: Size) {
-        setAspectRatio(size.width, size.height)
+    fun setAspectRatio(size: Size, orientation: Int) {
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            setAspectRatio(
+                    size.width, size.height)
+        } else {
+            setAspectRatio(
+                    size.height, size.width)
+        }
     }
 
     /**
