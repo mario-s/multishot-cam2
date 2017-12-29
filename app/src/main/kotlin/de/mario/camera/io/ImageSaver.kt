@@ -39,7 +39,7 @@ class ImageSaver(private val control: CameraControlable, private val reader: Ima
         if (!isExternalStorageWritable()) {
             sender.send(getString(R.string.no_storage))
         } else {
-            val img: Image? = reader.acquireNextImage()
+            val img: Image? = reader.acquireLatestImage()
             if (img != null) {
                 Log.d(TAG, "image timestamp: " + img.timestamp)
                 save(img)

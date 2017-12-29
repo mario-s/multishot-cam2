@@ -60,7 +60,7 @@ object ImageSaverTest : Spek( {
         it("run method should read next image from reader") {
             given(storageAccessable.getStorageState()).willReturn(Environment.MEDIA_MOUNTED)
             classUnderTest?.run()
-            verify(reader).acquireNextImage()
+            verify(reader).acquireLatestImage()
         }
 
     }
