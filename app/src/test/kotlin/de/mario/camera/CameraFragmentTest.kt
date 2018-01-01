@@ -2,6 +2,7 @@ package de.mario.camera
 
 
 import android.app.Activity
+import android.content.Intent
 import android.media.MediaActionSound
 import android.view.View
 import de.mario.camera.glue.ViewsMediatable
@@ -36,6 +37,7 @@ object CameraFragmentTest : Spek({
 
         afterEachTest {
             tmp.delete()
+            reset(view)
         }
 
         it("should have a factory method to create the fragment") {
@@ -86,6 +88,14 @@ object CameraFragmentTest : Spek({
 
             instance.onDestroy()
             verify(sound).release()
+        }
+
+        it("onClick should start settings") {
+            val instance = spy(CameraFragment())
+            given(view.id).willReturn(R.id.settings)
+
+            instance.onClick(view)
+            verify(instance).startActivity(any(Intent::class.java))
         }
     }
 })
