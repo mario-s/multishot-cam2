@@ -3,6 +3,8 @@ package de.mario.camera
 
 import android.app.Activity
 import android.content.Intent
+import android.hardware.camera2.CameraMetadata
+import android.hardware.camera2.CaptureRequest
 import android.media.MediaActionSound
 import android.view.View
 import de.mario.camera.glue.ViewsMediatable
@@ -88,6 +90,17 @@ object CameraFragmentTest : Spek({
 
             instance.onDestroy()
             verify(sound).release()
+        }
+
+        it("onClick should take picture") {
+            val instance = spy(CameraFragment())
+            given(view.id).willReturn(R.id.picture)
+            var builder = mock(CaptureRequest.Builder::class.java)
+            ReflectionTestUtils.setField(instance, "mPreviewRequestBuilder", builder)
+
+            instance.onClick(view)
+            verify(builder).set(CaptureRequest.CONTROL_AF_TRIGGER,
+                    CameraMetadata.CONTROL_AF_TRIGGER_START)
         }
 
         it("onClick should start settings") {
