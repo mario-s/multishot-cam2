@@ -5,6 +5,12 @@
         android:title="@string/camera">
 
         <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/shutter_sound"
+            android:summary="@string/prefs_shutter_sound_enabled_description"
+            android:title="@string/prefs_shutter_sound_enabled_title" />
+
+        <CheckBoxPreference
             android:defaultValue="false"
             android:key="@string/grid"
             android:summary="@string/prefs_grid_enabled_description"

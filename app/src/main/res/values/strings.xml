@@ -28,4 +28,8 @@
     <string name="level"><xliff:g id="preference_key">level</xliff:g></string>
     <string name="prefs_level_enabled_description">Show a horizontal level on the preview.</string>
     <string name="prefs_level_enabled_title">Show Horizontal Level</string>
+
+    <string name="shutter_sound"><xliff:g id="preference_key">shutter_sound</xliff:g></string>
+    <string name="prefs_shutter_sound_enabled_description">Enables shutter sound when checked.</string>
+    <string name="prefs_shutter_sound_enabled_title">Shutter Sound</string>
 </resources>

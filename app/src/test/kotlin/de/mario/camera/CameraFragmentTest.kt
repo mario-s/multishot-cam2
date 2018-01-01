@@ -2,6 +2,7 @@ package de.mario.camera
 
 
 import android.app.Activity
+import android.media.MediaActionSound
 import android.view.View
 import de.mario.camera.glue.ViewsMediatable
 import de.mario.camera.view.AutoFitTextureView
@@ -78,5 +79,13 @@ object CameraFragmentTest : Spek({
             verify(viewsMediator, atLeastOnce()).onResume()
         }
 
+        it("onDestroy should release sound") {
+            val instance = spy(CameraFragment())
+            val sound = mock(MediaActionSound::class.java)
+            ReflectionTestUtils.setField(instance, "sound", sound)
+
+            instance.onDestroy()
+            verify(sound).release()
+        }
     }
 })

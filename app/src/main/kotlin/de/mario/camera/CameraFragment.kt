@@ -7,6 +7,7 @@ import android.graphics.ImageFormat
 import android.graphics.Matrix
 import android.hardware.camera2.*
 import android.media.ImageReader
+import android.media.MediaActionSound
 import android.media.MediaScannerConnection
 import android.os.Bundle
 import android.os.Handler
@@ -40,6 +41,7 @@ import java.util.concurrent.TimeUnit
 
 open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureable {
 
+    private val sound = MediaActionSound()
     private val orientations = SurfaceOrientation()
     private val camState = CameraState()
     private val cameraDeviceProxy = CameraDeviceProxy(this)
@@ -92,6 +94,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
+        sound.load(MediaActionSound.SHUTTER_CLICK)
         settings = SettingsAccess(activity)
         val viewsOrientationListener = ViewsOrientationListener(activity)
         viewsMediator = ViewsMediator(activity, settings, viewsOrientationListener)
@@ -116,6 +119,11 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
         stopBackgroundThread()
         viewsMediator.onPause()
         super.onPause()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        sound.release()
     }
 
     override fun onClick(view: View) {
@@ -356,9 +364,17 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
             fileNameStack.clear()
             val requests = cameraDeviceProxy.createBurstRequests(orientations.get(displayRotation()), mImageReader!!.surface)
             mCaptureSession?.stopRepeating()
+            playShutterSound()
             mCaptureSession?.captureBurst(requests, captureImageCallback, null)
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
+        }
+    }
+
+    private fun playShutterSound() {
+        if(settings.isEnabled(R.string.shutter_sound)) {
+
+            sound.play(MediaActionSound.SHUTTER_CLICK)
         }
     }
 
