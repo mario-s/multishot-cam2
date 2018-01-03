@@ -373,7 +373,6 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
 
     private fun playShutterSound() {
         if(settings.isEnabled(R.string.shutter_sound)) {
-
             sound.play(MediaActionSound.SHUTTER_CLICK)
         }
     }
@@ -385,9 +384,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
     private val captureImageCallback
             = object : CameraCaptureSession.CaptureCallback() {
 
-        override fun onCaptureSequenceCompleted(session: CameraCaptureSession?, sequenceId: Int, frameNumber: Long) = reset()
-
-        private fun reset() {
+        override fun onCaptureSequenceCompleted(session: CameraCaptureSession?, sequenceId: Int, frameNumber: Long) {
             // Reset the auto-focus trigger
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
                     CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)

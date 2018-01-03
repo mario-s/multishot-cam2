@@ -92,6 +92,17 @@ object CameraFragmentTest : Spek({
             verify(sound).release()
         }
 
+        it("prepareCapturing should trigger the camera") {
+            val instance = spy(CameraFragment())
+            given(view.id).willReturn(R.id.picture)
+            var builder = mock(CaptureRequest.Builder::class.java)
+            ReflectionTestUtils.setField(instance, "mPreviewRequestBuilder", builder)
+
+            instance.prepareCapturing()
+            verify(builder).set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER,
+                    CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START)
+        }
+
         it("onClick should take picture") {
             val instance = spy(CameraFragment())
             given(view.id).willReturn(R.id.picture)
