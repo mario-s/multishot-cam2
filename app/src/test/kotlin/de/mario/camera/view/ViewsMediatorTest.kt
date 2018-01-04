@@ -1,6 +1,7 @@
 package de.mario.camera.view
 
 import android.app.Activity
+import android.view.View
 import de.mario.camera.glue.SettingsAccessable
 import de.mario.camera.glue.ViewsOrientationListenable
 import org.jetbrains.spek.api.Spek
@@ -25,7 +26,7 @@ object ViewsMediatorTest : Spek({
         val classUnderTest = ViewsMediator(activity, settings, listener)
 
         beforeEachTest {
-            given(activity.findViewById(anyInt())).willReturn(view)
+            given(activity.findViewById<View>(anyInt())).willReturn(view)
         }
 
         it("should enable listener onResume") {

@@ -51,18 +51,18 @@ object CameraFragmentTest : Spek({
             val instance = CameraFragment.newInstance()
             val other = mock(View::class.java)
             val textureView = mock(AutoFitTextureView::class.java)
-            given(view.findViewById(anyInt())).willReturn(other)
-            given(view.findViewById(R.id.texture)).willReturn(textureView)
+            given(view.findViewById<View>(anyInt())).willReturn(other)
+            given(view.findViewById<View>(R.id.texture)).willReturn(textureView)
 
             instance.onViewCreated(view, null)
-            verify(view).findViewById(anyInt())
+            verify(view).findViewById<View>(anyInt())
         }
 
         it("onActivityCreated should complete without error") {
             val instance = spy(CameraFragment())
 
             given(instance.activity).willReturn(activity)
-            given(activity.findViewById(anyInt())).willReturn(view)
+            given(activity.findViewById<View>(anyInt())).willReturn(view)
 
             instance.onActivityCreated(null)
         }

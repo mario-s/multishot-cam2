@@ -88,7 +88,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        mTextureView = view.findViewById(R.id.texture) as AutoFitTextureView
+        mTextureView = view.findViewById<AutoFitTextureView>(R.id.texture)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
