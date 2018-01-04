@@ -10,9 +10,8 @@ import org.jetbrains.spek.api.dsl.it
 import org.junit.Assert.assertThat
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.verify
 import org.hamcrest.CoreMatchers.`is`
+import org.mockito.Mockito.*
 
 /**
  *
@@ -31,6 +30,7 @@ object CaptureProgressCallbackTest : Spek( {
 
         beforeEachTest {
             state.currentState = CameraState.STATE_PREVIEW
+            reset(capturable)
         }
 
         it("should capture picture") {
@@ -49,6 +49,15 @@ object CaptureProgressCallbackTest : Spek( {
             classUnderTest.onCaptureCompleted(session, request, captureResult)
 
             assertThat(state.currentState, `is`(CameraState.STATE_WAITING_NON_PRECAPTURE))
+        }
+
+        it("should capture picture when state is WAITING_NON_PRECAPTURE") {
+            state.currentState = CameraState.STATE_WAITING_NON_PRECAPTURE
+
+            val captureResult = mock(TotalCaptureResult::class.java)
+            classUnderTest.onCaptureCompleted(session, request, captureResult)
+
+            verify(capturable).capturePicture()
         }
 
     }
