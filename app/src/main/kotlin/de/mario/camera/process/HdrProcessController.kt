@@ -10,7 +10,7 @@ import de.mario.camera.glue.HdrProcessControlable
 /**
  * Controller to start the HDR process.
  */
-internal class HdrProcessController(private val context: Context) : HdrProcessControlable {
+class HdrProcessController(private val context: Context) : HdrProcessControlable {
 
     override fun process(pictures: Array<String>) {
         val intent = Intent(context, ExposureMergeService::class.java)

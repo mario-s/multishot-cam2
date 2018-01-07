@@ -39,7 +39,7 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 
 
-open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureable {
+class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureable {
 
     private val sound = MediaActionSound()
     private val orientations = SurfaceOrientation()
