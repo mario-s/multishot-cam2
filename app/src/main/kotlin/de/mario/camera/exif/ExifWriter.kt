@@ -8,7 +8,7 @@ import java.io.IOException
 
 /**
  */
-class ExifWriter {
+class ExifWriter : ExifTagWriteable {
 
     private val exifFactory = ExifInterfaceFactory()
 
@@ -25,7 +25,7 @@ class ExifWriter {
                 ExifInterface.TAG_GPS_DATESTAMP, ExifInterface.TAG_GPS_PROCESSING_METHOD)
     }
 
-    fun addTags(source: File, tags: Map<String, String>) {
+    override fun addTags(source: File, tags: Map<String, String>) {
         if (!tags.isEmpty()) {
             try {
                 val sourceExif = getExifInterface(source)
@@ -42,7 +42,7 @@ class ExifWriter {
         }
     }
 
-    fun copy(source: File, target: File) {
+    override fun copy(source: File, target: File) {
         try {
             val sourceExif = getExifInterface(source)
             val targetExif = getExifInterface(target)
