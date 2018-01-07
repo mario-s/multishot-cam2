@@ -7,6 +7,7 @@ import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatcher
 import org.mockito.ArgumentMatchers.anyDouble
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
@@ -14,6 +15,7 @@ import org.mockito.Mockito.verify
 import org.opencv.core.Mat
 import org.opencv.core.Scalar
 import org.springframework.test.util.ReflectionTestUtils
+import java.io.File
 
 
 @RunWith(JUnitPlatform::class)
@@ -38,13 +40,13 @@ object ExposureMergeServiceTest : Spek({
         }
 
         it("should merge images") {
-            given(proxy.read(anyString())).willReturn(mat)
+            given(proxy.read(any<File>())).willReturn(mat)
             given(merger.merge(any())).willReturn(mat)
 
             classUnderTest.process(arrayOf("FOO.png", "BAR.png"))
 
             val order = Mockito.inOrder(proxy, merger)
-            order.verify(proxy, atLeastOnce()).read(anyString())
+            order.verify(proxy, atLeastOnce()).read(any<File>())
             order.verify(merger).merge(any())
         }
 

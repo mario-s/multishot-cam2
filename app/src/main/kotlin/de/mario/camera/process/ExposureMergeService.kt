@@ -68,8 +68,7 @@ internal class ExposureMergeService() : IntentService(TAG) {
         val imgs: MutableList<Mat> = mutableListOf()
 
         pics.forEach {
-            val f = File(it)
-            imgs.add(proxy.read(f.getPath()))
+            imgs.add(proxy.read(File(it)))
         }
 
         return imgs
