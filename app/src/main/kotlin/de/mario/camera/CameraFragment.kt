@@ -23,6 +23,7 @@ import de.mario.camera.SizeHelper.findLargestSize
 import de.mario.camera.device.CameraDeviceProxy
 import de.mario.camera.device.CameraLookup
 import de.mario.camera.glue.CameraControlable
+import de.mario.camera.glue.HdrProcessControlable
 import de.mario.camera.glue.SettingsAccessable
 import de.mario.camera.glue.ViewsMediatable
 import de.mario.camera.io.ImageSaver
@@ -64,7 +65,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     private lateinit var settings: SettingsAccessable
     private lateinit var viewsMediator: ViewsMediatable
     private lateinit var mPreviewSize: Size
-    private lateinit var hdrProcessController: HdrProcessController
+    private lateinit var hdrProcessController: HdrProcessControlable
 
     private var mBackgroundThread: HandlerThread? = null
     private var mBackgroundHandler: Handler? = null
@@ -292,7 +293,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         }
     }
 
-    override fun showToast(msg: String) = toaster.showToast(msg)
+    override fun showToast(msg: String?) = toaster.showToast(msg)
 
     override fun updateTransform(viewWidth: Int, viewHeight: Int) = mTextureView.setTransform(createMatrix(viewWidth, viewHeight))
 
@@ -302,7 +303,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         if(size >= MAX_IMG) {
             process()
             val folder = File(name).parent
-            showToast(getString(R.string.photos_saved).format(size, folder))
+            showToast(getString(R.string.photos_saved)?.format(size, folder))
         }
     }
 

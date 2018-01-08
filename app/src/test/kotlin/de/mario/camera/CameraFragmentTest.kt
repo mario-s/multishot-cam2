@@ -7,6 +7,9 @@ import android.hardware.camera2.CameraMetadata
 import android.hardware.camera2.CaptureRequest
 import android.media.MediaActionSound
 import android.view.View
+import com.nhaarman.mockito_kotlin.mock
+import de.mario.camera.glue.HdrProcessControlable
+import de.mario.camera.glue.SettingsAccessable
 import de.mario.camera.glue.ViewsMediatable
 import de.mario.camera.view.AutoFitTextureView
 import org.hamcrest.CoreMatchers.notNullValue
@@ -17,6 +20,8 @@ import org.junit.Assert.assertThat
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.*
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.*
@@ -49,8 +54,8 @@ object CameraFragmentTest : Spek({
 
         it("onViewCreated should request texture view") {
             val instance = CameraFragment.newInstance()
-            val other = mock(View::class.java)
-            val textureView = mock(AutoFitTextureView::class.java)
+            val other: View = mock()
+            val textureView: AutoFitTextureView = mock()
             given(view.findViewById<View>(anyInt())).willReturn(other)
             given(view.findViewById<View>(R.id.texture)).willReturn(textureView)
 
@@ -69,8 +74,8 @@ object CameraFragmentTest : Spek({
 
         it("onResume should toogle views") {
             val instance = spy(CameraFragment())
-            val textureView = mock(AutoFitTextureView::class.java)
-            val viewsMediator = mock(ViewsMediatable::class.java)
+            val textureView: AutoFitTextureView = mock()
+            val viewsMediator: ViewsMediatable = mock()
 
             ReflectionTestUtils.setField(instance, "mTextureView", textureView)
             ReflectionTestUtils.setField(instance, "viewsMediator", viewsMediator)
@@ -85,7 +90,7 @@ object CameraFragmentTest : Spek({
 
         it("onDestroy should release sound") {
             val instance = spy(CameraFragment())
-            val sound = mock(MediaActionSound::class.java)
+            val sound: MediaActionSound = mock()
             ReflectionTestUtils.setField(instance, "sound", sound)
 
             instance.onDestroy()
@@ -95,7 +100,7 @@ object CameraFragmentTest : Spek({
         it("prepareCapturing should trigger the camera") {
             val instance = spy(CameraFragment())
             given(view.id).willReturn(R.id.picture)
-            var builder = mock(CaptureRequest.Builder::class.java)
+            var builder: CaptureRequest.Builder = mock()
             ReflectionTestUtils.setField(instance, "mPreviewRequestBuilder", builder)
 
             instance.prepareCapturing()
@@ -106,7 +111,7 @@ object CameraFragmentTest : Spek({
         it("onClick should take picture") {
             val instance = spy(CameraFragment())
             given(view.id).willReturn(R.id.picture)
-            var builder = mock(CaptureRequest.Builder::class.java)
+            var builder: CaptureRequest.Builder = mock()
             ReflectionTestUtils.setField(instance, "mPreviewRequestBuilder", builder)
 
             instance.onClick(view)
@@ -120,6 +125,19 @@ object CameraFragmentTest : Spek({
 
             instance.onClick(view)
             verify(instance).startActivity(any(Intent::class.java))
+        }
+
+        it("appendSavedFile should append files and start processing if enabled") {
+            val instance = CameraFragment.newInstance()
+            val settings: SettingsAccessable = mock()
+            val hdrProcessController: HdrProcessControlable = mock()
+            ReflectionTestUtils.setField(instance, "settings", settings)
+            ReflectionTestUtils.setField(instance, "hdrProcessController", hdrProcessController)
+            given(settings.isEnabled(R.string.hdr)).willReturn(true)
+
+            val names = arrayOf("foo", "bar", "baz")
+            names.forEach {instance.appendSavedFile(it)}
+            verify(settings).isEnabled(R.string.hdr)
         }
     }
 })
