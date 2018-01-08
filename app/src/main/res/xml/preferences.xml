@@ -22,5 +22,11 @@
             android:summary="@string/prefs_level_enabled_description"
             android:title="@string/prefs_level_enabled_title" />
 
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/hdr"
+            android:summary="@string/prefs_hdr_enabled_description"
+            android:title="@string/prefs_hdr_enabled_title" />
+
     </PreferenceCategory>
 </PreferenceScreen>

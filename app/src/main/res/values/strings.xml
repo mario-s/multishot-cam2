@@ -32,4 +32,8 @@
     <string name="shutter_sound"><xliff:g id="preference_key">shutter_sound</xliff:g></string>
     <string name="prefs_shutter_sound_enabled_description">Enables shutter sound when checked.</string>
     <string name="prefs_shutter_sound_enabled_title">Shutter Sound</string>
+
+    <string name="hdr"><xliff:g id="preference_key">hdr</xliff:g></string>
+    <string name="prefs_hdr_enabled_description">Create a HDR image from the taken sequence. Note: it requires an extra library which will be downloaded if not present.</string>
+    <string name="prefs_hdr_enabled_title">Create HDR</string>
 </resources>

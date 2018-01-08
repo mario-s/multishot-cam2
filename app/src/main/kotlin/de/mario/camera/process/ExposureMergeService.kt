@@ -2,13 +2,11 @@ package de.mario.camera.process
 
 import android.app.IntentService
 import android.content.Intent
+import android.media.MediaScannerConnection
 import de.mario.camera.exif.ExifTagWriteable
 import de.mario.camera.exif.ExifWriter
-import org.opencv.imgcodecs.Imgcodecs
 import org.opencv.core.Mat
 import java.io.File
-import org.opencv.core.Core
-import org.opencv.core.Scalar
 
 
 
@@ -39,6 +37,8 @@ internal class ExposureMergeService() : IntentService(TAG) {
         val out = File(createFileName(firstPic))
         write(fusion, out)
         copyExif(firstPic, out)
+
+        MediaScannerConnection.scanFile(applicationContext, arrayOf(out.path), null, null)
     }
 
     private fun copyExif(src: String, target: File) {

@@ -27,6 +27,7 @@ import de.mario.camera.glue.SettingsAccessable
 import de.mario.camera.glue.ViewsMediatable
 import de.mario.camera.io.ImageSaver
 import de.mario.camera.orientation.ViewsOrientationListener
+import de.mario.camera.process.HdrProcessController
 import de.mario.camera.settings.SettingsAccess
 import de.mario.camera.settings.SettingsActivity
 import de.mario.camera.view.AutoFitTextureView
@@ -63,6 +64,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     private lateinit var settings: SettingsAccessable
     private lateinit var viewsMediator: ViewsMediatable
     private lateinit var mPreviewSize: Size
+    private lateinit var hdrProcessController: HdrProcessController
 
     private var mBackgroundThread: HandlerThread? = null
     private var mBackgroundHandler: Handler? = null
@@ -99,6 +101,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         val viewsOrientationListener = ViewsOrientationListener(activity)
         viewsMediator = ViewsMediator(activity, settings, viewsOrientationListener)
         viewsMediator.setOnClickListener(this)
+        hdrProcessController = HdrProcessController(activity)
     }
 
     override fun onResume() {
@@ -297,15 +300,18 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         fileNameStack.push(name)
         val size = fileNameStack.size
         if(size >= MAX_IMG) {
-            forceScan()
+            process()
             val folder = File(name).parent
             showToast(getString(R.string.photos_saved).format(size, folder))
         }
     }
 
-    private fun forceScan() {
+    private fun process() {
         val names = fileNameStack.toTypedArray()
         MediaScannerConnection.scanFile(activity, names, null, null)
+        if(settings.isEnabled(R.string.hdr)) {
+            hdrProcessController.process(names)
+        }
     }
 
     private fun createMatrix(viewWidth: Int, viewHeight: Int): Matrix {
