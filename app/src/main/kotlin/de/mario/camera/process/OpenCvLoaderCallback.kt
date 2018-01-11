@@ -14,8 +14,6 @@ class OpenCvLoaderCallback internal constructor(context: Context, private val in
     override fun onManagerConnected(status: Int) {
         if (status == LoaderCallbackInterface.SUCCESS) {
             mAppContext.startService(intent)
-        } else {
-            super.onManagerConnected(status)
         }
     }
 }

@@ -63,13 +63,13 @@ object ImageSaverTest : Spek( {
             val image = mock(Image::class.java)
             val plane = mock(Image.Plane::class.java)
             val buffer = ByteBuffer.allocate(10)
-            given(reader.acquireLatestImage()).willReturn(image)
+            given(reader.acquireNextImage()).willReturn(image)
             given(image.planes).willReturn(arrayOf(plane))
             given(plane.buffer).willReturn(buffer)
 
             classUnderTest?.run()
             val order = inOrder(reader, image)
-            order.verify(reader).acquireLatestImage()
+            order.verify(reader).acquireNextImage()
             order.verify(image).close()
         }
 

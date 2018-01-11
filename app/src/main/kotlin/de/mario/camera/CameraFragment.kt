@@ -371,7 +371,6 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
             fileNameStack.clear()
             val requests = cameraDeviceProxy.createBurstRequests(orientations.get(displayRotation()), mImageReader!!.surface)
             mCaptureSession?.stopRepeating()
-            playShutterSound()
             mCaptureSession?.captureBurst(requests, captureImageCallback, null)
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
@@ -392,6 +391,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
             = object : CameraCaptureSession.CaptureCallback() {
 
         override fun onCaptureSequenceCompleted(session: CameraCaptureSession?, sequenceId: Int, frameNumber: Long) {
+            playShutterSound()
             // Reset the auto-focus trigger
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
                     CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)
