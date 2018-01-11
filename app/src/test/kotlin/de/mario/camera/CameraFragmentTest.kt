@@ -12,6 +12,7 @@ import de.mario.camera.glue.HdrProcessControlable
 import de.mario.camera.glue.SettingsAccessable
 import de.mario.camera.glue.ViewsMediatable
 import de.mario.camera.view.AutoFitTextureView
+import de.mario.camera.widget.Toaster
 import org.hamcrest.CoreMatchers.notNullValue
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
@@ -128,12 +129,15 @@ object CameraFragmentTest : Spek({
         }
 
         it("appendSavedFile should append files and start processing if enabled") {
-            val instance = CameraFragment.newInstance()
+            val instance = spy(CameraFragment())
             val settings: SettingsAccessable = mock()
             val hdrProcessController: HdrProcessControlable = mock()
+            val toaster: Toaster = mock()
             ReflectionTestUtils.setField(instance, "settings", settings)
             ReflectionTestUtils.setField(instance, "hdrProcessController", hdrProcessController)
+            ReflectionTestUtils.setField(instance, "toaster", toaster)
             given(settings.isEnabled(R.string.hdr)).willReturn(true)
+            given(instance.getString(anyInt())).willReturn("%s %s")
 
             val names = arrayOf("foo", "bar", "baz")
             names.forEach {instance.appendSavedFile(it)}

@@ -303,7 +303,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         if(size >= MAX_IMG) {
             process()
             val folder = File(name).parent
-            showToast(getString(R.string.photos_saved)?.format(size, folder))
+            showToast(getString(R.string.photos_saved).format(size, folder))
         }
     }
 
