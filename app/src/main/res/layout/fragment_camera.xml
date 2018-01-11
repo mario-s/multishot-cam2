@@ -65,7 +65,7 @@
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_gravity="center"
-            android:src="@drawable/shutter_1"
+            android:src="@drawable/shutter"
             android:text="@string/picture"/>
 
         <ImageButton
