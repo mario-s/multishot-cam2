@@ -19,7 +19,8 @@ class OpenCvProxy {
 
     fun write(img: Mat, out: File) = Imgcodecs.imwrite(out.path, img)
 
-    fun multiply(src: Mat, scalar: Scalar, dest: Mat): Mat {
+    fun multiply(src: Mat, scalar: Scalar): Mat {
+        val dest = mat()
         Core.multiply(src, scalar, dest)
         return dest
     }
