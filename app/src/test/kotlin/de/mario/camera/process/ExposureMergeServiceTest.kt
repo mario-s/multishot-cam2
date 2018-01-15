@@ -2,16 +2,15 @@ package de.mario.camera.process
 
 import com.nhaarman.mockito_kotlin.*
 import de.mario.camera.exif.ExifTagWriteable
+import de.mario.camera.glue.SettingsAccessable
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatcher
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyDouble
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
-import org.mockito.Mockito.verify
 import org.opencv.core.Mat
 import org.opencv.core.Scalar
 import org.springframework.test.util.ReflectionTestUtils
@@ -28,10 +27,13 @@ object ExposureMergeServiceTest : Spek({
         val merger: Merger = mock()
         val mat: Mat = mock()
         val scalar: Scalar = mock()
+        val settingsAccess: SettingsAccessable = mock()
+
         val classUnderTest = ExposureMergeService()
         ReflectionTestUtils.setField(classUnderTest, "merger", merger)
         ReflectionTestUtils.setField(classUnderTest, "exifWriter", exifWriter)
         ReflectionTestUtils.setField(classUnderTest, "proxy", proxy)
+        ReflectionTestUtils.setField(classUnderTest, "settingsAccess", settingsAccess)
 
         beforeEachTest {
             reset(proxy, mat)
@@ -45,9 +47,10 @@ object ExposureMergeServiceTest : Spek({
 
             classUnderTest.process(arrayOf("FOO.png", "BAR.png"))
 
-            val order = Mockito.inOrder(proxy, merger)
+            val order = Mockito.inOrder(proxy, merger, settingsAccess)
             order.verify(proxy, atLeastOnce()).read(any<File>())
             order.verify(merger).merge(any())
+            order.verify(settingsAccess).isEnabled(anyInt())
         }
 
     }

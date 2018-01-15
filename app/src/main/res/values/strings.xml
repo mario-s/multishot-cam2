@@ -17,7 +17,11 @@
     <string name="camera">Camera</string>
     <string name="shutter">Shutter</string>
     <string name="ac_settings">Settings</string>
-    
+    <string name="title_merge_process">Image Merge Process</string>
+
+    <string name="EXPOSURE_MERGE">exposureMerge</string>
+    <string name="MERGED">merged</string>
+
     <string name="no_storage">Unable to save image! The storage is not present.</string>
     <string name="photos_saved" formatted="false">%s photos saved to %s.</string>
 
@@ -36,4 +40,9 @@
     <string name="hdr"><xliff:g id="preference_key">hdr</xliff:g></string>
     <string name="prefs_hdr_enabled_description">Create a HDR image from the taken sequence. Note: it requires an extra library which will be downloaded if not present.</string>
     <string name="prefs_hdr_enabled_title">Create HDR</string>
+
+    <string name="notifyHdr"><xliff:g id="preference_key">notifyHdr</xliff:g></string>
+    <string name="prefs_broadcast_hdr_enabled_title">System message for HDR process</string>
+    <string name="prefs_broadcast_hdr_enabled_description">The HDR service will send a general system notification when done.</string>
+
 </resources>
