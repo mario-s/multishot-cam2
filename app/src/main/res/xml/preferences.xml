@@ -22,11 +22,23 @@
             android:summary="@string/prefs_level_enabled_description"
             android:title="@string/prefs_level_enabled_title" />
 
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="hdr"
+        android:title="@string/prefs_process_hdr_title">
+
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="@string/hdr"
             android:summary="@string/prefs_hdr_enabled_description"
             android:title="@string/prefs_hdr_enabled_title" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:dependency="@string/hdr"
+            android:key="@string/notifyHdr"
+            android:summary="@string/prefs_broadcast_hdr_enabled_description"
+            android:title="@string/prefs_broadcast_hdr_enabled_title"/>
 
     </PreferenceCategory>
 </PreferenceScreen>
