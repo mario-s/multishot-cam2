@@ -19,7 +19,7 @@ import android.view.Surface
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
-import de.mario.camera.SizeHelper.findLargestSize
+import de.mario.camera.SizeHelper.smallestSize
 import de.mario.camera.device.CameraDeviceProxy
 import de.mario.camera.device.CameraLookup
 import de.mario.camera.glue.CameraControlable
@@ -169,7 +169,8 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
 
     private fun createPreviewSize(origin: Size): Size {
         val characteristics = cameraDeviceProxy.getCameraCharacteristics()
-        setupImageReader(findLargestSize(characteristics))
+        val imgSize = smallestSize(characteristics)
+        setupImageReader(imgSize)
 
         return previewSizeFactory.createPreviewSize(characteristics, origin)
     }
@@ -308,11 +309,13 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     }
 
     private fun process() {
-        val names = fileNameStack.toTypedArray()
-        MediaScannerConnection.scanFile(activity, names, null, null)
-        if(settings.isEnabled(R.string.hdr)) {
-            hdrProcessController.process(names)
-        }
+        mBackgroundHandler?.post({
+            val names = fileNameStack.toTypedArray()
+            MediaScannerConnection.scanFile(activity, names, null, null)
+            if(settings.isEnabled(R.string.hdr)) {
+                hdrProcessController.process(names)
+            }
+        })
     }
 
     private fun createMatrix(viewWidth: Int, viewHeight: Int): Matrix {

@@ -42,33 +42,37 @@ class ImageSaver(private val control: CameraControlable, private val reader: Ima
             val img: Image? = reader.acquireNextImage()
             if (img != null) {
                 Log.d(TAG, "image timestamp: " + img.timestamp)
-                save(img)
+                val file = newFile()
+                if(save(img, file)){
+                    sendImageSavedMessage(file)
+                }
             }
         }
     }
 
-    private fun save(image: Image) {
+    private fun save(image: Image, file: File): Boolean {
+        var success = false
         val plane = image.planes[0]
         val buffer = plane.buffer
         val bytes = ByteArray(buffer.remaining())
         buffer.get(bytes)
         var output: FileOutputStream? = null
         try {
-            val file = newFile()
             output = FileOutputStream(file)
             output.write(bytes)
-
-            sendImageSavedMessage(file)
+            output.flush()
         } catch (e: IOException) {
             Log.w(TAG, e.message, e)
         } finally {
             image.close()
             try {
                 output?.close()
+                success = true
             } catch (e: IOException) {
                 Log.w(TAG, e.message, e)
             }
         }
+        return success
     }
 
     private fun isExternalStorageWritable(): Boolean {

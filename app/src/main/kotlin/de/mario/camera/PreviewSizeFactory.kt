@@ -29,7 +29,7 @@ class PreviewSizeFactory(val fragment: Fragment) {
     fun createPreviewSize(characteristics: CameraCharacteristics, origin: Size): Size {
         val map = characteristics.get(
                 CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
-        val largest: Size = SizeHelper.findLargestSize(map)
+        val largest: Size = SizeHelper.largestSize(map)
 
 
         // Find out if we need to swap dimension to get the preview size relative to sensor

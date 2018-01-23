@@ -5,7 +5,7 @@ import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.params.StreamConfigurationMap
 import android.util.Log
 import android.util.Size
-import java.util.*
+import java.util.Collections.*
 
 
 /**
@@ -28,9 +28,9 @@ object SizeHelper {
         // Pick the smallest of those big enough. If there is no one big enough, pick the
         // largest of those not big enough.
         if (result.bigEnough.isNotEmpty()) {
-            return Collections.min(result.bigEnough, CompareSizesByArea())
+            return min(result.bigEnough, CompareSizesByArea())
         } else if (result.notBigEnough.isNotEmpty()) {
-            return Collections.max(result.notBigEnough, CompareSizesByArea())
+            return max(result.notBigEnough, CompareSizesByArea())
         } else {
             Log.w("SizeHelper", "Couldn't find any suitable preview size")
             return choices[0]
@@ -57,18 +57,18 @@ object SizeHelper {
         return Result(bigEnough, notBigEnough)
     }
 
-    fun findLargestSize(characteristics: CameraCharacteristics): Size {
-        val map = characteristics.get(
-                CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+    fun largestSize(characteristics: CameraCharacteristics): Size = largestSize(configMap(characteristics))
 
-        // For still image captures, we use the largest available size.
-        return findLargestSize(map)
-    }
+    fun largestSize(map : StreamConfigurationMap) : Size = max(sizes(map), CompareSizesByArea())
 
-    fun findLargestSize(map : StreamConfigurationMap) : Size {
-        val sizes: List<Size> = map.getOutputSizes(ImageFormat.JPEG).asList()
-        return Collections.max(sizes, CompareSizesByArea())
-    }
+    fun smallestSize(characteristics: CameraCharacteristics): Size = smallestSize(configMap(characteristics))
+
+    fun smallestSize(map: StreamConfigurationMap) : Size = min(sizes(map), CompareSizesByArea())
+
+    private fun configMap(characteristics: CameraCharacteristics): StreamConfigurationMap = characteristics.get(
+            CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+
+    private fun sizes(map : StreamConfigurationMap): List<Size> = map.getOutputSizes(ImageFormat.JPEG).asList()
 
     internal class CompareSizesByArea : Comparator<Size> {
 

@@ -39,7 +39,7 @@ object SizeHelperTest : Spek( {
             given(characteristic.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)).willReturn(map)
             given(map.getOutputSizes(ImageFormat.JPEG)).willReturn(arrayOf(min, max))
 
-            val result = SizeHelper.findLargestSize(characteristic)
+            val result = SizeHelper.largestSize(characteristic)
             assertThat(result, equalTo(max))
         }
 
