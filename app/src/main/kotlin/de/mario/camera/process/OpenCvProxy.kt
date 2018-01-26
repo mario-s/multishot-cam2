@@ -13,7 +13,9 @@ import android.R.attr.src
 
 class OpenCvProxy {
 
-    fun scalar(v0: Double, v1: Double, v2: Double): Scalar = Scalar(v0, v1, v2)
+    private companion object {
+        val SCALAR = Scalar(255.0, 255.0, 255.0)
+    }
 
     fun read(file: File): Mat = read(file.path)
 
@@ -23,10 +25,8 @@ class OpenCvProxy {
         Imgcodecs.imwrite(out.path, img)
     }
 
-    fun multiply(src: Mat, scalar: Scalar): Mat {
-        val scalar = Scalar(255.0, 255.0, 255.0)
-        val filter = Mat(src.size(), src.type(), scalar)
-        val dest = src.mul(filter)
-        return dest
+    fun multiply(src: Mat): Mat {
+        val filter = Mat(src.size(), src.type(), SCALAR)
+        return src.mul(filter)
     }
 }

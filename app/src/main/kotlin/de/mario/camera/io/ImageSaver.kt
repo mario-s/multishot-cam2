@@ -60,11 +60,11 @@ class ImageSaver(private val control: CameraControlable, private val reader: Ima
         try {
             output = FileOutputStream(file)
             output.write(bytes)
-            output.flush()
             success = true
         } catch (e: IOException) {
             Log.w(TAG, e.message, e)
         } finally {
+            image.close()
             try {
                 output?.close()
             } catch (e: IOException) {

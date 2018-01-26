@@ -74,13 +74,8 @@ internal class ExposureMergeService() : IntentService(TAG) {
     }
 
     private fun write(fusion: Mat, out: File) {
-        val result = multiply(fusion)
+        val result = proxy.multiply(fusion)
         proxy.write(result, out)
-    }
-
-    private fun multiply(fusion: Mat): Mat {
-        val scalar = proxy.scalar(255.0, 0.0, 255.0)
-        return proxy.multiply(fusion, scalar)
     }
 
     private fun loadImages(pics: Array<String>): List<Mat> {

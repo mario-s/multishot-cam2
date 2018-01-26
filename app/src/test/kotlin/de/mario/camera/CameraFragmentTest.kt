@@ -128,7 +128,7 @@ object CameraFragmentTest : Spek({
             verify(instance).startActivity(any(Intent::class.java))
         }
 
-        it("appendSavedFile should append files and start processing if enabled") {
+        it("appendSavedFile should append files and show message") {
             val instance = spy(CameraFragment())
             val settings: SettingsAccessable = mock()
             val hdrProcessController: HdrProcessControlable = mock()
@@ -141,7 +141,7 @@ object CameraFragmentTest : Spek({
 
             val names = arrayOf("foo", "bar", "baz")
             names.forEach {instance.appendSavedFile(it)}
-            verify(settings).isEnabled(R.string.hdr)
+            verify(instance).showToast(anyString())
         }
     }
 })

@@ -37,7 +37,6 @@ object ExposureMergeServiceTest : Spek({
 
         beforeEachTest {
             reset(proxy, mat)
-            given(proxy.scalar(anyDouble(), anyDouble(), anyDouble())).willReturn(scalar)
         }
 
         it("should merge images") {
