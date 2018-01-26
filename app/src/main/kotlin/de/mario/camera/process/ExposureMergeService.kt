@@ -3,6 +3,7 @@ package de.mario.camera.process
 import android.app.IntentService
 import android.content.Intent
 import android.media.MediaScannerConnection
+import android.util.Log
 import de.mario.camera.R
 import de.mario.camera.exif.ExifTagWriteable
 import de.mario.camera.exif.ExifWriter
@@ -26,7 +27,7 @@ internal class ExposureMergeService() : IntentService(TAG) {
     companion object {
         const val TAG = "ExposureMergeService"
         const val PARAM_PICS = "de.mario.camera.extra.PICS"
-        const val MERGED = "merged"
+        const val MERGED = "_fusion"
     }
 
     override fun onHandleIntent(intent: Intent?) {
@@ -78,7 +79,7 @@ internal class ExposureMergeService() : IntentService(TAG) {
     }
 
     private fun multiply(fusion: Mat): Mat {
-        val scalar = proxy.scalar(255.0, 255.0, 255.0)
+        val scalar = proxy.scalar(255.0, 0.0, 255.0)
         return proxy.multiply(fusion, scalar)
     }
 
@@ -86,7 +87,8 @@ internal class ExposureMergeService() : IntentService(TAG) {
         val imgs: MutableList<Mat> = mutableListOf()
 
         pics.forEach {
-            imgs.add(proxy.read(File(it)))
+            val mat = proxy.read(File(it))
+            imgs.add(mat)
         }
 
         return imgs
