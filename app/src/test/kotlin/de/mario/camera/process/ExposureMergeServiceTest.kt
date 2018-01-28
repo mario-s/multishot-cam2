@@ -1,5 +1,6 @@
 package de.mario.camera.process
 
+import android.content.Context
 import com.nhaarman.mockito_kotlin.*
 import de.mario.camera.exif.ExifTagWriteable
 import de.mario.camera.glue.SettingsAccessable
@@ -9,10 +10,8 @@ import org.jetbrains.spek.api.dsl.it
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.ArgumentMatchers.anyDouble
 import org.mockito.Mockito
 import org.opencv.core.Mat
-import org.opencv.core.Scalar
 import org.springframework.test.util.ReflectionTestUtils
 import java.io.File
 
@@ -26,7 +25,7 @@ object ExposureMergeServiceTest : Spek({
         val exifWriter: ExifTagWriteable = mock()
         val merger: Merger = mock()
         val mat: Mat = mock()
-        val scalar: Scalar = mock()
+        val context: Context = mock()
         val settingsAccess: SettingsAccessable = mock()
 
         val classUnderTest = ExposureMergeService()

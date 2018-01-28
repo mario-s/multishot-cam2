@@ -11,6 +11,7 @@ import com.nhaarman.mockito_kotlin.mock
 import de.mario.camera.glue.HdrProcessControlable
 import de.mario.camera.glue.SettingsAccessable
 import de.mario.camera.glue.ViewsMediatable
+import de.mario.camera.message.BroadcastingReceiverRegister
 import de.mario.camera.view.AutoFitTextureView
 import de.mario.camera.widget.Toaster
 import org.hamcrest.CoreMatchers.notNullValue
@@ -21,8 +22,6 @@ import org.junit.Assert.assertThat
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers.*
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.*
@@ -77,9 +76,11 @@ object CameraFragmentTest : Spek({
             val instance = spy(CameraFragment())
             val textureView: AutoFitTextureView = mock()
             val viewsMediator: ViewsMediatable = mock()
+            val broadcastingReceiverRegister: BroadcastingReceiverRegister = mock()
 
             ReflectionTestUtils.setField(instance, "mTextureView", textureView)
             ReflectionTestUtils.setField(instance, "viewsMediator", viewsMediator)
+            ReflectionTestUtils.setField(instance, "broadcastingReceiverRegister", broadcastingReceiverRegister)
 
             given(instance.activity).willReturn(activity)
             given(instance.view).willReturn(view)

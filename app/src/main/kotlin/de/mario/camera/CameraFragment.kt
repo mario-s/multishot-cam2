@@ -22,11 +22,10 @@ import android.view.ViewGroup
 import de.mario.camera.SizeHelper.smallestSize
 import de.mario.camera.device.CameraDeviceProxy
 import de.mario.camera.device.CameraLookup
-import de.mario.camera.glue.CameraControlable
-import de.mario.camera.glue.HdrProcessControlable
-import de.mario.camera.glue.SettingsAccessable
-import de.mario.camera.glue.ViewsMediatable
+import de.mario.camera.glue.*
 import de.mario.camera.io.ImageSaver
+import de.mario.camera.message.BroadcastingReceiverRegister
+import de.mario.camera.message.MessageHandler
 import de.mario.camera.orientation.ViewsOrientationListener
 import de.mario.camera.process.HdrProcessController
 import de.mario.camera.settings.SettingsAccess
@@ -58,6 +57,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     private val permissionRequester = PermissionRequester(this)
     private val captureProgressCallback = CaptureProgressCallback(camState, this)
     private val mSurfaceTextureListener = TextureViewSurfaceListener(this)
+    private val broadcastingReceiverRegister = BroadcastingReceiverRegister(this)
 
     private lateinit var mTextureView: AutoFitTextureView
     private lateinit var mPreviewRequestBuilder: CaptureRequest.Builder
@@ -109,6 +109,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         super.onResume()
 
         viewsMediator.onResume()
+        broadcastingReceiverRegister.registerBroadcastReceiver(activity)
         startBackgroundThread()
 
         if (mTextureView.isAvailable) {
@@ -121,6 +122,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     override fun onPause() {
         closeCamera()
         stopBackgroundThread()
+        broadcastingReceiverRegister.unregisterBroadcastReceiver(activity)
         viewsMediator.onPause()
         super.onPause()
     }
@@ -298,7 +300,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
 
     override fun updateTransform(viewWidth: Int, viewHeight: Int) = mTextureView.setTransform(createMatrix(viewWidth, viewHeight))
 
-    internal fun appendSavedFile(name: String) {
+    override fun appendSavedFile(name: String) {
         fileNameStack.push(name)
         val size = fileNameStack.size
         if(size >= MAX_IMG) {

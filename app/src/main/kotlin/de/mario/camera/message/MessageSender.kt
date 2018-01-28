@@ -1,4 +1,4 @@
-package de.mario.camera.glue
+package de.mario.camera.message
 
 import android.os.Handler
 import android.os.Message

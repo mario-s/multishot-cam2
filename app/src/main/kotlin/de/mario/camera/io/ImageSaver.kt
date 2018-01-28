@@ -8,8 +8,7 @@ import android.util.Log
 import de.mario.camera.R
 import de.mario.camera.glue.CameraControlable
 import de.mario.camera.glue.MessageSendable
-import de.mario.camera.glue.MessageType
-import de.mario.camera.glue.MessageSender
+import de.mario.camera.message.MessageSender
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -94,7 +93,7 @@ class ImageSaver(private val control: CameraControlable, private val reader: Ima
 
     private fun sendImageSavedMessage(file: File) {
         val msg = Message.obtain(control.getMessageHandler())
-        msg.what = MessageType.IMAGE_SAVED
+        msg.what = MessageSendable.MessageType.IMAGE_SAVED
         msg.data.putString("File", file.absolutePath)
         sender.send(msg)
     }
