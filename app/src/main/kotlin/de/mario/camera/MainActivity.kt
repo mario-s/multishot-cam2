@@ -2,6 +2,7 @@ package de.mario.camera
 
 import android.app.Activity
 import android.os.Bundle
+import android.util.Log
 
 class MainActivity : Activity() {
 
@@ -13,5 +14,10 @@ class MainActivity : Activity() {
                     .replace(R.id.container, CameraFragment.newInstance())
                     .commit()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("MultiShot", "finished!")
     }
 }

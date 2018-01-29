@@ -8,8 +8,7 @@ import android.util.Log
 import de.mario.camera.R
 import de.mario.camera.glue.CameraControlable
 import de.mario.camera.glue.MessageSendable
-import de.mario.camera.glue.MessageType
-import de.mario.camera.glue.MessageSender
+import de.mario.camera.message.MessageSender
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -39,26 +38,28 @@ class ImageSaver(private val control: CameraControlable, private val reader: Ima
         if (!isExternalStorageWritable()) {
             sender.send(getString(R.string.no_storage))
         } else {
-            val img: Image? = reader.acquireLatestImage()
+            val img: Image? = reader.acquireNextImage()
             if (img != null) {
                 Log.d(TAG, "image timestamp: " + img.timestamp)
-                save(img)
+                val file = newFile()
+                if(save(img, file)){
+                    sendImageSavedMessage(file)
+                }
             }
         }
     }
 
-    private fun save(image: Image) {
+    private fun save(image: Image, file: File): Boolean {
+        var success = false
         val plane = image.planes[0]
         val buffer = plane.buffer
         val bytes = ByteArray(buffer.remaining())
         buffer.get(bytes)
         var output: FileOutputStream? = null
         try {
-            val file = newFile()
             output = FileOutputStream(file)
             output.write(bytes)
-
-            sendImageSavedMessage(file)
+            success = true
         } catch (e: IOException) {
             Log.w(TAG, e.message, e)
         } finally {
@@ -69,6 +70,7 @@ class ImageSaver(private val control: CameraControlable, private val reader: Ima
                 Log.w(TAG, e.message, e)
             }
         }
+        return success
     }
 
     private fun isExternalStorageWritable(): Boolean {
@@ -91,7 +93,7 @@ class ImageSaver(private val control: CameraControlable, private val reader: Ima
 
     private fun sendImageSavedMessage(file: File) {
         val msg = Message.obtain(control.getMessageHandler())
-        msg.what = MessageType.IMAGE_SAVED
+        msg.what = MessageSendable.MessageType.IMAGE_SAVED
         msg.data.putString("File", file.absolutePath)
         sender.send(msg)
     }

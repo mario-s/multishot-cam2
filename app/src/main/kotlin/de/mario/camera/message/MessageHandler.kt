@@ -1,10 +1,11 @@
-package de.mario.camera
+package de.mario.camera.message
 
 
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import de.mario.camera.glue.MessageType
+import de.mario.camera.CameraFragment
+import de.mario.camera.glue.MessageSendable
 
 
 /**
@@ -14,18 +15,12 @@ class MessageHandler(private val control: CameraFragment) : Handler(Looper.getMa
 
     override fun handleMessage(message: Message) {
         when(message.what) {
-            MessageType.IMAGE_SAVED -> {
-                val filename = message.data.getString(MessageType.FILE)
+            MessageSendable.MessageType.IMAGE_SAVED -> {
+                val filename = message.data.getString(MessageSendable.MessageType.FILE)
                 control.appendSavedFile(filename)
             }
             else -> control.showToast(message.obj.toString())
         }
 
-    }
-
-    companion object {
-        private val TAG = MessageHandler::class.java.simpleName
-
-        private val PHOTOS_SAVED = R.string.photos_saved
     }
 }

@@ -19,14 +19,14 @@ import android.view.Surface
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
-import de.mario.camera.SizeHelper.findLargestSize
 import de.mario.camera.device.CameraDeviceProxy
 import de.mario.camera.device.CameraLookup
-import de.mario.camera.glue.CameraControlable
-import de.mario.camera.glue.SettingsAccessable
-import de.mario.camera.glue.ViewsMediatable
+import de.mario.camera.glue.*
 import de.mario.camera.io.ImageSaver
+import de.mario.camera.message.BroadcastingReceiverRegister
+import de.mario.camera.message.MessageHandler
 import de.mario.camera.orientation.ViewsOrientationListener
+import de.mario.camera.process.FusionProcessController
 import de.mario.camera.settings.SettingsAccess
 import de.mario.camera.settings.SettingsActivity
 import de.mario.camera.view.AutoFitTextureView
@@ -39,7 +39,7 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 
 
-open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureable {
+class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureable {
 
     private val sound = MediaActionSound()
     private val orientations = SurfaceOrientation()
@@ -56,6 +56,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
     private val permissionRequester = PermissionRequester(this)
     private val captureProgressCallback = CaptureProgressCallback(camState, this)
     private val mSurfaceTextureListener = TextureViewSurfaceListener(this)
+    private val broadcastingReceiverRegister = BroadcastingReceiverRegister(this)
 
     private lateinit var mTextureView: AutoFitTextureView
     private lateinit var mPreviewRequestBuilder: CaptureRequest.Builder
@@ -63,6 +64,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
     private lateinit var settings: SettingsAccessable
     private lateinit var viewsMediator: ViewsMediatable
     private lateinit var mPreviewSize: Size
+    private lateinit var hdrProcessController: FusionProcessControlable
 
     private var mBackgroundThread: HandlerThread? = null
     private var mBackgroundHandler: Handler? = null
@@ -88,7 +90,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        mTextureView = view.findViewById(R.id.texture) as AutoFitTextureView
+        mTextureView = view.findViewById<AutoFitTextureView>(R.id.texture)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -99,12 +101,14 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
         val viewsOrientationListener = ViewsOrientationListener(activity)
         viewsMediator = ViewsMediator(activity, settings, viewsOrientationListener)
         viewsMediator.setOnClickListener(this)
+        hdrProcessController = FusionProcessController(activity)
     }
 
     override fun onResume() {
         super.onResume()
 
         viewsMediator.onResume()
+        broadcastingReceiverRegister.registerBroadcastReceiver(activity)
         startBackgroundThread()
 
         if (mTextureView.isAvailable) {
@@ -117,6 +121,7 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
     override fun onPause() {
         closeCamera()
         stopBackgroundThread()
+        broadcastingReceiverRegister.unregisterBroadcastReceiver(activity)
         viewsMediator.onPause()
         super.onPause()
     }
@@ -165,9 +170,9 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
 
     private fun createPreviewSize(origin: Size): Size {
         val characteristics = cameraDeviceProxy.getCameraCharacteristics()
-        setupImageReader(findLargestSize(characteristics))
-
-        return previewSizeFactory.createPreviewSize(characteristics, origin)
+        val size = previewSizeFactory.createPreviewSize(characteristics, origin)
+        setupImageReader(size)
+        return size
     }
 
     private fun setupImageReader(largest: Size) {
@@ -289,23 +294,28 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
         }
     }
 
-    override fun showToast(msg: String) = toaster.showToast(msg)
+    override fun showToast(msg: String?) = toaster.showToast(msg)
 
     override fun updateTransform(viewWidth: Int, viewHeight: Int) = mTextureView.setTransform(createMatrix(viewWidth, viewHeight))
 
-    internal fun appendSavedFile(name: String) {
+    override fun appendSavedFile(name: String) {
         fileNameStack.push(name)
         val size = fileNameStack.size
         if(size >= MAX_IMG) {
-            forceScan()
+            process()
             val folder = File(name).parent
             showToast(getString(R.string.photos_saved).format(size, folder))
         }
     }
 
-    private fun forceScan() {
-        val names = fileNameStack.toTypedArray()
-        MediaScannerConnection.scanFile(activity, names, null, null)
+    private fun process() {
+        mBackgroundHandler?.post({
+            val names = fileNameStack.toTypedArray()
+            MediaScannerConnection.scanFile(activity, names, null, null)
+            if(settings.isEnabled(R.string.hdr)) {
+                hdrProcessController.process(names)
+            }
+        })
     }
 
     private fun createMatrix(viewWidth: Int, viewHeight: Int): Matrix {
@@ -364,7 +374,6 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
             fileNameStack.clear()
             val requests = cameraDeviceProxy.createBurstRequests(orientations.get(displayRotation()), mImageReader!!.surface)
             mCaptureSession?.stopRepeating()
-            playShutterSound()
             mCaptureSession?.captureBurst(requests, captureImageCallback, null)
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
@@ -373,7 +382,6 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
 
     private fun playShutterSound() {
         if(settings.isEnabled(R.string.shutter_sound)) {
-
             sound.play(MediaActionSound.SHUTTER_CLICK)
         }
     }
@@ -385,9 +393,8 @@ open class CameraFragment : Fragment(), OnClickListener, CameraControlable, Capt
     private val captureImageCallback
             = object : CameraCaptureSession.CaptureCallback() {
 
-        override fun onCaptureSequenceCompleted(session: CameraCaptureSession?, sequenceId: Int, frameNumber: Long) = reset()
-
-        private fun reset() {
+        override fun onCaptureSequenceCompleted(session: CameraCaptureSession?, sequenceId: Int, frameNumber: Long) {
+            playShutterSound()
             // Reset the auto-focus trigger
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
                     CameraMetadata.CONTROL_AF_TRIGGER_CANCEL)

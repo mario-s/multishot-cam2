@@ -16,7 +16,7 @@ class ViewsMediator(val activity: Activity, val settings: SettingsAccessable,
     }
 
     private fun toggleViews() {
-        fun findView(id: Int): AbstractPaintView = activity.findViewById(id) as AbstractPaintView
+        fun findView(id: Int): AbstractPaintView = activity.findViewById<AbstractPaintView>(id)
 
         findView(R.id.grid).enable(settings.isEnabled(R.string.grid))
         findView(R.id.level).enable(settings.isEnabled(R.string.level))
@@ -24,11 +24,11 @@ class ViewsMediator(val activity: Activity, val settings: SettingsAccessable,
 
     private fun toggleOrientationListener(enable: Boolean) {
         if (enable) {
-            BUTTONS.forEach { viewsOrientationListener.addView(activity.findViewById(it)) }
+            BUTTONS.forEach { viewsOrientationListener.addView(activity.findViewById<View>(it)) }
             viewsOrientationListener.enable()
         } else {
             viewsOrientationListener.disable()
-            BUTTONS.forEach { viewsOrientationListener.removeView(activity.findViewById(it)) }
+            BUTTONS.forEach { viewsOrientationListener.removeView(activity.findViewById<View>(it)) }
         }
     }
 
@@ -42,6 +42,6 @@ class ViewsMediator(val activity: Activity, val settings: SettingsAccessable,
     }
 
     override fun setOnClickListener(listener: View.OnClickListener) {
-        BUTTONS.forEach { activity.findViewById(it).setOnClickListener(listener) }
+        BUTTONS.forEach { activity.findViewById<View>(it).setOnClickListener(listener) }
     }
 }

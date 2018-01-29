@@ -14,11 +14,12 @@ import org.junit.platform.runner.JUnitPlatform
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.BDDMockito.anyInt
-import org.mockito.BDDMockito.given
+import org.mockito.BDDMockito.*
+import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.springframework.test.util.ReflectionTestUtils
+import java.nio.ByteBuffer
 
 
 /**
@@ -31,7 +32,7 @@ object ImageSaverTest : Spek( {
 
         val tmp = TemporaryFolder()
         val control = mock(CameraControlable::class.java)
-        val image = mock(Image::class.java)
+
         val reader = mock(ImageReader::class.java)
         val messageSendable = mock(MessageSendable::class.java)
         val storageAccessable = mock(StorageAccessable::class.java)
@@ -59,8 +60,17 @@ object ImageSaverTest : Spek( {
 
         it("run method should read next image from reader") {
             given(storageAccessable.getStorageState()).willReturn(Environment.MEDIA_MOUNTED)
+            val image = mock(Image::class.java)
+            val plane = mock(Image.Plane::class.java)
+            val buffer = ByteBuffer.allocate(10)
+            given(reader.acquireNextImage()).willReturn(image)
+            given(image.planes).willReturn(arrayOf(plane))
+            given(plane.buffer).willReturn(buffer)
+
             classUnderTest?.run()
-            verify(reader).acquireLatestImage()
+            val order = inOrder(reader, image)
+            order.verify(reader).acquireNextImage()
+            order.verify(image).close()
         }
 
     }
