@@ -3,13 +3,21 @@ package de.mario.camera.process
 import org.opencv.core.Mat
 import org.opencv.core.Scalar
 import org.opencv.imgcodecs.Imgcodecs
+import org.opencv.photo.Photo
 import java.io.File
 
 
-class OpenCvProxy {
+internal class OpenCvProxy {
 
     private companion object {
         val SCALAR = Scalar(255.0, 255.0, 255.0)
+    }
+
+    fun merge(images: List<Mat>): Mat {
+        val fusion = Mat()
+        val merger = Photo.createMergeMertens()
+        merger.process(images, fusion)
+        return fusion
     }
 
     fun read(file: File): Mat = read(file.path)

@@ -16,8 +16,6 @@ import java.io.File
 
 internal class ExposureMergeService() : IntentService(TAG) {
 
-    private val merger: Merger = MertensMerger()
-
     private val exifWriter: ExifTagWriteable = ExifWriter()
 
     private val proxy = OpenCvProxy()
@@ -37,7 +35,7 @@ internal class ExposureMergeService() : IntentService(TAG) {
     internal fun process(pictures: Array<String>) {
         val images = loadImages(pictures)
 
-        val fusion = merger.merge(images)
+        val fusion = proxy.merge(images)
 
         val firstPic = pictures[0]
         val out = File(createFileName(firstPic))
