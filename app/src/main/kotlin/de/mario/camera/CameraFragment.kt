@@ -19,7 +19,6 @@ import android.view.Surface
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
-import de.mario.camera.SizeHelper.smallestSize
 import de.mario.camera.device.CameraDeviceProxy
 import de.mario.camera.device.CameraLookup
 import de.mario.camera.glue.*
@@ -171,10 +170,9 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
 
     private fun createPreviewSize(origin: Size): Size {
         val characteristics = cameraDeviceProxy.getCameraCharacteristics()
-        val imgSize = smallestSize(characteristics)
-        setupImageReader(imgSize)
-
-        return previewSizeFactory.createPreviewSize(characteristics, origin)
+        val size = previewSizeFactory.createPreviewSize(characteristics, origin)
+        setupImageReader(size)
+        return size
     }
 
     private fun setupImageReader(largest: Size) {

@@ -1,6 +1,5 @@
 package de.mario.camera.process
 
-import android.content.Context
 import com.nhaarman.mockito_kotlin.*
 import de.mario.camera.exif.ExifTagWriteable
 import de.mario.camera.glue.SettingsAccessable
@@ -25,7 +24,6 @@ object ExposureMergeServiceTest : Spek({
         val exifWriter: ExifTagWriteable = mock()
         val merger: Merger = mock()
         val mat: Mat = mock()
-        val context: Context = mock()
         val settingsAccess: SettingsAccessable = mock()
 
         val classUnderTest = ExposureMergeService()
