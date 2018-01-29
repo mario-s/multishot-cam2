@@ -17,13 +17,15 @@
     <string name="camera">Camera</string>
     <string name="shutter">Shutter</string>
     <string name="ac_settings">Settings</string>
-    <string name="title_merge_process">Image Merge Process</string>
 
     <string name="EXPOSURE_MERGE">exposureMerge</string>
     <string name="MERGED">merged</string>
 
+    <string name="title_merge_process">Image Merge Process</string>
+
     <string name="no_storage">Unable to save image! The storage is not present.</string>
     <string name="photos_saved" formatted="false">%s photos saved to %s.</string>
+    <string name="fusion_saved" formatted="false">Processed image saved in %s</string>
 
     <string name="grid"><xliff:g id="preference_key">grid</xliff:g></string>
     <string name="prefs_grid_enabled_description">Show a 3x3 grid on the preview.</string>
