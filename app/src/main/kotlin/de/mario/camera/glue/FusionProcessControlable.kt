@@ -1,6 +1,6 @@
 package de.mario.camera.glue
 
-interface HdrProcessControlable {
+interface FusionProcessControlable {
 
     fun process(images: Array<String>)
 }

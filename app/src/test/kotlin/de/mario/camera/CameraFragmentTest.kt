@@ -8,7 +8,7 @@ import android.hardware.camera2.CaptureRequest
 import android.media.MediaActionSound
 import android.view.View
 import com.nhaarman.mockito_kotlin.mock
-import de.mario.camera.glue.HdrProcessControlable
+import de.mario.camera.glue.FusionProcessControlable
 import de.mario.camera.glue.SettingsAccessable
 import de.mario.camera.glue.ViewsMediatable
 import de.mario.camera.message.BroadcastingReceiverRegister
@@ -132,7 +132,7 @@ object CameraFragmentTest : Spek({
         it("appendSavedFile should append files and show message") {
             val instance = spy(CameraFragment())
             val settings: SettingsAccessable = mock()
-            val hdrProcessController: HdrProcessControlable = mock()
+            val hdrProcessController: FusionProcessControlable = mock()
             val toaster: Toaster = mock()
             ReflectionTestUtils.setField(instance, "settings", settings)
             ReflectionTestUtils.setField(instance, "hdrProcessController", hdrProcessController)

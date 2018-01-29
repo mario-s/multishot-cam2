@@ -64,7 +64,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     private lateinit var settings: SettingsAccessable
     private lateinit var viewsMediator: ViewsMediatable
     private lateinit var mPreviewSize: Size
-    private lateinit var hdrProcessController: HdrProcessControlable
+    private lateinit var hdrProcessController: FusionProcessControlable
 
     private var mBackgroundThread: HandlerThread? = null
     private var mBackgroundHandler: Handler? = null
