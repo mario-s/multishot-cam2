@@ -26,7 +26,7 @@ import de.mario.camera.io.ImageSaver
 import de.mario.camera.message.BroadcastingReceiverRegister
 import de.mario.camera.message.MessageHandler
 import de.mario.camera.orientation.ViewsOrientationListener
-import de.mario.camera.process.HdrProcessController
+import de.mario.camera.process.FusionProcessController
 import de.mario.camera.settings.SettingsAccess
 import de.mario.camera.settings.SettingsActivity
 import de.mario.camera.view.AutoFitTextureView
@@ -101,7 +101,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         val viewsOrientationListener = ViewsOrientationListener(activity)
         viewsMediator = ViewsMediator(activity, settings, viewsOrientationListener)
         viewsMediator.setOnClickListener(this)
-        hdrProcessController = HdrProcessController(activity)
+        hdrProcessController = FusionProcessController(activity)
     }
 
     override fun onResume() {
