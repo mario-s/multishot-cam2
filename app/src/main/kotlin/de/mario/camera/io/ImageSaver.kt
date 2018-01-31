@@ -88,7 +88,7 @@ class ImageSaver(private val control: CameraControlable, private val reader: Ima
     }
 
     private fun getString(key: Int): String {
-        return control.getString(key)
+        return control.getContext().getString(key)
     }
 
     private fun sendImageSavedMessage(file: File) {

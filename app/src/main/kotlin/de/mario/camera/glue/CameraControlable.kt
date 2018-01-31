@@ -12,8 +12,6 @@ interface CameraControlable {
 
     fun showToast(msg: String?)
 
-    fun getString(id: Int): String
-
     fun openCamera(width: Int, height: Int)
 
     fun updateTransform(viewWidth: Int, viewHeight: Int)

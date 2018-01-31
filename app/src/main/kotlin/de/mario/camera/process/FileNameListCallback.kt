@@ -1,6 +1,5 @@
 package de.mario.camera.process
 
-import android.content.Context
 import android.databinding.ObservableArrayList
 import android.databinding.ObservableList.OnListChangedCallback;
 import android.media.MediaScannerConnection
@@ -9,7 +8,6 @@ import android.os.HandlerThread
 import android.util.Log
 import de.mario.camera.R
 import de.mario.camera.glue.CameraControlable
-import de.mario.camera.glue.SettingsAccessable
 import de.mario.camera.settings.SettingsAccess
 import java.io.File
 
@@ -44,29 +42,28 @@ class FileNameListCallback(private val control: CameraControlable): OnListChange
         }
     }
 
-    private fun process(source : List<String>) {
+    private fun process(source : Array<String>) {
         handler.post({
-            val names = source.toTypedArray()
-            val folder = File(names[0]).parent
+            val folder = File(source[0]).parent
             control.showToast(context.getString(R.string.photos_saved).format(source.size, folder))
-            MediaScannerConnection.scanFile(context, names, null, null)
+            MediaScannerConnection.scanFile(context, source, null, null)
 
             if(settings.isEnabled(R.string.hdr)) {
-                processController.process(names)
+                processController.process(source)
             }
         })
     }
 
     override fun onItemRangeInserted(source: ObservableArrayList<String>?, start: Int, count: Int) {
         if(source != null && source.size >= MAX_IMG) {
-            process(source)
+            process(source.toTypedArray())
         }
     }
 
     override fun onItemRangeMoved(source: ObservableArrayList<String>?, start: Int, end: Int, count: Int) {
     }
 
-    override fun onItemRangeChanged(source: ObservableArrayList<String>?, start: Int, cpount: Int) {
+    override fun onItemRangeChanged(source: ObservableArrayList<String>?, start: Int, count: Int) {
     }
 
     override fun onItemRangeRemoved(source: ObservableArrayList<String>?, start: Int, count: Int) {

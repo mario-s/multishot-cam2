@@ -1,10 +1,12 @@
 package de.mario.camera.io
 
 
+import android.content.Context
 import android.media.Image
 import android.media.ImageReader
 import android.os.Environment
 import android.os.Handler
+import com.nhaarman.mockito_kotlin.mock
 import de.mario.camera.glue.CameraControlable
 import de.mario.camera.glue.MessageSendable
 import org.jetbrains.spek.api.Spek
@@ -31,18 +33,19 @@ object ImageSaverTest : Spek( {
     describe("the image saver") {
 
         val tmp = TemporaryFolder()
-        val control = mock(CameraControlable::class.java)
-
-        val reader = mock(ImageReader::class.java)
-        val messageSendable = mock(MessageSendable::class.java)
-        val storageAccessable = mock(StorageAccessable::class.java)
+        val control: CameraControlable = mock()
+        val context: Context = mock()
+        val reader: ImageReader = mock()
+        val messageSendable: MessageSendable = mock()
+        val storageAccessable: StorageAccessable = mock()
         var classUnderTest: ImageSaver? = null
 
         beforeEachTest {
             tmp.create()
             val handler = mock(Handler::class.java)
             given(control.getMessageHandler()).willReturn(handler)
-            given(control.getString(anyInt())).willReturn("foo")
+            given(control.getContext()).willReturn(context)
+            given(context.getString(anyInt())).willReturn("foo")
             given(storageAccessable.getStorageDirectory()).willReturn(tmp.newFile(("foo")))
             classUnderTest = ImageSaver(control, reader)
             ReflectionTestUtils.setField(classUnderTest, "sender", messageSendable)
