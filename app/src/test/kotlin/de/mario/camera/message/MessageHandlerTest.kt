@@ -33,8 +33,9 @@ object MessageHandlerTest : Spek({
             given(data.getString(MessageSendable.MessageType.FILE)).willReturn(name)
 
             classUnderTest.handleMessage(message)
-            val stack = ReflectionTestUtils.getField(fragment, "fileNameStack") as List<String>
-            assertThat(stack.isEmpty(), `is`(false))
+            @Suppress("UNCHECKED_CAST")
+            val names = ReflectionTestUtils.getField(fragment, "fileNames") as List<String>
+            assertThat(names.isEmpty(), `is`(false))
         }
     }
 })
