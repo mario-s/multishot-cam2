@@ -1,9 +1,12 @@
 package de.mario.camera.glue
 
+import android.content.Context
 import android.os.Handler
 
 
 interface CameraControlable {
+
+    fun getContext(): Context
 
     fun getMessageHandler(): Handler
 
