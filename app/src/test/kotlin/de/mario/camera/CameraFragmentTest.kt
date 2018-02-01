@@ -15,6 +15,7 @@ import de.mario.camera.glue.FusionProcessControlable
 import de.mario.camera.glue.SettingsAccessable
 import de.mario.camera.glue.ViewsMediatable
 import de.mario.camera.message.BroadcastingReceiverRegister
+import de.mario.camera.process.FileNameListCallback
 import de.mario.camera.view.AutoFitTextureView
 import de.mario.camera.widget.Toaster
 import org.hamcrest.CoreMatchers.notNullValue
@@ -68,8 +69,8 @@ object CameraFragmentTest : Spek({
 
         it("onActivityCreated should complete without error") {
             val instance = spy(CameraFragment())
-
             given(instance.activity).willReturn(activity)
+            given(instance.context).willReturn(activity)
             given(activity.findViewById<View>(anyInt())).willReturn(view)
 
             instance.onActivityCreated(null)
@@ -93,13 +94,16 @@ object CameraFragmentTest : Spek({
             verify(viewsMediator, atLeastOnce()).onResume()
         }
 
-        it("onDestroy should release sound") {
+        it("onDestroy should free resources") {
             val instance = spy(CameraFragment())
             val sound: MediaActionSound = mock()
+            val callback: FileNameListCallback = mock()
             ReflectionTestUtils.setField(instance, "sound", sound)
+            ReflectionTestUtils.setField(instance, "listCallback", callback)
 
             instance.onDestroy()
             verify(sound).release()
+            verify(callback).stop()
         }
 
         it("prepareCapturing should trigger the camera") {
