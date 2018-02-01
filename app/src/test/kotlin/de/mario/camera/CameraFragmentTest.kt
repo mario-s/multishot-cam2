@@ -3,6 +3,9 @@ package de.mario.camera
 
 import android.app.Activity
 import android.content.Intent
+import android.databinding.Observable
+import android.databinding.ObservableArrayList
+import android.databinding.ObservableList
 import android.hardware.camera2.CameraMetadata
 import android.hardware.camera2.CaptureRequest
 import android.media.MediaActionSound
@@ -129,20 +132,15 @@ object CameraFragmentTest : Spek({
             verify(instance).startActivity(any(Intent::class.java))
         }
 
-        it("appendSavedFile should append files and show message") {
-            val instance = spy(CameraFragment())
-            val settings: SettingsAccessable = mock()
-            val hdrProcessController: FusionProcessControlable = mock()
-            val toaster: Toaster = mock()
-            ReflectionTestUtils.setField(instance, "settings", settings)
-            ReflectionTestUtils.setField(instance, "hdrProcessController", hdrProcessController)
-            ReflectionTestUtils.setField(instance, "toaster", toaster)
-            given(settings.isEnabled(R.string.hdr)).willReturn(true)
-            given(instance.getString(anyInt())).willReturn("%s %s")
+        it("appendSavedFile should append files and trigger callback") {
+            val instance = CameraFragment.newInstance()
+            @Suppress("UNCHECKED_CAST")
+            val observable = ReflectionTestUtils.getField(instance, "fileNames") as ObservableArrayList<String>
+            val callback: ObservableList.OnListChangedCallback<ObservableArrayList<String>> = mock()
+            observable.addOnListChangedCallback(callback)
 
-            val names = arrayOf("foo", "bar", "baz")
-            names.forEach {instance.appendSavedFile(it)}
-            verify(instance).showToast(anyString())
+            instance.appendSavedFile("foo")
+            verify(callback).onItemRangeInserted(observable, 0, 1)
         }
     }
 })
