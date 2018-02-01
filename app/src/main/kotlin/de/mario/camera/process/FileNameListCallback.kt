@@ -18,7 +18,7 @@ class FileNameListCallback(private val control: CameraControlable): OnListChange
     private val context = control.getContext()
     private val handlerThread: HandlerThread
     private val handler: Handler
-    private val processController = FusionProcessController(context)
+    private val trigger = FusionProcessTrigger(context)
     private val settings = SettingsAccess(context)
 
     companion object {
@@ -49,7 +49,7 @@ class FileNameListCallback(private val control: CameraControlable): OnListChange
             MediaScannerConnection.scanFile(context, source, null, null)
 
             if(settings.isEnabled(R.string.hdr)) {
-                processController.process(source)
+                trigger.process(source)
             }
         })
     }

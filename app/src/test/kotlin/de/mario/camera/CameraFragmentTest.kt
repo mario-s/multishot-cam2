@@ -3,7 +3,6 @@ package de.mario.camera
 
 import android.app.Activity
 import android.content.Intent
-import android.databinding.Observable
 import android.databinding.ObservableArrayList
 import android.databinding.ObservableList
 import android.hardware.camera2.CameraMetadata
@@ -11,13 +10,10 @@ import android.hardware.camera2.CaptureRequest
 import android.media.MediaActionSound
 import android.view.View
 import com.nhaarman.mockito_kotlin.mock
-import de.mario.camera.glue.FusionProcessControlable
-import de.mario.camera.glue.SettingsAccessable
 import de.mario.camera.glue.ViewsMediatable
 import de.mario.camera.message.BroadcastingReceiverRegister
 import de.mario.camera.process.FileNameListCallback
 import de.mario.camera.view.AutoFitTextureView
-import de.mario.camera.widget.Toaster
 import org.hamcrest.CoreMatchers.notNullValue
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
