@@ -11,7 +11,7 @@ class BroadcastingReceiverRegister(private val control: CameraControlable) {
     private val broadcastReceiver = BroadcastingReceiver(control)
 
     fun registerBroadcastReceiver(context: Context) {
-        val action = control.getString(R.string.EXPOSURE_MERGE)
+        val action = control.getContext().getString(R.string.EXPOSURE_MERGE)
         val filter = IntentFilter(action)
         LocalBroadcastManager.getInstance(context).registerReceiver(broadcastReceiver, filter)
     }

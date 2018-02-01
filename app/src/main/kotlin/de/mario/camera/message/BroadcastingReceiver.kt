@@ -19,5 +19,5 @@ class BroadcastingReceiver(private val control: CameraControlable) : BroadcastRe
         }
     }
 
-    private fun string(id: Int): String = control.getString(id)
+    private fun string(id: Int): String = control.getContext().getString(id)
 }

@@ -3,12 +3,12 @@ package de.mario.camera
 import android.app.AlertDialog
 import android.app.Fragment
 import android.content.Intent
+import android.databinding.ObservableArrayList
 import android.graphics.ImageFormat
 import android.graphics.Matrix
 import android.hardware.camera2.*
 import android.media.ImageReader
 import android.media.MediaActionSound
-import android.media.MediaScannerConnection
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
@@ -26,15 +26,13 @@ import de.mario.camera.io.ImageSaver
 import de.mario.camera.message.BroadcastingReceiverRegister
 import de.mario.camera.message.MessageHandler
 import de.mario.camera.orientation.ViewsOrientationListener
-import de.mario.camera.process.FusionProcessController
+import de.mario.camera.process.FileNameListCallback
 import de.mario.camera.settings.SettingsAccess
 import de.mario.camera.settings.SettingsActivity
 import de.mario.camera.view.AutoFitTextureView
 import de.mario.camera.view.ViewsMediator
 import de.mario.camera.widget.ErrorDialog
 import de.mario.camera.widget.Toaster
-import java.io.File
-import java.util.*
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 
@@ -47,7 +45,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     private val cameraDeviceProxy = CameraDeviceProxy(this)
 
     private val mCameraOpenCloseLock = Semaphore(1)
-    private val fileNameStack = LinkedList<String>()
+    private val fileNames = ObservableArrayList<String>()
 
     private val toaster = Toaster(this)
     private val messageHandler = MessageHandler(this)
@@ -64,7 +62,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     private lateinit var settings: SettingsAccessable
     private lateinit var viewsMediator: ViewsMediatable
     private lateinit var mPreviewSize: Size
-    private lateinit var hdrProcessController: FusionProcessControlable
+    private lateinit var listCallback: FileNameListCallback
 
     private var mBackgroundThread: HandlerThread? = null
     private var mBackgroundHandler: Handler? = null
@@ -76,8 +74,6 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         const val TAG = "CameraFragment"
 
         const val FRAGMENT_DIALOG = "dialog"
-
-        private const val MAX_IMG = 3
 
         fun newInstance(): CameraFragment = CameraFragment()
     }
@@ -101,7 +97,8 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         val viewsOrientationListener = ViewsOrientationListener(activity)
         viewsMediator = ViewsMediator(activity, settings, viewsOrientationListener)
         viewsMediator.setOnClickListener(this)
-        hdrProcessController = FusionProcessController(activity)
+        listCallback = FileNameListCallback(this)
+        fileNames.addOnListChangedCallback(listCallback)
     }
 
     override fun onResume() {
@@ -129,6 +126,8 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     override fun onDestroy() {
         super.onDestroy()
         sound.release()
+        listCallback.stop()
+        fileNames.removeOnListChangedCallback(listCallback)
     }
 
     override fun onClick(view: View) {
@@ -177,7 +176,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
 
     private fun setupImageReader(largest: Size) {
         mImageReader = ImageReader.newInstance(largest.width, largest.height,
-                ImageFormat.JPEG, MAX_IMG)
+                ImageFormat.JPEG, FileNameListCallback.MAX_IMG)
         mImageReader?.setOnImageAvailableListener(
                 mOnImageAvailableListener, mBackgroundHandler)
     }
@@ -299,23 +298,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     override fun updateTransform(viewWidth: Int, viewHeight: Int) = mTextureView.setTransform(createMatrix(viewWidth, viewHeight))
 
     override fun appendSavedFile(name: String) {
-        fileNameStack.push(name)
-        val size = fileNameStack.size
-        if(size >= MAX_IMG) {
-            process()
-            val folder = File(name).parent
-            showToast(getString(R.string.photos_saved).format(size, folder))
-        }
-    }
-
-    private fun process() {
-        mBackgroundHandler?.post({
-            val names = fileNameStack.toTypedArray()
-            MediaScannerConnection.scanFile(activity, names, null, null)
-            if(settings.isEnabled(R.string.hdr)) {
-                hdrProcessController.process(names)
-            }
-        })
+        fileNames.add(name)
     }
 
     private fun createMatrix(viewWidth: Int, viewHeight: Int): Matrix {
@@ -371,7 +354,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
      */
     override fun capturePicture() {
         try {
-            fileNameStack.clear()
+            fileNames.clear()
             val requests = cameraDeviceProxy.createBurstRequests(orientations.get(displayRotation()), mImageReader!!.surface)
             mCaptureSession?.stopRepeating()
             mCaptureSession?.captureBurst(requests, captureImageCallback, null)

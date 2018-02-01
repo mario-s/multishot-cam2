@@ -5,14 +5,13 @@ import android.content.Intent
 
 import org.opencv.android.OpenCVLoader
 
-import de.mario.camera.glue.FusionProcessControlable
 
 /**
- * Controller to start the HDR process.
+ * Trigger to start the HDR process.
  */
-class FusionProcessController(private val context: Context) : FusionProcessControlable {
+internal class FusionProcessTrigger(private val context: Context) {
 
-    override fun process(pictures: Array<String>) {
+    fun process(pictures: Array<String>) {
         val intent = Intent(context, ExposureMergeService::class.java)
         intent.putExtra(ExposureMergeService.PARAM_PICS, pictures)
         val callback = OpenCvLoaderCallback(context, intent)

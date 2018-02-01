@@ -3,17 +3,17 @@ package de.mario.camera
 
 import android.app.Activity
 import android.content.Intent
+import android.databinding.ObservableArrayList
+import android.databinding.ObservableList
 import android.hardware.camera2.CameraMetadata
 import android.hardware.camera2.CaptureRequest
 import android.media.MediaActionSound
 import android.view.View
 import com.nhaarman.mockito_kotlin.mock
-import de.mario.camera.glue.FusionProcessControlable
-import de.mario.camera.glue.SettingsAccessable
 import de.mario.camera.glue.ViewsMediatable
 import de.mario.camera.message.BroadcastingReceiverRegister
+import de.mario.camera.process.FileNameListCallback
 import de.mario.camera.view.AutoFitTextureView
-import de.mario.camera.widget.Toaster
 import org.hamcrest.CoreMatchers.notNullValue
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
@@ -65,8 +65,8 @@ object CameraFragmentTest : Spek({
 
         it("onActivityCreated should complete without error") {
             val instance = spy(CameraFragment())
-
             given(instance.activity).willReturn(activity)
+            given(instance.context).willReturn(activity)
             given(activity.findViewById<View>(anyInt())).willReturn(view)
 
             instance.onActivityCreated(null)
@@ -90,13 +90,16 @@ object CameraFragmentTest : Spek({
             verify(viewsMediator, atLeastOnce()).onResume()
         }
 
-        it("onDestroy should release sound") {
+        it("onDestroy should free resources") {
             val instance = spy(CameraFragment())
             val sound: MediaActionSound = mock()
+            val callback: FileNameListCallback = mock()
             ReflectionTestUtils.setField(instance, "sound", sound)
+            ReflectionTestUtils.setField(instance, "listCallback", callback)
 
             instance.onDestroy()
             verify(sound).release()
+            verify(callback).stop()
         }
 
         it("prepareCapturing should trigger the camera") {
@@ -129,20 +132,15 @@ object CameraFragmentTest : Spek({
             verify(instance).startActivity(any(Intent::class.java))
         }
 
-        it("appendSavedFile should append files and show message") {
-            val instance = spy(CameraFragment())
-            val settings: SettingsAccessable = mock()
-            val hdrProcessController: FusionProcessControlable = mock()
-            val toaster: Toaster = mock()
-            ReflectionTestUtils.setField(instance, "settings", settings)
-            ReflectionTestUtils.setField(instance, "hdrProcessController", hdrProcessController)
-            ReflectionTestUtils.setField(instance, "toaster", toaster)
-            given(settings.isEnabled(R.string.hdr)).willReturn(true)
-            given(instance.getString(anyInt())).willReturn("%s %s")
+        it("appendSavedFile should append files and trigger callback") {
+            val instance = CameraFragment.newInstance()
+            @Suppress("UNCHECKED_CAST")
+            val observable = ReflectionTestUtils.getField(instance, "fileNames") as ObservableArrayList<String>
+            val callback: ObservableList.OnListChangedCallback<ObservableArrayList<String>> = mock()
+            observable.addOnListChangedCallback(callback)
 
-            val names = arrayOf("foo", "bar", "baz")
-            names.forEach {instance.appendSavedFile(it)}
-            verify(instance).showToast(anyString())
+            instance.appendSavedFile("foo")
+            verify(callback).onItemRangeInserted(observable, 0, 1)
         }
     }
 })
