@@ -169,7 +169,8 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
 
     private fun createPreviewSize(origin: Size): Size {
         val characteristics = cameraDeviceProxy.getCameraCharacteristics()
-        val size = previewSizeFactory.createPreviewSize(characteristics, origin)
+        val largest = SizeFilter.max(cameraDeviceProxy.imageResolutions())
+        val size = previewSizeFactory.createPreviewSize(characteristics, origin, largest)
         setupImageReader(size)
         return size
     }

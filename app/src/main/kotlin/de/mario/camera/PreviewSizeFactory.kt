@@ -7,30 +7,31 @@ import android.hardware.camera2.CameraCharacteristics
 import android.util.Log
 import android.util.Size
 import android.view.Surface
-import de.mario.camera.SizeHelper.chooseOptimalSize
+import de.mario.camera.SizeFilter.chooseOptimalSize
 
 
 class PreviewSizeFactory(val fragment: Fragment) {
 
-    private val TAG = "PreviewSizeFactory"
+    private companion object {
+        val TAG = "PreviewSizeFactory"
 
-    /**
-     * Max preview width that is guaranteed by Camera2 API
-     */
-    private val MAX_PREVIEW_WIDTH = 1920
+        /**
+         * Max preview width that is guaranteed by Camera2 API
+         */
+        val MAX_PREVIEW_WIDTH = 1920
 
-    /**
-     * Max preview height that is guaranteed by Camera2 API
-     */
-    private val MAX_PREVIEW_HEIGHT = 1080
+        /**
+         * Max preview height that is guaranteed by Camera2 API
+         */
+        val MAX_PREVIEW_HEIGHT = 1080
+    }
+
 
     private fun defaultDisplay() = fragment.activity.windowManager.defaultDisplay
 
-    fun createPreviewSize(characteristics: CameraCharacteristics, origin: Size): Size {
+    fun createPreviewSize(characteristics: CameraCharacteristics, origin: Size, largest: Size): Size {
         val map = characteristics.get(
                 CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
-        val largest: Size = SizeHelper.largestSize(map)
-
 
         // Find out if we need to swap dimension to get the preview size relative to sensor
         // coordinate.

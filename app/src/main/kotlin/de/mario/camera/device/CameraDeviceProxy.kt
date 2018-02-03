@@ -1,13 +1,16 @@
 package de.mario.camera.device
 
 import android.app.Fragment
+import android.graphics.ImageFormat
 import android.hardware.camera2.CameraCaptureSession.StateCallback
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CaptureRequest
+import android.hardware.camera2.params.StreamConfigurationMap
 import android.os.Handler
 import android.util.Log
 import android.util.Range
+import android.util.Size
 import android.view.Surface
 
 class CameraDeviceProxy(fragment: Fragment) {
@@ -81,5 +84,13 @@ class CameraDeviceProxy(fragment: Fragment) {
         // Flash is automatically enabled when necessary.
         builder?.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH)
     }
+
+    fun imageResolutions(): List<Size> {
+        val map = configMap(getCameraCharacteristics())
+        return map.getOutputSizes(ImageFormat.JPEG).asList()
+    }
+
+    private fun configMap(characteristics: CameraCharacteristics): StreamConfigurationMap = characteristics.get(
+            CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
 
 }
