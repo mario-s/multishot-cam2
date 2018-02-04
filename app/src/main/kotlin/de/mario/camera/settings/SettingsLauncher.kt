@@ -14,7 +14,7 @@ class SettingsLauncher(private val fragment: Fragment, private val cameraProxy: 
 
     private fun intent(): Intent {
         val intent = Intent(context(), SettingsActivity::class.java)
-        intent.putExtra(RESOLUTIONS, cameraProxy.imageSizes())
+        //intent.putExtra(RESOLUTIONS, cameraProxy.imageSizes())
         return intent
     }
 
