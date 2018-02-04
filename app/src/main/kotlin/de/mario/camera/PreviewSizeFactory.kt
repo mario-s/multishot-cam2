@@ -11,8 +11,6 @@ import de.mario.camera.glue.CameraDeviceProxyable
 
 internal class PreviewSizeFactory(private val fragment: Fragment, private val cameraProxy: CameraDeviceProxyable) {
 
-    private fun defaultDisplay() = fragment.activity.windowManager.defaultDisplay
-
     private companion object {
         val TAG = "PreviewSizeFactory"
 
@@ -27,6 +25,7 @@ internal class PreviewSizeFactory(private val fragment: Fragment, private val ca
         val MAX_PREVIEW_HEIGHT = 1080
     }
 
+    private fun defaultDisplay() = fragment.activity.windowManager.defaultDisplay
 
     fun createPreviewSize(origin: Size): Size {
 
