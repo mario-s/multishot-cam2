@@ -13,6 +13,7 @@ import com.nhaarman.mockito_kotlin.mock
 import de.mario.camera.glue.ViewsMediatable
 import de.mario.camera.message.BroadcastingReceiverRegister
 import de.mario.camera.process.FileNameListCallback
+import de.mario.camera.settings.SettingsLauncher
 import de.mario.camera.view.AutoFitTextureView
 import org.hamcrest.CoreMatchers.notNullValue
 import org.jetbrains.spek.api.Spek
@@ -126,10 +127,12 @@ object CameraFragmentTest : Spek({
 
         it("onClick should start settings") {
             val instance = spy(CameraFragment())
+            val launcher: SettingsLauncher = mock()
+            ReflectionTestUtils.setField(instance, "settingsLauncher", launcher)
             given(view.id).willReturn(R.id.settings)
 
             instance.onClick(view)
-            verify(instance).startActivity(any(Intent::class.java))
+            verify(launcher).startSettings()
         }
 
         it("appendSavedFile should append files and trigger callback") {

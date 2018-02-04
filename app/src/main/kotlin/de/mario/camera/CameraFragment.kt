@@ -29,6 +29,7 @@ import de.mario.camera.orientation.ViewsOrientationListener
 import de.mario.camera.process.FileNameListCallback
 import de.mario.camera.settings.SettingsAccess
 import de.mario.camera.settings.SettingsActivity
+import de.mario.camera.settings.SettingsLauncher
 import de.mario.camera.view.AutoFitTextureView
 import de.mario.camera.view.ViewsMediator
 import de.mario.camera.widget.ErrorDialog
@@ -50,11 +51,13 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     private val messageHandler = MessageHandler(this)
     private val cameraLookup = CameraLookup(this)
     private val cameraDeviceProxy = CameraDeviceProxy(this)
+    private val mSurfaceTextureListener = TextureViewSurfaceListener(this)
+    private val broadcastingReceiverRegister = BroadcastingReceiverRegister(this)
+
+    private val settingsLauncher = SettingsLauncher(this, cameraDeviceProxy)
     private val previewSizeFactory = PreviewSizeFactory(this, cameraDeviceProxy)
     private val permissionRequester = PermissionRequester(this)
     private val captureProgressCallback = CaptureProgressCallback(camState, this)
-    private val mSurfaceTextureListener = TextureViewSurfaceListener(this)
-    private val broadcastingReceiverRegister = BroadcastingReceiverRegister(this)
 
     private lateinit var mTextureView: AutoFitTextureView
     private lateinit var mPreviewRequestBuilder: CaptureRequest.Builder
@@ -133,7 +136,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     override fun onClick(view: View) {
         when (view.id) {
             R.id.picture -> takePicture()
-            R.id.settings -> startSettings()
+            R.id.settings -> settingsLauncher.startSettings()
             R.id.info -> AlertDialog.Builder(activity!!)
                             .setMessage(R.string.intro_message)
                             .setPositiveButton(android.R.string.ok, null)
@@ -306,8 +309,6 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     }
 
     private fun displayRotation(): Int = activity.windowManager.defaultDisplay.rotation
-
-    private fun startSettings() = startActivity(Intent(activity, SettingsActivity::class.java))
 
     /**
      * Initiate a still image capture.
