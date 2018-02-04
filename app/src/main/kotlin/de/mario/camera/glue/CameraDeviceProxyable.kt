@@ -5,9 +5,9 @@ import android.util.Size
 
 interface CameraDeviceProxyable {
 
-    fun getCameraCharacteristics(): CameraCharacteristics
-
     fun surfaceSizes(): Array<Size>
 
     fun imageSizes(): Array<Size>
+
+    fun sensorOrientation(): Int
 }

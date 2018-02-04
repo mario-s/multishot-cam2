@@ -29,7 +29,7 @@ class CameraDeviceProxy(fragment: Fragment) : CameraDeviceProxyable{
         managerSupply.cameraManager().openCamera(cameraId, callback, handler)
     }
 
-    override fun getCameraCharacteristics(): CameraCharacteristics = managerSupply.cameraCharacteristics(cameraId!!)
+    fun getCameraCharacteristics(): CameraCharacteristics = managerSupply.cameraCharacteristics(cameraId!!)
 
     fun close() {
         cameraDevice?.close()
@@ -90,6 +90,9 @@ class CameraDeviceProxy(fragment: Fragment) : CameraDeviceProxyable{
     override fun surfaceSizes(): Array<Size> = configMap().getOutputSizes(SurfaceTexture::class.java)
 
     override fun imageSizes(): Array<Size> = configMap().getOutputSizes(ImageFormat.JPEG)
+
+    override fun sensorOrientation(): Int = getCameraCharacteristics().get(CameraCharacteristics.SENSOR_ORIENTATION)
+
 
     private fun configMap(): StreamConfigurationMap = getCameraCharacteristics().get(
             CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)

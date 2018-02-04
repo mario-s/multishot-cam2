@@ -2,7 +2,6 @@ package de.mario.camera
 
 import android.app.Fragment
 import android.graphics.Point
-import android.hardware.camera2.CameraCharacteristics
 import android.util.Log
 import android.util.Size
 import android.view.Surface
@@ -71,7 +70,7 @@ internal class PreviewSizeFactory(private val fragment: Fragment, private val ca
 
     private fun swapDimensions(): Boolean {
         val displayRotation = defaultDisplay().rotation
-        val sensorOrientation = cameraProxy.getCameraCharacteristics().get(CameraCharacteristics.SENSOR_ORIENTATION)
+        val sensorOrientation = cameraProxy.sensorOrientation()
         var swappedDimensions = false
         when (displayRotation) {
             Surface.ROTATION_0, Surface.ROTATION_180 -> if (sensorOrientation == 90 || sensorOrientation == 270) {
