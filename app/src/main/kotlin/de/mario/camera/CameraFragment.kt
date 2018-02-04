@@ -42,7 +42,6 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     private val sound = MediaActionSound()
     private val orientations = SurfaceOrientation()
     private val camState = CameraState()
-    private val cameraDeviceProxy = CameraDeviceProxy(this)
 
     private val mCameraOpenCloseLock = Semaphore(1)
     private val fileNames = ObservableArrayList<String>()
@@ -50,7 +49,8 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     private val toaster = Toaster(this)
     private val messageHandler = MessageHandler(this)
     private val cameraLookup = CameraLookup(this)
-    private val previewSizeFactory = PreviewSizeFactory(this)
+    private val cameraDeviceProxy = CameraDeviceProxy(this)
+    private val previewSizeFactory = PreviewSizeFactory(this, cameraDeviceProxy)
     private val permissionRequester = PermissionRequester(this)
     private val captureProgressCallback = CaptureProgressCallback(camState, this)
     private val mSurfaceTextureListener = TextureViewSurfaceListener(this)
@@ -168,9 +168,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     }
 
     private fun createPreviewSize(origin: Size): Size {
-        val characteristics = cameraDeviceProxy.getCameraCharacteristics()
-        val largest = SizeFilter.max(cameraDeviceProxy.imageResolutions())
-        val size = previewSizeFactory.createPreviewSize(characteristics, origin, largest)
+        val size = previewSizeFactory.createPreviewSize(origin)
         setupImageReader(size)
         return size
     }

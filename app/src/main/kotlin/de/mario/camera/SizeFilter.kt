@@ -55,7 +55,7 @@ object SizeFilter {
         return Result(bigEnough, notBigEnough)
     }
 
-    fun max(sizes: List<Size>) = Collections.max(sizes, CompareSizesByArea())
+    fun max(sizes: Array<Size>) = Collections.max(sizes.asList(), CompareSizesByArea())
 
     internal class CompareSizesByArea : Comparator<Size> {
 

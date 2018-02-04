@@ -95,7 +95,7 @@ object CameraDeviceProxyTest : Spek({
             given(characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)).willReturn(map)
             given(map.getOutputSizes(ImageFormat.JPEG)).willReturn(arrayOf(Size(1,1)))
 
-            val result = classUnderTest.imageResolutions()
+            val result = classUnderTest.imageSizes()
 
             assertThat(result.isEmpty(), `is`(false))
         }

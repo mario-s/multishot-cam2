@@ -2,15 +2,17 @@ package de.mario.camera
 
 import android.app.Fragment
 import android.graphics.Point
-import android.graphics.SurfaceTexture
 import android.hardware.camera2.CameraCharacteristics
 import android.util.Log
 import android.util.Size
 import android.view.Surface
 import de.mario.camera.SizeFilter.chooseOptimalSize
+import de.mario.camera.glue.CameraDeviceProxyable
 
 
-class PreviewSizeFactory(val fragment: Fragment) {
+internal class PreviewSizeFactory(private val fragment: Fragment, private val cameraProxy: CameraDeviceProxyable) {
+
+    private fun defaultDisplay() = fragment.activity.windowManager.defaultDisplay
 
     private companion object {
         val TAG = "PreviewSizeFactory"
@@ -27,15 +29,11 @@ class PreviewSizeFactory(val fragment: Fragment) {
     }
 
 
-    private fun defaultDisplay() = fragment.activity.windowManager.defaultDisplay
-
-    fun createPreviewSize(characteristics: CameraCharacteristics, origin: Size, largest: Size): Size {
-        val map = characteristics.get(
-                CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+    fun createPreviewSize(origin: Size): Size {
 
         // Find out if we need to swap dimension to get the preview size relative to sensor
         // coordinate.
-        val swappedDimensions = swapDimensions(characteristics)
+        val swappedDimensions = swapDimensions()
         val width = origin.width
         val height = origin.height
 
@@ -61,17 +59,19 @@ class PreviewSizeFactory(val fragment: Fragment) {
             maxPreviewHeight = MAX_PREVIEW_HEIGHT
         }
 
+        val largest = SizeFilter.max(cameraProxy.imageSizes())
+
         // Danger, W.R.! Attempting to use too large a preview size could  exceed the camera
         // bus' bandwidth limitation, resulting in gorgeous previews but the storage of
         // garbage capture data.
-        return chooseOptimalSize(map.getOutputSizes(SurfaceTexture::class.java),
+        return chooseOptimalSize(cameraProxy.surfaceSizes(),
                 Size(rotatedPreviewWidth, rotatedPreviewHeight), Size(maxPreviewWidth,
                 maxPreviewHeight), largest)
     }
 
-    private fun swapDimensions(characteristics: CameraCharacteristics): Boolean {
+    private fun swapDimensions(): Boolean {
         val displayRotation = defaultDisplay().rotation
-        val sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION)
+        val sensorOrientation = cameraProxy.getCameraCharacteristics().get(CameraCharacteristics.SENSOR_ORIENTATION)
         var swappedDimensions = false
         when (displayRotation) {
             Surface.ROTATION_0, Surface.ROTATION_180 -> if (sensorOrientation == 90 || sensorOrientation == 270) {

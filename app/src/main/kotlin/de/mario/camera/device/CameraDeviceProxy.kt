@@ -2,6 +2,7 @@ package de.mario.camera.device
 
 import android.app.Fragment
 import android.graphics.ImageFormat
+import android.graphics.SurfaceTexture
 import android.hardware.camera2.CameraCaptureSession.StateCallback
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraDevice
@@ -12,8 +13,9 @@ import android.util.Log
 import android.util.Range
 import android.util.Size
 import android.view.Surface
+import de.mario.camera.glue.CameraDeviceProxyable
 
-class CameraDeviceProxy(fragment: Fragment) {
+class CameraDeviceProxy(fragment: Fragment) : CameraDeviceProxyable{
     private val managerSupply = CameraManagerSupply(fragment)
     internal var cameraDevice: CameraDevice? = null
     internal var cameraId: String? = null
@@ -27,7 +29,7 @@ class CameraDeviceProxy(fragment: Fragment) {
         managerSupply.cameraManager().openCamera(cameraId, callback, handler)
     }
 
-    fun getCameraCharacteristics(): CameraCharacteristics = managerSupply.cameraCharacteristics(cameraId!!)
+    override fun getCameraCharacteristics(): CameraCharacteristics = managerSupply.cameraCharacteristics(cameraId!!)
 
     fun close() {
         cameraDevice?.close()
@@ -85,12 +87,11 @@ class CameraDeviceProxy(fragment: Fragment) {
         builder?.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH)
     }
 
-    fun imageResolutions(): List<Size> {
-        val map = configMap(getCameraCharacteristics())
-        return map.getOutputSizes(ImageFormat.JPEG).asList()
-    }
+    override fun surfaceSizes(): Array<Size> = configMap().getOutputSizes(SurfaceTexture::class.java)
 
-    private fun configMap(characteristics: CameraCharacteristics): StreamConfigurationMap = characteristics.get(
+    override fun imageSizes(): Array<Size> = configMap().getOutputSizes(ImageFormat.JPEG)
+
+    private fun configMap(): StreamConfigurationMap = getCameraCharacteristics().get(
             CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
 
 }
