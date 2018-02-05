@@ -11,6 +11,7 @@ import android.media.MediaActionSound
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
+import android.os.Message
 import android.util.Log
 import android.util.Size
 import android.view.LayoutInflater
@@ -27,7 +28,6 @@ import de.mario.camera.message.MessageHandler
 import de.mario.camera.orientation.ViewsOrientationListener
 import de.mario.camera.process.FileNameListCallback
 import de.mario.camera.settings.SettingsAccess
-import de.mario.camera.settings.SettingsActivity
 import de.mario.camera.settings.SettingsLauncher
 import de.mario.camera.view.AutoFitTextureView
 import de.mario.camera.view.ViewsMediator
@@ -135,7 +135,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     override fun onClick(view: View) {
         when (view.id) {
             R.id.picture -> takePicture()
-            R.id.settings -> settingsLauncher.startSettings()
+            R.id.settings -> startSettings()
             R.id.info -> AlertDialog.Builder(activity!!)
                             .setMessage(R.string.intro_message)
                             .setPositiveButton(android.R.string.ok, null)
@@ -154,6 +154,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
             cameraDeviceProxy.cameraId = cameraLookup.findCameraId()
 
             mPreviewSize = createPreviewSize(Size(width, height))
+            initImageReader()
 
             // We fit the aspect ratio of TextureView to the size of preview we picked.
             val orientation = resources.configuration.orientation
@@ -169,14 +170,20 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         }
     }
 
-    private fun createPreviewSize(origin: Size): Size {
-        val size = previewSizeFactory.createPreviewSize(origin)
-        setupImageReader(size)
-        return size
+    private fun createPreviewSize(origin: Size): Size = previewSizeFactory.createPreviewSize(origin)
+
+    private fun sizeForImageReader(): Size {
+        val resolutions = cameraDeviceProxy.imageSizes()
+        if (!resolutions.isEmpty()){
+            val index: Int = resolutions.size / 2
+            return resolutions.get(index)
+        }
+        return mPreviewSize
     }
 
-    private fun setupImageReader(largest: Size) {
-        mImageReader = ImageReader.newInstance(largest.width, largest.height,
+    private fun initImageReader() {
+        val size = sizeForImageReader()
+        mImageReader = ImageReader.newInstance(size.width, size.height,
                 ImageFormat.JPEG, FileNameListCallback.MAX_IMG)
         mImageReader?.setOnImageAvailableListener(
                 mOnImageAvailableListener, mBackgroundHandler)
@@ -388,6 +395,14 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
             mCaptureSession?.setRepeatingRequest(mPreviewRequest, captureProgressCallback,
                     mBackgroundHandler)
         }
+    }
+
+    internal fun startSettings() {
+        mBackgroundHandler?.post({
+            val msg = Message.obtain()
+            msg.data.putString(SettingsLauncher.SELECTED_RESOLUTION, sizeForImageReader().toString())
+            settingsLauncher.sendMessage(msg)
+        })
     }
 
     /**

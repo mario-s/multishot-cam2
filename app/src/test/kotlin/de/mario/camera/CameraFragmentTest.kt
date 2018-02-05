@@ -8,8 +8,11 @@ import android.databinding.ObservableList
 import android.hardware.camera2.CameraMetadata
 import android.hardware.camera2.CaptureRequest
 import android.media.MediaActionSound
+import android.os.Bundle
+import android.os.Message
 import android.view.View
 import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.willReturn
 import de.mario.camera.glue.ViewsMediatable
 import de.mario.camera.message.BroadcastingReceiverRegister
 import de.mario.camera.process.FileNameListCallback
@@ -23,9 +26,11 @@ import org.junit.Assert.assertThat
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.*
+import org.mockito.stubbing.Answer
 import org.springframework.test.util.ReflectionTestUtils
 
 /**
@@ -127,12 +132,11 @@ object CameraFragmentTest : Spek({
 
         it("onClick should start settings") {
             val instance = spy(CameraFragment())
-            val launcher: SettingsLauncher = mock()
-            ReflectionTestUtils.setField(instance, "settingsLauncher", launcher)
             given(view.id).willReturn(R.id.settings)
+            doAnswer(Answer<Unit> {}).`when`(instance).startSettings()
 
             instance.onClick(view)
-            verify(launcher).startSettings()
+            verify(instance).startSettings()
         }
 
         it("appendSavedFile should append files and trigger callback") {
