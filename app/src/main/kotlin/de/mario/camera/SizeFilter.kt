@@ -18,7 +18,7 @@ object SizeFilter {
         var result: Size? = null
         if(!input.isEmpty()) {
             val pair = input.split("x").map { it.toInt() }
-            if(!pair.isEmpty()) {
+            if(pair.size > 1) {
                 result = Size(pair.first(), pair.last())
             }
         }
