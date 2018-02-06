@@ -174,9 +174,9 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
 
     private fun sizeForImageReader(): Size {
         val sizePrefs = settings.getString(getString(R.string.pictureSize))
-        if(!sizePrefs.isEmpty()) {
-            val pair = sizePrefs.split("x").map { it.toInt() }
-            return Size(pair.first(), pair.last())
+        val size = SizeFilter.parse(sizePrefs)
+        if(size != null) {
+            return size
         }
         val resolutions = cameraDeviceProxy.imageSizes()
         if (!resolutions.isEmpty()){
