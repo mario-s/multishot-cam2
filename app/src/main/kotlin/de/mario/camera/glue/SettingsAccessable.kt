@@ -2,9 +2,7 @@ package de.mario.camera.glue
 
 interface SettingsAccessable {
 
-    companion object {
-        const val PICTURE_SIZE = "pictureSize"
-    }
+    fun getString(key: String): String
 
     fun isEnabled(key: Int): Boolean
 

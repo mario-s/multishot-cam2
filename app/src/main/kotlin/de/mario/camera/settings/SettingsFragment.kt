@@ -20,10 +20,11 @@ class SettingsFragment : android.preference.PreferenceFragment() {
     }
 
     private fun addImageResolutions(intent: Intent) {
+        val key = getString(R.string.pictureSize)
         val resolutions = intent.getStringArrayExtra(SettingsLauncher.RESOLUTIONS)
-        val selected = intent.getStringExtra(SettingsLauncher.SELECTED_RESOLUTION)
+        val selected = intent.getStringExtra(key)
         val customListPref = createListPreference(resolutions, selected);
-        customListPref.setKey(SettingsAccessable.PICTURE_SIZE)
+        customListPref.setKey(key)
         customListPref.setTitle(R.string.prefs_picture_size_title)
         customListPref.setSummary(R.string.prefs_picture_size_description)
 

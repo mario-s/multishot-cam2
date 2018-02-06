@@ -149,7 +149,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
      * @param width  The width of available size for camera preview
      * @param height The height of available size for camera preview
      */
-    private fun setUpCameraOutputs(width: Int, height: Int) {
+    private fun initCameraOutput(width: Int, height: Int) {
         try {
             cameraDeviceProxy.cameraId = cameraLookup.findCameraId()
 
@@ -173,6 +173,11 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     private fun createPreviewSize(origin: Size): Size = previewSizeFactory.createPreviewSize(origin)
 
     private fun sizeForImageReader(): Size {
+        val sizePrefs = settings.getString(getString(R.string.pictureSize))
+        if(!sizePrefs.isEmpty()) {
+            val pair = sizePrefs.split("x").map { it.toInt() }
+            return Size(pair.first(), pair.last())
+        }
         val resolutions = cameraDeviceProxy.imageSizes()
         if (!resolutions.isEmpty()){
             val index: Int = resolutions.size / 2
@@ -194,7 +199,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
      */
     override fun openCamera(width: Int, height: Int) {
         if (permissionRequester.hasPermissions()) {
-            setUpCameraOutputs(width, height)
+            initCameraOutput(width, height)
             updateTransform(width, height)
             try {
                 if (!mCameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
@@ -400,7 +405,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     internal fun startSettings() {
         mBackgroundHandler?.post({
             val msg = Message.obtain()
-            msg.data.putString(SettingsLauncher.SELECTED_RESOLUTION, sizeForImageReader().toString())
+            msg.data.putString(getString(R.string.pictureSize), sizeForImageReader().toString())
             settingsLauncher.sendMessage(msg)
         })
     }

@@ -9,6 +9,7 @@
     <string name="shutter_sound"><xliff:g id="preference_key">shutter_sound</xliff:g></string>
     <string name="hdr"><xliff:g id="preference_key">hdr</xliff:g></string>
     <string name="notifyHdr"><xliff:g id="preference_key">notifyHdr</xliff:g></string>
+    <string name="pictureSize"><xliff:g id="preference_key">pictureSize</xliff:g></string>
 
     <!-- keys for settings NO TRANSLATION -->
 

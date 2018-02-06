@@ -13,7 +13,6 @@ class SettingsLauncher(private val fragment: Fragment, private val cameraProxy: 
 
     companion object {
         const val RESOLUTIONS = "resolutions"
-        const val SELECTED_RESOLUTION = "selectedPictureSize"
     }
 
     override fun handleMessage(msg: Message) {

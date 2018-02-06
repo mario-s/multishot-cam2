@@ -13,7 +13,7 @@ import java.lang.Integer.parseInt
  */
 class SettingsAccess(private val context: Context) : SettingsAccessable{
 
-    fun getString(key: String): String {
+    override fun getString(key: String): String {
         return prefs().getString(key, "")
     }
 
