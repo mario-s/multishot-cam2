@@ -3,13 +3,17 @@ package de.mario.camera.device
 import android.app.Activity
 import android.app.Fragment
 import android.content.Context
+import android.graphics.ImageFormat
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CaptureRequest.Builder
+import android.hardware.camera2.params.StreamConfigurationMap
 import android.os.Handler
 import android.util.Range
+import android.util.Size
 import android.view.Surface
+import com.nhaarman.mockito_kotlin.reset
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.notNullValue
 import org.jetbrains.spek.api.Spek
@@ -37,36 +41,37 @@ object CameraDeviceProxyTest : Spek({
         val cameraManager = mock(CameraManager::class.java)
         val characteristics = mock(CameraCharacteristics::class.java)
         val builder = mock(Builder::class.java)
-        var classUnderTest: CameraDeviceProxy? = null
+        val fragment = mock(Fragment::class.java)
+        val activity = mock(Activity::class.java)
+
+        given(fragment.activity).willReturn(activity)
+        given(activity.getSystemService(Context.CAMERA_SERVICE)).willReturn(cameraManager)
+        given(cameraManager.getCameraCharacteristics(ID)).willReturn(characteristics)
+
+        val classUnderTest = CameraDeviceProxy(fragment)
+        classUnderTest.cameraDevice = cameraDevice
+        classUnderTest.cameraId = ID
+
 
         beforeEachTest {
-            val fragment = mock(Fragment::class.java)
-            val activity = mock(Activity::class.java)
-
-            given(fragment.activity).willReturn(activity)
-            given(activity.getSystemService(Context.CAMERA_SERVICE)).willReturn(cameraManager)
-            given(cameraManager.getCameraCharacteristics(ID)).willReturn(characteristics)
-
-            classUnderTest = CameraDeviceProxy(fragment)
-            classUnderTest!!.cameraDevice = cameraDevice
-            classUnderTest!!.cameraId = ID
+            reset(characteristics)
         }
 
         it("should return false when actual device is present") {
-            assertThat(classUnderTest!!.isClosed(), `is`(false))
+            assertThat(classUnderTest.isClosed(), `is`(false))
         }
 
         it("should create a CaptureRequest.Builder") {
             val type = 0;
             given(cameraDevice.createCaptureRequest(type)).willReturn(builder)
-            val result = classUnderTest!!.createCaptureRequest(type, target)
+            val result = classUnderTest.createCaptureRequest(type, target)
             assertThat(result, notNullValue())
         }
 
         it("should forward open camera call") {
             val callBack = mock(CameraDevice.StateCallback::class.java)
             val handler = mock(Handler::class.java)
-            classUnderTest?.openCamera(callBack, handler)
+            classUnderTest.openCamera(callBack, handler)
             Mockito.verify(cameraManager).openCamera(ID, callBack, handler)
         }
 
@@ -79,7 +84,19 @@ object CameraDeviceProxyTest : Spek({
             given(cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)).willReturn(builder)
 
             val target = mock(Surface::class.java)
-            val result = classUnderTest!!.createBurstRequests(0, target)
+            val result = classUnderTest.createBurstRequests(0, target)
+            assertThat(result.isEmpty(), `is`(false))
+        }
+
+
+        it("should return a list of image resolutions") {
+            val map: StreamConfigurationMap = kmock()
+
+            given(characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)).willReturn(map)
+            given(map.getOutputSizes(ImageFormat.JPEG)).willReturn(arrayOf(Size(1,1)))
+
+            val result = classUnderTest.imageSizes()
+
             assertThat(result.isEmpty(), `is`(false))
         }
     }

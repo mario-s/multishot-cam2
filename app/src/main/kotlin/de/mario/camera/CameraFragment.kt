@@ -2,7 +2,6 @@ package de.mario.camera
 
 import android.app.AlertDialog
 import android.app.Fragment
-import android.content.Intent
 import android.databinding.ObservableArrayList
 import android.graphics.ImageFormat
 import android.graphics.Matrix
@@ -12,6 +11,7 @@ import android.media.MediaActionSound
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
+import android.os.Message
 import android.util.Log
 import android.util.Size
 import android.view.LayoutInflater
@@ -28,7 +28,7 @@ import de.mario.camera.message.MessageHandler
 import de.mario.camera.orientation.ViewsOrientationListener
 import de.mario.camera.process.FileNameListCallback
 import de.mario.camera.settings.SettingsAccess
-import de.mario.camera.settings.SettingsActivity
+import de.mario.camera.settings.SettingsLauncher
 import de.mario.camera.view.AutoFitTextureView
 import de.mario.camera.view.ViewsMediator
 import de.mario.camera.widget.ErrorDialog
@@ -42,7 +42,6 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     private val sound = MediaActionSound()
     private val orientations = SurfaceOrientation()
     private val camState = CameraState()
-    private val cameraDeviceProxy = CameraDeviceProxy(this)
 
     private val mCameraOpenCloseLock = Semaphore(1)
     private val fileNames = ObservableArrayList<String>()
@@ -50,11 +49,14 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     private val toaster = Toaster(this)
     private val messageHandler = MessageHandler(this)
     private val cameraLookup = CameraLookup(this)
-    private val previewSizeFactory = PreviewSizeFactory(this)
-    private val permissionRequester = PermissionRequester(this)
-    private val captureProgressCallback = CaptureProgressCallback(camState, this)
+    private val cameraDeviceProxy = CameraDeviceProxy(this)
     private val mSurfaceTextureListener = TextureViewSurfaceListener(this)
     private val broadcastingReceiverRegister = BroadcastingReceiverRegister(this)
+
+    private val settingsLauncher = SettingsLauncher(this, cameraDeviceProxy)
+    private val previewSizeFactory = PreviewSizeFactory(this, cameraDeviceProxy)
+    private val permissionRequester = PermissionRequester(this)
+    private val captureProgressCallback = CaptureProgressCallback(camState, this)
 
     private lateinit var mTextureView: AutoFitTextureView
     private lateinit var mPreviewRequestBuilder: CaptureRequest.Builder
@@ -147,11 +149,12 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
      * @param width  The width of available size for camera preview
      * @param height The height of available size for camera preview
      */
-    private fun setUpCameraOutputs(width: Int, height: Int) {
+    private fun initCameraOutput(width: Int, height: Int) {
         try {
             cameraDeviceProxy.cameraId = cameraLookup.findCameraId()
 
             mPreviewSize = createPreviewSize(Size(width, height))
+            initImageReader()
 
             // We fit the aspect ratio of TextureView to the size of preview we picked.
             val orientation = resources.configuration.orientation
@@ -167,15 +170,25 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         }
     }
 
-    private fun createPreviewSize(origin: Size): Size {
-        val characteristics = cameraDeviceProxy.getCameraCharacteristics()
-        val size = previewSizeFactory.createPreviewSize(characteristics, origin)
-        setupImageReader(size)
-        return size
+    private fun createPreviewSize(origin: Size): Size = previewSizeFactory.createPreviewSize(origin)
+
+    private fun sizeForImageReader(): Size {
+        val sizePrefs = settings.getString(getString(R.string.pictureSize))
+        val size = SizeFilter.parse(sizePrefs)
+        if(size != null) {
+            return size
+        }
+        val resolutions = cameraDeviceProxy.imageSizes()
+        if (!resolutions.isEmpty()){
+            val index: Int = resolutions.size / 2
+            return resolutions.get(index)
+        }
+        return mPreviewSize
     }
 
-    private fun setupImageReader(largest: Size) {
-        mImageReader = ImageReader.newInstance(largest.width, largest.height,
+    private fun initImageReader() {
+        val size = sizeForImageReader()
+        mImageReader = ImageReader.newInstance(size.width, size.height,
                 ImageFormat.JPEG, FileNameListCallback.MAX_IMG)
         mImageReader?.setOnImageAvailableListener(
                 mOnImageAvailableListener, mBackgroundHandler)
@@ -186,7 +199,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
      */
     override fun openCamera(width: Int, height: Int) {
         if (permissionRequester.hasPermissions()) {
-            setUpCameraOutputs(width, height)
+            initCameraOutput(width, height)
             updateTransform(width, height)
             try {
                 if (!mCameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
@@ -308,8 +321,6 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
 
     private fun displayRotation(): Int = activity.windowManager.defaultDisplay.rotation
 
-    private fun startSettings() = startActivity(Intent(activity, SettingsActivity::class.java))
-
     /**
      * Initiate a still image capture.
      * Lock the focus as the first step for a still image capture.
@@ -389,6 +400,14 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
             mCaptureSession?.setRepeatingRequest(mPreviewRequest, captureProgressCallback,
                     mBackgroundHandler)
         }
+    }
+
+    internal fun startSettings() {
+        mBackgroundHandler?.post({
+            val msg = Message.obtain()
+            msg.data.putString(getString(R.string.pictureSize), sizeForImageReader().toString())
+            settingsLauncher.sendMessage(msg)
+        })
     }
 
     /**

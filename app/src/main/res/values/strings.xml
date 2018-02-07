@@ -1,5 +1,18 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">Multishot Camera</string>
+
+    <!-- keys for settings NO TRANSLATION -->
+    <string name="cat_camera"><xliff:g id="preference_key">camera</xliff:g></string>
+    <string name="cat_hdr"><xliff:g id="preference_key">hdr</xliff:g></string>
+    <string name="grid"><xliff:g id="preference_key">grid</xliff:g></string>
+    <string name="level"><xliff:g id="preference_key">level</xliff:g></string>
+    <string name="shutter_sound"><xliff:g id="preference_key">shutter_sound</xliff:g></string>
+    <string name="hdr"><xliff:g id="preference_key">hdr</xliff:g></string>
+    <string name="notifyHdr"><xliff:g id="preference_key">notifyHdr</xliff:g></string>
+    <string name="pictureSize"><xliff:g id="preference_key">pictureSize</xliff:g></string>
+
+    <!-- keys for settings NO TRANSLATION -->
+
     <string name="picture">Picture</string>
     <string name="description_info">Info</string>
     <string name="request_camera_permission">This app needs camera permission.</string>
@@ -27,26 +40,19 @@
     <string name="photos_saved" formatted="false">%s photos saved to %s.</string>
     <string name="fusion_saved" formatted="false">Processed image saved in %s</string>
 
-    <string name="grid"><xliff:g id="preference_key">grid</xliff:g></string>
+
     <string name="prefs_grid_enabled_description">Show a 3x3 grid on the preview.</string>
     <string name="prefs_grid_enabled_title">Show Grid</string>
-
-    <string name="level"><xliff:g id="preference_key">level</xliff:g></string>
     <string name="prefs_level_enabled_description">Show a horizontal level on the preview.</string>
     <string name="prefs_level_enabled_title">Show Horizontal Level</string>
-
-    <string name="shutter_sound"><xliff:g id="preference_key">shutter_sound</xliff:g></string>
     <string name="prefs_shutter_sound_enabled_description">Enables shutter sound when checked.</string>
     <string name="prefs_shutter_sound_enabled_title">Shutter Sound</string>
-
     <string name="prefs_process_hdr_title">HDR Processing</string>
-
-    <string name="hdr"><xliff:g id="preference_key">hdr</xliff:g></string>
     <string name="prefs_hdr_enabled_description">Create a HDR image from the taken sequence. Note: it requires an extra library which will be downloaded if not present.</string>
     <string name="prefs_hdr_enabled_title">Create HDR</string>
-
-    <string name="notifyHdr"><xliff:g id="preference_key">notifyHdr</xliff:g></string>
     <string name="prefs_broadcast_hdr_enabled_title">System message for HDR process</string>
     <string name="prefs_broadcast_hdr_enabled_description">The HDR service will send a general system notification when done.</string>
+    <string name="prefs_picture_size_description">Set the size for the images.</string>
+    <string name="prefs_picture_size_title">Picture Size</string>
 
 </resources>

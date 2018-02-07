@@ -15,8 +15,7 @@ import org.junit.runner.RunWith
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.mock
 
-/**
- */
+
 @RunWith(JUnitPlatform::class)
 object CameraLookupTest : Spek({
     val ID = "foo"

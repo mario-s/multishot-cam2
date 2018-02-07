@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
-        android:key="camera"
+        android:key="@string/cat_camera"
         android:title="@string/camera">
 
         <CheckBoxPreference
@@ -25,7 +25,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:key="hdr"
+        android:key="@string/cat_hdr"
         android:title="@string/prefs_process_hdr_title">
 
         <CheckBoxPreference
