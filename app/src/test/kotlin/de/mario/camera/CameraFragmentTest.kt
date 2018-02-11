@@ -45,17 +45,22 @@ object CameraFragmentTest : Spek({
 
     describe("the camera fragment") {
 
-        val view = mock(View::class.java)
-        val activity = mock(Activity::class.java)
+        val view: View = mock()
+        val activity: Activity = mock()
+        val windowManager: WindowManager = mock()
+        val display: Display = mock()
+        val textureView: AutoFitTextureView = mock()
         val tmp = TemporaryFolder()
 
         beforeEachTest {
             tmp.create()
+            reset(view, activity, windowManager, display)
+            given(activity.windowManager).willReturn(windowManager)
+            given(windowManager.defaultDisplay).willReturn(display)
         }
 
         afterEachTest {
             tmp.delete()
-            reset(view, activity)
         }
 
         it("should have a factory method to create the fragment") {
@@ -85,7 +90,6 @@ object CameraFragmentTest : Spek({
 
         it("onResume should toogle views") {
             val instance = spy(CameraFragment())
-            val textureView: AutoFitTextureView = mock()
             val viewsMediator: ViewsMediatable = mock()
             val broadcastingReceiverRegister: BroadcastingReceiverRegister = mock()
 
@@ -146,18 +150,13 @@ object CameraFragmentTest : Spek({
 
         it("onOpenCamera should open the camera device") {
             val instance = spy(CameraFragment())
-            val windowManager: WindowManager = mock()
-            val display: Display = mock()
             val cameraOpenCloseLock: Semaphore = mock()
             val permissionRequester: PermissionRequester = mock()
-            val textureView: AutoFitTextureView = mock()
             val previewSize: Size = mock()
 
             given(permissionRequester.hasPermissions()).willReturn(true)
             given(instance.getString(anyInt())).willReturn("foo")
             given(instance.activity).willReturn(activity)
-            given(activity.windowManager).willReturn(windowManager)
-            given(windowManager.defaultDisplay).willReturn(display)
             given(cameraOpenCloseLock.tryAcquire(CameraFragment.TIMEOUT, TimeUnit.MILLISECONDS)).willReturn(true)
 
             ReflectionTestUtils.setField(instance, "permissionRequester", permissionRequester)
