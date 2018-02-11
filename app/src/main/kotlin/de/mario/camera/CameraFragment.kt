@@ -43,7 +43,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     private val orientations = SurfaceOrientation()
     private val camState = CameraState()
 
-    private val mCameraOpenCloseLock = Semaphore(1)
+    private val cameraOpenCloseLock = Semaphore(1)
     private val fileNames = ObservableArrayList<String>()
 
     private val toaster = Toaster(this)
@@ -202,10 +202,12 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
             initCameraOutput(width, height)
             updateTransform(width, height)
             try {
-                if (!mCameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
+                if (!cameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
                     throw IllegalStateException("Time out waiting to lock camera opening.")
                 }
-                cameraDeviceProxy.openCamera(mStateCallback, mBackgroundHandler!!)
+                if(mBackgroundHandler != null){
+                    cameraDeviceProxy.openCamera(mStateCallback, mBackgroundHandler!!)
+                }
             } catch (e: CameraAccessException) {
                 Log.w(TAG, e.message, e)
             } catch (e: InterruptedException) {
@@ -216,7 +218,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
 
     private fun closeCamera() {
         try {
-            mCameraOpenCloseLock.acquire()
+            cameraOpenCloseLock.acquire()
             mCaptureSession?.close()
             mCaptureSession = null
             cameraDeviceProxy.close()
@@ -225,7 +227,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         } catch (e: InterruptedException) {
             throw RuntimeException("Interrupted while trying to lock camera closing.", e)
         } finally {
-            mCameraOpenCloseLock.release()
+            cameraOpenCloseLock.release()
         }
     }
 
@@ -417,7 +419,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
 
         override fun onOpened(cameraDevice: CameraDevice) {
             // This method is called when the camera is opened.  We start camera preview here.
-            mCameraOpenCloseLock.release()
+            cameraOpenCloseLock.release()
             cameraDeviceProxy.cameraDevice = cameraDevice
             createCameraPreviewSession()
         }
@@ -430,7 +432,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         override fun onDisconnected(cameraDevice: CameraDevice) = releaseCamera(cameraDevice)
 
         private fun releaseCamera(cameraDevice: CameraDevice) {
-            mCameraOpenCloseLock.release()
+            cameraOpenCloseLock.release()
             cameraDevice.close()
             cameraDeviceProxy.close()
         }
