@@ -10,7 +10,10 @@ import android.hardware.camera2.CaptureRequest
 import android.media.MediaActionSound
 import android.os.Bundle
 import android.os.Message
+import android.util.Size
+import android.view.Display
 import android.view.View
+import android.view.WindowManager
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.willReturn
 import de.mario.camera.glue.ViewsMediatable
@@ -32,6 +35,8 @@ import org.mockito.BDDMockito.given
 import org.mockito.Mockito.*
 import org.mockito.stubbing.Answer
 import org.springframework.test.util.ReflectionTestUtils
+import java.util.concurrent.Semaphore
+import java.util.concurrent.TimeUnit
 
 /**
  */
@@ -50,7 +55,7 @@ object CameraFragmentTest : Spek({
 
         afterEachTest {
             tmp.delete()
-            reset(view)
+            reset(view, activity)
         }
 
         it("should have a factory method to create the fragment") {
@@ -84,7 +89,7 @@ object CameraFragmentTest : Spek({
             val viewsMediator: ViewsMediatable = mock()
             val broadcastingReceiverRegister: BroadcastingReceiverRegister = mock()
 
-            ReflectionTestUtils.setField(instance, "mTextureView", textureView)
+            ReflectionTestUtils.setField(instance, "textureView", textureView)
             ReflectionTestUtils.setField(instance, "viewsMediator", viewsMediator)
             ReflectionTestUtils.setField(instance, "broadcastingReceiverRegister", broadcastingReceiverRegister)
 
@@ -137,6 +142,31 @@ object CameraFragmentTest : Spek({
 
             instance.onClick(view)
             verify(instance).startSettings()
+        }
+
+        it("onOpenCamera should open the camera device") {
+            val instance = spy(CameraFragment())
+            val windowManager: WindowManager = mock()
+            val display: Display = mock()
+            val cameraOpenCloseLock: Semaphore = mock()
+            val permissionRequester: PermissionRequester = mock()
+            val textureView: AutoFitTextureView = mock()
+            val previewSize: Size = mock()
+
+            given(permissionRequester.hasPermissions()).willReturn(true)
+            given(instance.getString(anyInt())).willReturn("foo")
+            given(instance.activity).willReturn(activity)
+            given(activity.windowManager).willReturn(windowManager)
+            given(windowManager.defaultDisplay).willReturn(display)
+            given(cameraOpenCloseLock.tryAcquire(CameraFragment.TIMEOUT, TimeUnit.MILLISECONDS)).willReturn(true)
+
+            ReflectionTestUtils.setField(instance, "permissionRequester", permissionRequester)
+            ReflectionTestUtils.setField(instance, "textureView", textureView)
+            ReflectionTestUtils.setField(instance, "previewSize", previewSize)
+            ReflectionTestUtils.setField(instance, "cameraOpenCloseLock", cameraOpenCloseLock)
+
+            instance.openCamera(1920,1080)
+            verify(cameraOpenCloseLock).release()
         }
 
         it("appendSavedFile should append files and trigger callback") {

@@ -58,12 +58,12 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     private val permissionRequester = PermissionRequester(this)
     private val captureProgressCallback = CaptureProgressCallback(camState, this)
 
-    private lateinit var mTextureView: AutoFitTextureView
+    private lateinit var textureView: AutoFitTextureView
     private lateinit var mPreviewRequestBuilder: CaptureRequest.Builder
     private lateinit var mPreviewRequest: CaptureRequest
     private lateinit var settings: SettingsAccessable
     private lateinit var viewsMediator: ViewsMediatable
-    private lateinit var mPreviewSize: Size
+    private lateinit var previewSize: Size
     private lateinit var listCallback: FileNameListCallback
 
     private var mBackgroundThread: HandlerThread? = null
@@ -78,6 +78,8 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         const val FRAGMENT_DIALOG = "dialog"
 
         fun newInstance(): CameraFragment = CameraFragment()
+
+        internal const val TIMEOUT = 2500L
     }
 
     override fun getMessageHandler(): Handler = messageHandler
@@ -88,7 +90,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        mTextureView = view.findViewById<AutoFitTextureView>(R.id.texture)
+        textureView = view.findViewById<AutoFitTextureView>(R.id.texture)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -110,10 +112,10 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         broadcastingReceiverRegister.registerBroadcastReceiver(activity)
         startBackgroundThread()
 
-        if (mTextureView.isAvailable) {
-            openCamera(mTextureView.width, mTextureView.height)
+        if (textureView.isAvailable) {
+            openCamera(textureView.width, textureView.height)
         } else {
-            mTextureView.surfaceTextureListener = mSurfaceTextureListener
+            textureView.surfaceTextureListener = mSurfaceTextureListener
         }
     }
 
@@ -153,12 +155,12 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         try {
             cameraDeviceProxy.cameraId = cameraLookup.findCameraId()
 
-            mPreviewSize = createPreviewSize(Size(width, height))
+            previewSize = createPreviewSize(Size(width, height))
             initImageReader()
 
             // We fit the aspect ratio of TextureView to the size of preview we picked.
             val orientation = resources.configuration.orientation
-            mTextureView.setAspectRatio(mPreviewSize, orientation)
+            textureView.setAspectRatio(previewSize, orientation)
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
         } catch (e: NullPointerException) {
@@ -183,7 +185,8 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
             val index: Int = resolutions.size / 2
             return resolutions.get(index)
         }
-        return mPreviewSize
+        //if everything fails return the preview size
+        return previewSize
     }
 
     private fun initImageReader() {
@@ -202,7 +205,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
             initCameraOutput(width, height)
             updateTransform(width, height)
             try {
-                if (!cameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
+                if (!cameraOpenCloseLock.tryAcquire(TIMEOUT, TimeUnit.MILLISECONDS)) {
                     throw IllegalStateException("Time out waiting to lock camera opening.")
                 }
                 if(mBackgroundHandler != null){
@@ -212,6 +215,8 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
                 Log.w(TAG, e.message, e)
             } catch (e: InterruptedException) {
                 throw IllegalStateException("Interrupted while trying to lock camera opening.", e)
+            } finally {
+                cameraOpenCloseLock.release()
             }
         }
     }
@@ -225,7 +230,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
             mImageReader?.close()
             mImageReader = null
         } catch (e: InterruptedException) {
-            throw RuntimeException("Interrupted while trying to lock camera closing.", e)
+            Log.w(TAG, e.message, e)
         } finally {
             cameraOpenCloseLock.release()
         }
@@ -264,10 +269,10 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
      */
     private fun createCameraPreviewSession() {
         try {
-            val texture = mTextureView.surfaceTexture
+            val texture = textureView.surfaceTexture
 
             // We configure the size of default buffer to be the size of camera preview we want.
-            texture.setDefaultBufferSize(mPreviewSize.width, mPreviewSize.height)
+            texture.setDefaultBufferSize(previewSize.width, previewSize.height)
 
             // This is the output Surface we need to start preview.
             val surface = Surface(texture)
@@ -310,7 +315,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
 
     override fun showToast(msg: String?) = toaster.showToast(msg)
 
-    override fun updateTransform(viewWidth: Int, viewHeight: Int) = mTextureView.setTransform(createMatrix(viewWidth, viewHeight))
+    override fun updateTransform(viewWidth: Int, viewHeight: Int) = textureView.setTransform(createMatrix(viewWidth, viewHeight))
 
     override fun appendSavedFile(name: String) {
         fileNames.add(name)
@@ -318,7 +323,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
 
     private fun createMatrix(viewWidth: Int, viewHeight: Int): Matrix {
         val viewSize = Size(viewWidth, viewHeight)
-        return MatrixFactory.create(mPreviewSize, viewSize, displayRotation())
+        return MatrixFactory.create(previewSize, viewSize, displayRotation())
     }
 
     private fun displayRotation(): Int = activity.windowManager.defaultDisplay.rotation
