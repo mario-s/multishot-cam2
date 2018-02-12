@@ -25,6 +25,7 @@ import de.mario.camera.glue.*
 import de.mario.camera.io.ImageSaver
 import de.mario.camera.message.BroadcastingReceiverRegister
 import de.mario.camera.message.MessageHandler
+import de.mario.camera.orientation.DeviceOrientationListener
 import de.mario.camera.orientation.ViewsOrientationListener
 import de.mario.camera.process.FileNameListCallback
 import de.mario.camera.settings.SettingsAccess
@@ -40,7 +41,6 @@ import java.util.concurrent.TimeUnit
 class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureable {
 
     private val sound = MediaActionSound()
-    private val orientations = SurfaceOrientation()
     private val camState = CameraState()
 
     private val cameraOpenCloseLock = Semaphore(1)
@@ -65,6 +65,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     private lateinit var viewsMediator: ViewsMediatable
     private lateinit var previewSize: Size
     private lateinit var listCallback: FileNameListCallback
+    private lateinit var deviceOrientationListener: DeviceOrientationListener
 
     private var mBackgroundThread: HandlerThread? = null
     private var mBackgroundHandler: Handler? = null
@@ -98,6 +99,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
 
         sound.load(MediaActionSound.SHUTTER_CLICK)
         settings = SettingsAccess(activity)
+        deviceOrientationListener = DeviceOrientationListener(activity)
         val viewsOrientationListener = ViewsOrientationListener(activity)
         viewsMediator = ViewsMediator(activity, settings, viewsOrientationListener)
         viewsMediator.setOnClickListener(this)
@@ -108,6 +110,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     override fun onResume() {
         super.onResume()
 
+        deviceOrientationListener.enable()
         viewsMediator.onResume()
         broadcastingReceiverRegister.registerBroadcastReceiver(activity)
         startBackgroundThread()
@@ -123,6 +126,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         closeCamera()
         stopBackgroundThread()
         broadcastingReceiverRegister.unregisterBroadcastReceiver(activity)
+        deviceOrientationListener.disable()
         viewsMediator.onPause()
         super.onPause()
     }
@@ -323,10 +327,9 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
 
     private fun createMatrix(viewWidth: Int, viewHeight: Int): Matrix {
         val viewSize = Size(viewWidth, viewHeight)
-        return MatrixFactory.create(previewSize, viewSize, displayRotation())
+        return MatrixFactory.create(previewSize, viewSize, deviceOrientationListener.displayRotation())
     }
 
-    private fun displayRotation(): Int = activity.windowManager.defaultDisplay.rotation
 
     /**
      * Initiate a still image capture.
@@ -373,7 +376,8 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     override fun capturePicture() {
         try {
             fileNames.clear()
-            val requests = cameraDeviceProxy.createBurstRequests(orientations.get(displayRotation()), mImageReader!!.surface)
+            val orientation = deviceOrientationListener.getOrientation()
+            val requests = cameraDeviceProxy.createBurstRequests(orientation, mImageReader!!.surface)
             mCaptureSession?.stopRepeating()
             mCaptureSession?.captureBurst(requests, captureImageCallback, null)
         } catch (e: CameraAccessException) {

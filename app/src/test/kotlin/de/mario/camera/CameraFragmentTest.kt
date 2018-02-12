@@ -2,24 +2,20 @@ package de.mario.camera
 
 
 import android.app.Activity
-import android.content.Intent
 import android.databinding.ObservableArrayList
 import android.databinding.ObservableList
 import android.hardware.camera2.CameraMetadata
 import android.hardware.camera2.CaptureRequest
 import android.media.MediaActionSound
-import android.os.Bundle
-import android.os.Message
 import android.util.Size
 import android.view.Display
 import android.view.View
 import android.view.WindowManager
 import com.nhaarman.mockito_kotlin.mock
-import com.nhaarman.mockito_kotlin.willReturn
 import de.mario.camera.glue.ViewsMediatable
 import de.mario.camera.message.BroadcastingReceiverRegister
+import de.mario.camera.orientation.DeviceOrientationListener
 import de.mario.camera.process.FileNameListCallback
-import de.mario.camera.settings.SettingsLauncher
 import de.mario.camera.view.AutoFitTextureView
 import org.hamcrest.CoreMatchers.notNullValue
 import org.jetbrains.spek.api.Spek
@@ -29,7 +25,6 @@ import org.junit.Assert.assertThat
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.*
@@ -51,10 +46,11 @@ object CameraFragmentTest : Spek({
         val display: Display = mock()
         val textureView: AutoFitTextureView = mock()
         val tmp = TemporaryFolder()
+        val deviceOrientationListener: DeviceOrientationListener = mock()
 
         beforeEachTest {
             tmp.create()
-            reset(view, activity, windowManager, display)
+            reset(view, activity, windowManager, display, deviceOrientationListener)
             given(activity.windowManager).willReturn(windowManager)
             given(windowManager.defaultDisplay).willReturn(display)
         }
@@ -96,6 +92,7 @@ object CameraFragmentTest : Spek({
             ReflectionTestUtils.setField(instance, "textureView", textureView)
             ReflectionTestUtils.setField(instance, "viewsMediator", viewsMediator)
             ReflectionTestUtils.setField(instance, "broadcastingReceiverRegister", broadcastingReceiverRegister)
+            ReflectionTestUtils.setField(instance, "deviceOrientationListener", deviceOrientationListener)
 
             given(instance.activity).willReturn(activity)
             given(instance.view).willReturn(view)
@@ -163,6 +160,7 @@ object CameraFragmentTest : Spek({
             ReflectionTestUtils.setField(instance, "textureView", textureView)
             ReflectionTestUtils.setField(instance, "previewSize", previewSize)
             ReflectionTestUtils.setField(instance, "cameraOpenCloseLock", cameraOpenCloseLock)
+            ReflectionTestUtils.setField(instance, "deviceOrientationListener", deviceOrientationListener)
 
             instance.openCamera(1920,1080)
             verify(cameraOpenCloseLock).release()

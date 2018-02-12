@@ -1,11 +1,11 @@
-package de.mario.camera
+package de.mario.camera.orientation
 
 import android.util.SparseIntArray
 import android.view.Surface
 
 /**
  */
-class SurfaceOrientation : SparseIntArray(){
+internal object OrientationMapper : SparseIntArray(){
     init {
         append(Surface.ROTATION_0, 90)
         append(Surface.ROTATION_90, 0)

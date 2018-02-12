@@ -11,9 +11,9 @@ import java.lang.Math.*
  */
 class OrientationNoiseFilter {
 
-    private var alpha: Double = 0.toDouble()
+    private var alpha: Double = 0.0
 
-    private var timestamp: Float = 0.toFloat()
+    private var timestamp: Float = 0.0f
 
     private val timestampOld: Float
 
