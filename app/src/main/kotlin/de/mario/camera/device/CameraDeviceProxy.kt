@@ -10,13 +10,13 @@ import android.hardware.camera2.CaptureRequest
 import android.hardware.camera2.params.StreamConfigurationMap
 import android.os.Handler
 import android.util.Log
-import android.util.Range
 import android.util.Size
 import android.view.Surface
 import de.mario.camera.glue.CameraDeviceProxyable
 
 class CameraDeviceProxy(fragment: Fragment) : CameraDeviceProxyable{
     private val managerSupply = CameraManagerSupply(fragment)
+    private val exposuresFactory = ExposuresFactory(fragment)
     internal var cameraDevice: CameraDevice? = null
     internal var cameraId: String? = null
 
@@ -29,7 +29,7 @@ class CameraDeviceProxy(fragment: Fragment) : CameraDeviceProxyable{
         managerSupply.cameraManager().openCamera(cameraId, callback, handler)
     }
 
-    fun getCameraCharacteristics(): CameraCharacteristics = managerSupply.cameraCharacteristics(cameraId!!)
+    private fun cameraCharacteristics(): CameraCharacteristics = managerSupply.cameraCharacteristics(cameraId!!)
 
     fun close() {
         cameraDevice?.close()
@@ -57,14 +57,12 @@ class CameraDeviceProxy(fragment: Fragment) : CameraDeviceProxyable{
     }
 
     fun createBurstRequests(orientation: Int, target: Surface): List<CaptureRequest> {
-        val range = exposureCompensationRange()
-        val evs = arrayOf(0, range.lower, range.upper)
-
-        Log.d(TAG, "ev: " + evs)
-
         val builder = captureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE, target)
         setAuto(builder!!)
         builder.set(CaptureRequest.JPEG_ORIENTATION, orientation)
+
+        val evs = exposuresFactory.exposureCompensations(cameraId!!)
+        Log.d(TAG, "ev: " + evs)
 
         return buildRequests(builder, evs)
     }
@@ -75,10 +73,6 @@ class CameraDeviceProxy(fragment: Fragment) : CameraDeviceProxyable{
             builder.build()
         }
     }
-
-    private fun exposureCompensationRange(): Range<Int>
-            = getCameraCharacteristics().get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE)
-
 
     private fun setAuto(builder: CaptureRequest.Builder?) {
         // Auto focus should be continuous for camera preview.
@@ -91,10 +85,9 @@ class CameraDeviceProxy(fragment: Fragment) : CameraDeviceProxyable{
 
     override fun imageSizes(): Array<Size> = configMap().getOutputSizes(ImageFormat.JPEG)
 
-    override fun sensorOrientation(): Int = getCameraCharacteristics().get(CameraCharacteristics.SENSOR_ORIENTATION)
+    override fun sensorOrientation(): Int = cameraCharacteristics().get(CameraCharacteristics.SENSOR_ORIENTATION)
 
-
-    private fun configMap(): StreamConfigurationMap = getCameraCharacteristics().get(
+    private fun configMap(): StreamConfigurationMap = cameraCharacteristics().get(
             CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
 
 }
