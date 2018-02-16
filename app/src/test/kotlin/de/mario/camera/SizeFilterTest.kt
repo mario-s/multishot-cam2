@@ -5,6 +5,7 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
+import org.jetbrains.spek.api.dsl.on
 import org.junit.Assert.assertThat
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
@@ -29,16 +30,18 @@ object SizeFilterTest : Spek( {
             given(max.height).willReturn(100)
         }
 
-        it("should return the maximum for optimal size when all three sizes are max") {
-            val choices = arrayOf(min, max)
-            val result = SizeFilter.chooseOptimalSize(choices, max, max, max)
-            assertThat(result, equalTo(max))
-        }
+        on("chooseOptimalSize") {
+            it("should return the maximum for optimal size when all three sizes are max") {
+                val choices = arrayOf(min, max)
+                val result = SizeFilter.chooseOptimalSize(choices, max, max, max)
+                assertThat(result, equalTo(max))
+            }
 
-        it("should return the minimum for optimal size when two sizes are max") {
-            val choices = arrayOf(min, max)
-            val result = SizeFilter.chooseOptimalSize(choices, max, max, min)
-            assertThat(result, equalTo(min))
+            it("should return the minimum for optimal size when two sizes are max") {
+                val choices = arrayOf(min, max)
+                val result = SizeFilter.chooseOptimalSize(choices, max, max, min)
+                assertThat(result, equalTo(min))
+            }
         }
 
     }

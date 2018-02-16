@@ -1,20 +1,31 @@
 package de.mario.camera.device
 
-import android.app.Fragment
 import android.hardware.camera2.CameraCharacteristics
-import de.mario.camera.glue.SettingsAccessable
-import de.mario.camera.settings.SettingsAccess
+import android.util.Range
 
-internal class ExposuresFactory(private val fragment: Fragment) {
 
-    private val managerSupply = CameraManagerSupply(fragment)
+internal class ExposuresFactory(private val managerSupply: CameraManagerSupply) {
 
-    private fun settings(): SettingsAccessable = SettingsAccess(fragment.context)
+    fun exposures(cameraId: String, seqType: Int): Array<Int> {
+        val range = range(cameraId)
 
-    fun exposureCompensations(cameraId: String): Array<Int> {
-        val characteristics = managerSupply.cameraCharacteristics(cameraId)
-        val range = characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE)
+        when (seqType) {
+            1 -> return minToMaxIn2El(range)
+            else -> return arrayOf(range.lower, 0, range.upper)
+        }
+    }
 
-        return arrayOf(0, range.lower, range.upper)
+    private fun range(cameraId: String): Range<Int> {
+        val chars = managerSupply.cameraCharacteristics(cameraId)
+        return chars.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE)
+    }
+
+    private fun minToMaxIn2El(range: Range<Int>): Array<Int> {
+        val values = mutableListOf<Int>()
+        for(i in range.lower .. range.upper step 2) {
+            values.add(i)
+        }
+
+        return values.toTypedArray()
     }
 }

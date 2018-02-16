@@ -12,11 +12,18 @@ import android.os.Handler
 import android.util.Log
 import android.util.Size
 import android.view.Surface
+import de.mario.camera.R
 import de.mario.camera.glue.CameraDeviceProxyable
+import de.mario.camera.glue.SettingsAccessable
+import de.mario.camera.settings.SettingsAccess
 
-class CameraDeviceProxy(fragment: Fragment) : CameraDeviceProxyable{
+open class CameraDeviceProxy(private val fragment: Fragment) : CameraDeviceProxyable{
     private val managerSupply = CameraManagerSupply(fragment)
-    private val exposuresFactory = ExposuresFactory(fragment)
+    private val exposuresFactory = ExposuresFactory(managerSupply)
+    private val settings: SettingsAccessable by lazy {
+        settings()
+    }
+
     internal var cameraDevice: CameraDevice? = null
     internal var cameraId: String? = null
 
@@ -24,12 +31,16 @@ class CameraDeviceProxy(fragment: Fragment) : CameraDeviceProxyable{
         const val TAG = "CameraDeviceProxy"
     }
 
+    internal open fun settings(): SettingsAccessable = SettingsAccess(fragment.context)
+
+    private fun characteristics(): CameraCharacteristics = managerSupply.cameraCharacteristics(cameraId!!)
+
+    private fun configMap(): StreamConfigurationMap = characteristics().get(
+            CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
 
     fun openCamera(callback: CameraDevice.StateCallback, handler: Handler)  {
         managerSupply.cameraManager().openCamera(cameraId, callback, handler)
     }
-
-    private fun cameraCharacteristics(): CameraCharacteristics = managerSupply.cameraCharacteristics(cameraId!!)
 
     fun close() {
         cameraDevice?.close()
@@ -61,7 +72,8 @@ class CameraDeviceProxy(fragment: Fragment) : CameraDeviceProxyable{
         setAuto(builder!!)
         builder.set(CaptureRequest.JPEG_ORIENTATION, orientation)
 
-        val evs = exposuresFactory.exposureCompensations(cameraId!!)
+        val seq = settings.getInt(R.string.evSequence)
+        val evs = exposuresFactory.exposures(cameraId!!, seq)
         Log.d(TAG, "ev: " + evs)
 
         return buildRequests(builder, evs)
@@ -85,9 +97,7 @@ class CameraDeviceProxy(fragment: Fragment) : CameraDeviceProxyable{
 
     override fun imageSizes(): Array<Size> = configMap().getOutputSizes(ImageFormat.JPEG)
 
-    override fun sensorOrientation(): Int = cameraCharacteristics().get(CameraCharacteristics.SENSOR_ORIENTATION)
+    override fun sensorOrientation(): Int = characteristics().get(CameraCharacteristics.SENSOR_ORIENTATION)
 
-    private fun configMap(): StreamConfigurationMap = cameraCharacteristics().get(
-            CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
 
 }

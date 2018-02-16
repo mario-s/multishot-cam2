@@ -17,11 +17,11 @@ class SettingsAccess(private val context: Context) : SettingsAccessable{
         return prefs().getString(key, "")
     }
 
-    fun getInt(key: Int): Int {
+    override fun getInt(key: Int): Int {
         return getInt(context.getString(key))
     }
 
-    fun getInt(key: String): Int {
+    override fun getInt(key: String): Int {
         return parseInt(prefs().getString(key, "0"))
     }
 

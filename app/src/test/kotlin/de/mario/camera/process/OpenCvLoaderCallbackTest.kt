@@ -14,9 +14,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.opencv.android.LoaderCallbackInterface
 
-/**
- *
- */
+
 @RunWith(JUnitPlatform::class)
 object OpenCvLoaderCallbackTest : Spek({
 

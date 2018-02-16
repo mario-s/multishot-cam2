@@ -2,7 +2,6 @@ package de.mario.camera.settings
 
 import android.app.Fragment
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.os.Message
 import android.util.Size
@@ -11,7 +10,6 @@ import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.reset
 import com.nhaarman.mockito_kotlin.verify
 import de.mario.camera.glue.CameraDeviceProxyable
-import org.hamcrest.Matchers.any
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
@@ -22,11 +20,9 @@ import org.mockito.BDDMockito.given
 
 @RunWith(JUnitPlatform::class)
 object SettingsLauncherTest : Spek({
-    val ID = "foo"
 
     describe("the settings launcher") {
 
-        val intent: Intent = mock()
         val context: Context = mock()
         val fragment: Fragment = mock()
         val cameraProxy: CameraDeviceProxyable = mock()
