@@ -21,10 +21,12 @@ class FileNameListCallback(private val control: CameraControlable): OnListChange
     private val trigger = FusionProcessTrigger(context)
     private val settings = SettingsAccess(context)
 
+    var requiredImages: Int = INIT
+    set
+
     companion object {
         const val TAG = "FileNameListCallback"
-        //TODO: use settings for number of images
-        const val MAX_IMG = 3
+        private const val INIT = 3
     }
 
     init {
@@ -55,7 +57,7 @@ class FileNameListCallback(private val control: CameraControlable): OnListChange
     }
 
     override fun onItemRangeInserted(source: ObservableArrayList<String>?, start: Int, count: Int) {
-        if(source != null && source.size >= MAX_IMG) {
+        if(source != null && source.size >= requiredImages) {
             process(source.toTypedArray())
         }
     }
