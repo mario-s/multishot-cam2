@@ -17,9 +17,12 @@ import de.mario.camera.glue.CameraDeviceProxyable
 import de.mario.camera.glue.SettingsAccessable
 import de.mario.camera.settings.SettingsAccess
 
+/**
+ * A proxy to access the actual camera device.
+ */
 open class CameraDeviceProxy(private val fragment: Fragment) : CameraDeviceProxyable{
     private val managerSupply = CameraManagerSupply(fragment)
-    private val exposuresFactory = ExposuresFactory(managerSupply)
+    private val exposuresFactory = SequenceFactory(managerSupply)
     private val settings: SettingsAccessable by lazy {
         settings()
     }
@@ -73,7 +76,7 @@ open class CameraDeviceProxy(private val fragment: Fragment) : CameraDeviceProxy
         builder.set(CaptureRequest.JPEG_ORIENTATION, orientation)
 
         val seq = settings.getInt(R.string.evSequence)
-        val evs = exposuresFactory.exposures(cameraId!!, seq)
+        val evs = exposuresFactory.create(cameraId!!, seq)
         Log.d(TAG, "ev: " + evs)
 
         return buildRequests(builder, evs)

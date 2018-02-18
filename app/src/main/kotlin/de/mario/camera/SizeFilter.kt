@@ -74,7 +74,7 @@ object SizeFilter {
     internal class CompareSizesByArea : Comparator<Size> {
 
         override fun compare(lhs: Size, rhs: Size): Int {
-            // We cast here to ensure the multiplications won't overflow
+            //cast here to ensure the multiplications won't overflow
             val l = lhs.width.toLong() * lhs.height
             val r = rhs.width.toLong() * rhs.height
             return java.lang.Long.signum(l - r)

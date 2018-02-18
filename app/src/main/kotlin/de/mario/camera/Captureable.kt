@@ -9,8 +9,6 @@ interface Captureable {
 
     /**
      * Run the prepare sequence for capturing a still image.
-     *
-     *
      */
     fun prepareCapturing()
 }

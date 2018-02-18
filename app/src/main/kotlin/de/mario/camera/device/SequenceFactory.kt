@@ -4,9 +4,12 @@ import android.hardware.camera2.CameraCharacteristics
 import android.util.Range
 
 
-internal class ExposuresFactory(private val managerSupply: CameraManagerSupply) {
+/**
+ * This factory creates a sequence of integers which can be used for the exposure lock.
+ */
+internal class SequenceFactory(private val managerSupply: CameraManagerSupply) {
 
-    fun exposures(cameraId: String, seqType: Int): Array<Int> {
+    fun create(cameraId: String, seqType: Int): Array<Int> {
         val range = range(cameraId)
 
         when (seqType) {

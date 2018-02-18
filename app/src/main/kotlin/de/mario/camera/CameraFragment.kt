@@ -369,10 +369,6 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         }
     }
 
-    /**
-     * Capture a still picture. This method should be called when we get a response in
-     * {@link #captureProgressCallback} from both {@link #lockFocus()}.
-     */
     override fun capturePicture() {
         try {
             fileNames.clear()
