@@ -48,7 +48,6 @@ object PreviewSizeFactoryTest : Spek( {
         }
 
         it("should return the minimum size") {
-            val map: StreamConfigurationMap = mock()
             val arr = arrayOf(min, max)
 
             given(cameraProxy.imageSizes()).willReturn(arr)

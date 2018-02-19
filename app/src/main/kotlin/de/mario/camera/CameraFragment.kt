@@ -70,7 +70,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     private var mBackgroundThread: HandlerThread? = null
     private var mBackgroundHandler: Handler? = null
     private var mImageReader: ImageReader? = null
-    private var mCaptureSession: CameraCaptureSession? = null
+    private var captureSession: CameraCaptureSession? = null
 
     companion object {
 
@@ -196,7 +196,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     private fun initImageReader() {
         val size = sizeForImageReader()
         mImageReader = ImageReader.newInstance(size.width, size.height,
-                ImageFormat.JPEG, FileNameListCallback.MAX_IMG)
+                ImageFormat.JPEG, 2)
         mImageReader?.setOnImageAvailableListener(
                 mOnImageAvailableListener, mBackgroundHandler)
     }
@@ -228,8 +228,8 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     private fun closeCamera() {
         try {
             cameraOpenCloseLock.acquire()
-            mCaptureSession?.close()
-            mCaptureSession = null
+            captureSession?.close()
+            captureSession = null
             cameraDeviceProxy.close()
             mImageReader?.close()
             mImageReader = null
@@ -295,11 +295,11 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
                             }
 
                             // When the session is ready, we start displaying the preview.
-                            mCaptureSession = cameraCaptureSession
+                            captureSession = cameraCaptureSession
                             try {
                                 // Finally, we start displaying the camera preview.
                                 mPreviewRequest = mPreviewRequestBuilder.build()
-                                mCaptureSession?.setRepeatingRequest(mPreviewRequest,
+                                captureSession?.setRepeatingRequest(mPreviewRequest,
                                         captureProgressCallback, mBackgroundHandler)
                             } catch (e: CameraAccessException) {
                                 Log.w(TAG, e.message, e)
@@ -362,24 +362,21 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     private fun prepareSession(before: () -> Unit) {
         try {
             before()
-            mCaptureSession?.capture(mPreviewRequestBuilder.build(), captureProgressCallback,
+            captureSession?.capture(mPreviewRequestBuilder.build(), captureProgressCallback,
                 mBackgroundHandler!!)
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
         }
     }
 
-    /**
-     * Capture a still picture. This method should be called when we get a response in
-     * {@link #captureProgressCallback} from both {@link #lockFocus()}.
-     */
     override fun capturePicture() {
         try {
             fileNames.clear()
             val orientation = deviceOrientationListener.getOrientation()
             val requests = cameraDeviceProxy.createBurstRequests(orientation, mImageReader!!.surface)
-            mCaptureSession?.stopRepeating()
-            mCaptureSession?.captureBurst(requests, captureImageCallback, null)
+            listCallback.requiredImages = requests.size
+            captureSession?.stopRepeating()
+            captureSession?.captureBurst(requests, captureImageCallback, null)
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
         }
@@ -408,7 +405,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
 
             // After this, the camera will go back to the normal state of preview.
             camState.currentState = CameraState.STATE_PREVIEW
-            mCaptureSession?.setRepeatingRequest(mPreviewRequest, captureProgressCallback,
+            captureSession?.setRepeatingRequest(mPreviewRequest, captureProgressCallback,
                     mBackgroundHandler)
         }
     }

@@ -12,6 +12,7 @@ import de.mario.camera.glue.MessageSendable
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
+import org.jetbrains.spek.api.dsl.on
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
@@ -56,24 +57,26 @@ object ImageSaverTest : Spek( {
             tmp.delete()
         }
 
-        it("run method should call message sender when done") {
-            classUnderTest?.run()
-            verify(messageSendable).send(anyString())
-        }
+        on("run") {
+            it("should call message sender when done") {
+                classUnderTest?.run()
+                verify(messageSendable).send(anyString())
+            }
 
-        it("run method should read next image from reader") {
-            given(storageAccessable.getStorageState()).willReturn(Environment.MEDIA_MOUNTED)
-            val image = mock(Image::class.java)
-            val plane = mock(Image.Plane::class.java)
-            val buffer = ByteBuffer.allocate(10)
-            given(reader.acquireNextImage()).willReturn(image)
-            given(image.planes).willReturn(arrayOf(plane))
-            given(plane.buffer).willReturn(buffer)
+            it("should read next image from reader") {
+                given(storageAccessable.getStorageState()).willReturn(Environment.MEDIA_MOUNTED)
+                val image = mock(Image::class.java)
+                val plane = mock(Image.Plane::class.java)
+                val buffer = ByteBuffer.allocate(10)
+                given(reader.acquireNextImage()).willReturn(image)
+                given(image.planes).willReturn(arrayOf(plane))
+                given(plane.buffer).willReturn(buffer)
 
-            classUnderTest?.run()
-            val order = inOrder(reader, image)
-            order.verify(reader).acquireNextImage()
-            order.verify(image).close()
+                classUnderTest?.run()
+                val order = inOrder(reader, image)
+                order.verify(reader).acquireNextImage()
+                order.verify(image).close()
+            }
         }
 
     }

@@ -4,6 +4,21 @@
         android:key="@string/cat_camera"
         android:title="@string/camera">
 
+        <ListPreference
+            android:defaultValue="0"
+            android:enabled="true"
+            android:entries="@array/exposureArray"
+            android:entryValues="@array/exposureValues"
+            android:key="@string/evSequence"
+            android:summary="@string/prefs_exposure_description"
+            android:title="@string/prefs_exposure_title"/>
+
+        <ListPreference
+            android:enabled="true"
+            android:key="@string/pictureSize"
+            android:summary="@string/prefs_picture_size_description"
+            android:title="@string/prefs_picture_size_title"/>
+
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="@string/shutter_sound"

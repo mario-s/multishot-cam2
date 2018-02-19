@@ -4,14 +4,18 @@ package de.mario.camera
 import android.app.Activity
 import android.databinding.ObservableArrayList
 import android.databinding.ObservableList
+import android.hardware.camera2.CameraCaptureSession
 import android.hardware.camera2.CameraMetadata
 import android.hardware.camera2.CaptureRequest
+import android.media.ImageReader
 import android.media.MediaActionSound
 import android.util.Size
 import android.view.Display
+import android.view.Surface
 import android.view.View
 import android.view.WindowManager
 import com.nhaarman.mockito_kotlin.mock
+import de.mario.camera.device.CameraDeviceProxy
 import de.mario.camera.glue.ViewsMediatable
 import de.mario.camera.message.BroadcastingReceiverRegister
 import de.mario.camera.orientation.DeviceOrientationListener
@@ -21,11 +25,11 @@ import org.hamcrest.CoreMatchers.notNullValue
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
+import org.jetbrains.spek.api.dsl.on
 import org.junit.Assert.assertThat
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.*
 import org.mockito.stubbing.Answer
@@ -64,7 +68,7 @@ object CameraFragmentTest : Spek({
             assertThat(instance, notNullValue())
         }
 
-        it("onViewCreated should request texture view") {
+        it("should request texture view onViewCreated") {
             val instance = CameraFragment.newInstance()
             val other: View = mock()
             val textureView: AutoFitTextureView = mock()
@@ -84,7 +88,7 @@ object CameraFragmentTest : Spek({
             instance.onActivityCreated(null)
         }
 
-        it("onResume should toogle views") {
+        it("should toogle views onResume") {
             val instance = spy(CameraFragment())
             val viewsMediator: ViewsMediatable = mock()
             val broadcastingReceiverRegister: BroadcastingReceiverRegister = mock()
@@ -102,7 +106,7 @@ object CameraFragmentTest : Spek({
             verify(viewsMediator, atLeastOnce()).onResume()
         }
 
-        it("onDestroy should free resources") {
+        it("should free resources on onDestroy") {
             val instance = spy(CameraFragment())
             val sound: MediaActionSound = mock()
             val callback: FileNameListCallback = mock()
@@ -125,27 +129,29 @@ object CameraFragmentTest : Spek({
                     CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START)
         }
 
-        it("onClick should take picture") {
-            val instance = spy(CameraFragment())
-            given(view.id).willReturn(R.id.picture)
-            var builder: CaptureRequest.Builder = mock()
-            ReflectionTestUtils.setField(instance, "mPreviewRequestBuilder", builder)
+        on("onClick") {
+            it("should take picture") {
+                val instance = spy(CameraFragment())
+                given(view.id).willReturn(R.id.picture)
+                var builder: CaptureRequest.Builder = mock()
+                ReflectionTestUtils.setField(instance, "mPreviewRequestBuilder", builder)
 
-            instance.onClick(view)
-            verify(builder).set(CaptureRequest.CONTROL_AF_TRIGGER,
-                    CameraMetadata.CONTROL_AF_TRIGGER_START)
+                instance.onClick(view)
+                verify(builder).set(CaptureRequest.CONTROL_AF_TRIGGER,
+                        CameraMetadata.CONTROL_AF_TRIGGER_START)
+            }
+
+            it("should start settings") {
+                val instance = spy(CameraFragment())
+                given(view.id).willReturn(R.id.settings)
+                doAnswer(Answer<Unit> {}).`when`(instance).startSettings()
+
+                instance.onClick(view)
+                verify(instance).startSettings()
+            }
         }
 
-        it("onClick should start settings") {
-            val instance = spy(CameraFragment())
-            given(view.id).willReturn(R.id.settings)
-            doAnswer(Answer<Unit> {}).`when`(instance).startSettings()
-
-            instance.onClick(view)
-            verify(instance).startSettings()
-        }
-
-        it("onOpenCamera should open the camera device") {
+        it("should open the camera device on onOpenCamera") {
             val instance = spy(CameraFragment())
             val cameraOpenCloseLock: Semaphore = mock()
             val permissionRequester: PermissionRequester = mock()
@@ -166,7 +172,7 @@ object CameraFragmentTest : Spek({
             verify(cameraOpenCloseLock).release()
         }
 
-        it("appendSavedFile should append files and trigger callback") {
+        it("should append files and trigger callback on appendSavedFile") {
             val instance = CameraFragment.newInstance()
             @Suppress("UNCHECKED_CAST")
             val observable = ReflectionTestUtils.getField(instance, "fileNames") as ObservableArrayList<String>
@@ -175,6 +181,30 @@ object CameraFragmentTest : Spek({
 
             instance.appendSavedFile("foo")
             verify(callback).onItemRangeInserted(observable, 0, 1)
+        }
+
+        it("should create burst on capturePicture") {
+            val instance = CameraFragment.newInstance()
+            val surface: Surface = mock()
+            val imageReader: ImageReader = mock()
+            val captureSession: CameraCaptureSession = mock()
+            val cameraDeviceProxy: CameraDeviceProxy = mock()
+            val listCallback: FileNameListCallback = mock()
+
+            given(imageReader.surface).willReturn(surface)
+
+            ReflectionTestUtils.setField(instance, "mImageReader", imageReader)
+            ReflectionTestUtils.setField(instance, "captureSession", captureSession)
+            ReflectionTestUtils.setField(instance, "cameraDeviceProxy", cameraDeviceProxy)
+            ReflectionTestUtils.setField(instance, "listCallback", listCallback)
+            ReflectionTestUtils.setField(instance, "deviceOrientationListener", deviceOrientationListener)
+
+
+            instance.capturePicture()
+
+            val order = inOrder(listCallback, captureSession)
+            order.verify(listCallback).requiredImages = 0
+            order.verify(captureSession).captureBurst(anyList(), any(), any())
         }
     }
 })

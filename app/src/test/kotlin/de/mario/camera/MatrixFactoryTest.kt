@@ -5,6 +5,7 @@ import org.hamcrest.CoreMatchers.notNullValue
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
+import org.jetbrains.spek.api.dsl.on
 import org.junit.Assert.assertThat
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
@@ -31,20 +32,22 @@ object MatrixFactoryTest : Spek({
             assertThat(result, notNullValue())
         }
 
-        it("should return a matrix for a rotation of 0 degree") {
-            verify(0)
-        }
+        on("create") {
+            it("should return a matrix for a rotation of 0 degree") {
+                verify(0)
+            }
 
-        it("should return a matrix for a rotation of 90 degree") {
-            verify(90)
-        }
+            it("should return a matrix for a rotation of 90 degree") {
+                verify(90)
+            }
 
-        it("should return a matrix for a rotation of 180 degree") {
-            verify(180)
-        }
+            it("should return a matrix for a rotation of 180 degree") {
+                verify(180)
+            }
 
-        it("should return a matrix for a rotation of 270 degree") {
-            verify(270)
+            it("should return a matrix for a rotation of 270 degree") {
+                verify(270)
+            }
         }
     }
 })

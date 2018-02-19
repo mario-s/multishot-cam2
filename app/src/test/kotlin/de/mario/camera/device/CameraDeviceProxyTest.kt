@@ -24,8 +24,9 @@ import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito
-import org.mockito.Mockito.mock
-import com.nhaarman.mockito_kotlin.mock as kmock
+import com.nhaarman.mockito_kotlin.mock
+import de.mario.camera.glue.SettingsAccessable
+import org.mockito.ArgumentMatchers.anyInt
 
 
 /**
@@ -36,22 +37,26 @@ object CameraDeviceProxyTest : Spek({
 
     describe("the camera proxy") {
 
-        val cameraDevice = mock(CameraDevice::class.java)
-        val target = mock(Surface::class.java)
-        val cameraManager = mock(CameraManager::class.java)
-        val characteristics = mock(CameraCharacteristics::class.java)
-        val builder = mock(Builder::class.java)
-        val fragment = mock(Fragment::class.java)
-        val activity = mock(Activity::class.java)
+        val settingsAccess: SettingsAccessable = mock()
+        val cameraDevice: CameraDevice = mock()
+        val target: Surface = mock()
+        val cameraManager: CameraManager = mock()
+        val characteristics: CameraCharacteristics = mock()
+        val builder: Builder = mock()
+        val fragment: Fragment = mock()
+        val activity: Activity = mock()
 
         given(fragment.activity).willReturn(activity)
+        given(fragment.context).willReturn(activity)
         given(activity.getSystemService(Context.CAMERA_SERVICE)).willReturn(cameraManager)
         given(cameraManager.getCameraCharacteristics(ID)).willReturn(characteristics)
+        given(activity.getString(anyInt())).willReturn("0")
 
-        val classUnderTest = CameraDeviceProxy(fragment)
+        val classUnderTest = object : CameraDeviceProxy(fragment) {
+            override fun settings(): SettingsAccessable = settingsAccess
+        }
         classUnderTest.cameraDevice = cameraDevice
         classUnderTest.cameraId = ID
-
 
         beforeEachTest {
             reset(characteristics)
@@ -69,31 +74,31 @@ object CameraDeviceProxyTest : Spek({
         }
 
         it("should forward open camera call") {
-            val callBack = mock(CameraDevice.StateCallback::class.java)
-            val handler = mock(Handler::class.java)
+            val callBack: CameraDevice.StateCallback = mock()
+            val handler: Handler = mock()
             classUnderTest.openCamera(callBack, handler)
             Mockito.verify(cameraManager).openCamera(ID, callBack, handler)
         }
 
         it("should create a collection of capture requests") {
-            val range:Range<Int> = kmock()
+            val range: Range<Int> = mock()
             given(range.lower).willReturn(-4)
             given(range.upper).willReturn(4)
 
             given(characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE)).willReturn(range)
             given(cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)).willReturn(builder)
 
-            val target = mock(Surface::class.java)
+            val target: Surface = mock()
             val result = classUnderTest.createBurstRequests(0, target)
             assertThat(result.isEmpty(), `is`(false))
         }
 
 
         it("should return a list of image resolutions") {
-            val map: StreamConfigurationMap = kmock()
+            val map: StreamConfigurationMap = mock()
 
             given(characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)).willReturn(map)
-            given(map.getOutputSizes(ImageFormat.JPEG)).willReturn(arrayOf(Size(1,1)))
+            given(map.getOutputSizes(ImageFormat.JPEG)).willReturn(arrayOf(Size(1, 1)))
 
             val result = classUnderTest.imageSizes()
 
