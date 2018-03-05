@@ -1,4 +1,4 @@
-package de.mario.camera.process
+package de.mario.camera.opencv
 
 import android.content.Context;
 import android.app.PendingIntent

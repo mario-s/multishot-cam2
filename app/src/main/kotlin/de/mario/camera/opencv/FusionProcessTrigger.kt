@@ -1,4 +1,4 @@
-package de.mario.camera.process
+package de.mario.camera.opencv
 
 import android.content.Context
 import android.content.Intent
@@ -14,7 +14,7 @@ internal class FusionProcessTrigger(private val context: Context) {
     fun process(pictures: Array<String>) {
         val intent = Intent(context, ExposureMergeService::class.java)
         intent.putExtra(ExposureMergeService.PARAM_PICS, pictures)
-        val callback = OpenCvLoaderCallback(context, intent)
+        val callback = LoaderCallback(context, intent)
         OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, context, callback)
     }
 

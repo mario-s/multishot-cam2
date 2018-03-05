@@ -1,4 +1,4 @@
-package de.mario.camera.process
+package de.mario.camera.opencv
 
 
 import android.app.Activity
@@ -22,7 +22,7 @@ object OpenCvLoaderCallbackTest : Spek({
 
         val context: Activity = mock()
         val intent: Intent = mock()
-        val classUnderTest = OpenCvLoaderCallback(context, intent)
+        val classUnderTest = LoaderCallback(context, intent)
 
         beforeEachTest {
             reset(context)

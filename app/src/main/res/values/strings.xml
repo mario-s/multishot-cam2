@@ -19,11 +19,11 @@
     <string name="request_camera_permission">This app needs camera permission.</string>
     <string name="request_write_permission">This app needs write permission to save images.</string>
     <string name="camera_error">This device doesn\'t support Camera2 API.</string>
-    <string name="intro_message">
+    <string name="info_message">
         <![CDATA[
 
 
-            This app creates a sequence of photos with different exposure values.
+            To use all features of this app, please install OpenCv Manager from the Play Store.
 
 
         ]]>

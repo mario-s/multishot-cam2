@@ -1,4 +1,4 @@
-package de.mario.camera.process
+package de.mario.camera.opencv
 
 import org.opencv.core.Mat
 import org.opencv.core.Scalar
