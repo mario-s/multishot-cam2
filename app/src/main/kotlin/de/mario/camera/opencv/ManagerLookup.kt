@@ -1,5 +1,6 @@
 package de.mario.camera.opencv
 
+import android.app.Fragment
 import android.content.Context
 import android.content.pm.PackageManager
 
@@ -8,8 +9,10 @@ import android.content.pm.PackageManager
  */
 class ManagerLookup(private val context: Context) {
 
+    constructor(fragment: Fragment): this(fragment.context)
+
     private companion object {
-        const val OPENCV = "org.opencv"
+        const val OPENCV = "org.opencv.engine"
     }
 
     /**

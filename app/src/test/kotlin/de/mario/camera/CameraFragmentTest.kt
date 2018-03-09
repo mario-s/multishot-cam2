@@ -2,6 +2,7 @@ package de.mario.camera
 
 
 import android.app.Activity
+import android.content.pm.PackageManager
 import android.databinding.ObservableArrayList
 import android.databinding.ObservableList
 import android.hardware.camera2.CameraCaptureSession
@@ -23,6 +24,7 @@ import de.mario.camera.opencv.FileNameListCallback
 import de.mario.camera.view.AutoFitTextureView
 import org.hamcrest.CoreMatchers.notNullValue
 import org.jetbrains.spek.api.Spek
+import org.jetbrains.spek.api.dsl.context
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
@@ -51,6 +53,7 @@ object CameraFragmentTest : Spek({
         val textureView: AutoFitTextureView = mock()
         val tmp = TemporaryFolder()
         val deviceOrientationListener: DeviceOrientationListener = mock()
+        val packageManager: PackageManager = mock()
 
         beforeEachTest {
             tmp.create()
@@ -69,7 +72,9 @@ object CameraFragmentTest : Spek({
         }
 
         it("should request texture view onViewCreated") {
-            val instance = CameraFragment.newInstance()
+            val instance = spy(CameraFragment())
+            given(instance.context).willReturn(activity)
+            given(activity.packageManager).willReturn(packageManager)
             val other: View = mock()
             val textureView: AutoFitTextureView = mock()
             given(view.findViewById<View>(anyInt())).willReturn(other)
