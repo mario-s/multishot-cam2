@@ -8,7 +8,6 @@ import android.graphics.Matrix
 import android.hardware.camera2.*
 import android.media.ImageReader
 import android.media.MediaActionSound
-import android.opengl.Visibility
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
@@ -29,7 +28,6 @@ import de.mario.camera.message.MessageHandler
 import de.mario.camera.orientation.DeviceOrientationListener
 import de.mario.camera.orientation.ViewsOrientationListener
 import de.mario.camera.opencv.FileNameListCallback
-import de.mario.camera.opencv.ManagerLookup
 import de.mario.camera.settings.SettingsAccess
 import de.mario.camera.settings.SettingsLauncher
 import de.mario.camera.view.AutoFitTextureView
@@ -95,14 +93,12 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         textureView = view.findViewById<AutoFitTextureView>(R.id.texture)
 
-        updateInfoVisibility(view)
-    }
-
-    private fun updateInfoVisibility(view: View) {
-        if (ManagerLookup(this).exists()) {
+        if (existsOpenCv()) {
             view.findViewById<View>(R.id.info).visibility = View.GONE
         }
     }
+
+    private fun existsOpenCv() = PackageLookup(this).exists(PackageLookup.OPENCV)
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
