@@ -9,7 +9,7 @@ import org.opencv.android.LoaderCallbackInterface
 /**
  * Callback when OpenCV is loaded.
  */
-class LoaderCallback internal constructor(context: Context, private val intent: Intent) : BaseLoaderCallback(context) {
+internal class LoaderCallback(context: Context, private val intent: Intent) : BaseLoaderCallback(context) {
 
     override fun onManagerConnected(status: Int) {
         if (status == LoaderCallbackInterface.SUCCESS) {

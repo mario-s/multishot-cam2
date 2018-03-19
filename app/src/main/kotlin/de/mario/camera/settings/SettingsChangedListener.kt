@@ -6,7 +6,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import de.mario.camera.R
 import de.mario.camera.device.PackageLookup
 
-class SettingsChangedListener(private val context: Context) : OnSharedPreferenceChangeListener {
+internal class SettingsChangedListener(private val context: Context) : OnSharedPreferenceChangeListener {
 
     private val settings = SettingsAccess(context)
     private val lookup = PackageLookup(context)
