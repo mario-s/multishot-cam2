@@ -21,6 +21,7 @@ import android.view.View.OnClickListener
 import android.view.ViewGroup
 import de.mario.camera.device.CameraDeviceProxy
 import de.mario.camera.device.CameraLookup
+import de.mario.camera.device.PackageLookup
 import de.mario.camera.glue.*
 import de.mario.camera.io.ImageSaver
 import de.mario.camera.message.BroadcastingReceiverRegister
@@ -93,12 +94,12 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         textureView = view.findViewById<AutoFitTextureView>(R.id.texture)
 
-        if (existsOpenCv()) {
+        if (hasOpenCv()) {
             view.findViewById<View>(R.id.info).visibility = View.GONE
         }
     }
 
-    private fun existsOpenCv() = PackageLookup(this).exists(PackageLookup.OPENCV)
+    private fun hasOpenCv() = PackageLookup(this).exists(PackageLookup.OPENCV)
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)

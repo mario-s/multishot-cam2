@@ -1,4 +1,4 @@
-package de.mario.camera
+package de.mario.camera.device
 
 import android.app.Fragment
 import android.content.Context

@@ -2,6 +2,7 @@ package de.mario.camera.settings
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.preference.PreferenceManager
 import de.mario.camera.glue.SettingsAccessable
 
@@ -32,6 +33,10 @@ class SettingsAccess(private val context: Context) : SettingsAccessable{
     override fun isEnabled(key: String): Boolean {
         return prefs().getBoolean(key, false)
     }
+
+    internal fun addListener(listener: OnSharedPreferenceChangeListener) = prefs().registerOnSharedPreferenceChangeListener(listener)
+
+    internal fun removeListener(listener: OnSharedPreferenceChangeListener) = prefs().unregisterOnSharedPreferenceChangeListener(listener)
 
     private fun prefs(): SharedPreferences {
         return PreferenceManager.getDefaultSharedPreferences(context)
