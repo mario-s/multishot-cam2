@@ -1,36 +1,51 @@
 package de.mario.camera.settings
 
 import android.content.Intent
+import android.os.Bundle
+import android.preference.CheckBoxPreference
 import android.preference.ListPreference
 import android.preference.PreferenceCategory
+import android.preference.PreferenceFragment
+import android.view.View
 import de.mario.camera.R
 
-/**
- */
-class SettingsFragment : android.preference.PreferenceFragment() {
+
+internal class SettingsFragment : PreferenceFragment() {
+
+    private lateinit var listener: SettingsChangedListener
+
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+        listener = SettingsChangedListener(context)
+        listener.register()
+        listener.hdrCheck = category(R.string.cat_hdr).findPreference(getString(R.string.hdr)) as CheckBoxPreference
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        listener.unregister()
+    }
 
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
 
-        addPreferencesFromResource(de.mario.camera.R.xml.preferences);
+        addPreferencesFromResource(R.xml.preferences);
 
         val intent = activity.intent
         addImageResolutions(intent)
     }
 
     private fun addImageResolutions(intent: Intent) {
-        val catKey = getString(R.string.cat_camera)
         val prefKey = getString(R.string.pictureSize)
 
         val resolutions = intent.getStringArrayExtra(SettingsLauncher.RESOLUTIONS)
         val selected = intent.getStringExtra(prefKey)
 
-        val customListPref = preferenceCategory(catKey).findPreference(prefKey) as ListPreference
+        val customListPref = category(R.string.cat_camera).findPreference(prefKey) as ListPreference
         customListPref.entries = resolutions
         customListPref.entryValues = resolutions
         customListPref.value = selected
     }
-
-    private fun preferenceCategory(catKey: String): PreferenceCategory = findPreference(catKey) as PreferenceCategory
+    
+    private fun category(key: Int): PreferenceCategory = findPreference(getString(key)) as PreferenceCategory
 
 }
