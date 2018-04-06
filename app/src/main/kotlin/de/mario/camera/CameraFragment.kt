@@ -1,6 +1,5 @@
 package de.mario.camera
 
-import android.app.AlertDialog
 import android.app.Fragment
 import android.databinding.ObservableArrayList
 import android.graphics.ImageFormat
