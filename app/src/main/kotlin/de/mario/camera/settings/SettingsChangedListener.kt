@@ -7,6 +7,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.preference.CheckBoxPreference
 import de.mario.camera.R
 import de.mario.camera.device.PackageLookup
+import de.mario.camera.opencv.OpenCvAlert
 
 internal class SettingsChangedListener(private val context: Context) : OnSharedPreferenceChangeListener {
 
@@ -33,12 +34,7 @@ internal class SettingsChangedListener(private val context: Context) : OnSharedP
         register()
     }
 
-    internal fun showAlert() {
-        AlertDialog.Builder(context)
-                .setMessage(R.string.info_message)
-                .setPositiveButton(android.R.string.ok, null)
-                .show()
-    }
+    internal fun showAlert() = OpenCvAlert.show(context)
 
     private fun isHdr(key: String?) =
             key.equals(string(R.string.hdr)) && settings.isEnabled(R.string.hdr)

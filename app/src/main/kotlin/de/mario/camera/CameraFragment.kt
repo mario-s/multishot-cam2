@@ -29,6 +29,7 @@ import de.mario.camera.message.MessageHandler
 import de.mario.camera.orientation.DeviceOrientationListener
 import de.mario.camera.orientation.ViewsOrientationListener
 import de.mario.camera.opencv.FileNameListCallback
+import de.mario.camera.opencv.OpenCvAlert
 import de.mario.camera.settings.SettingsAccess
 import de.mario.camera.settings.SettingsLauncher
 import de.mario.camera.view.AutoFitTextureView
@@ -149,10 +150,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         when (view.id) {
             R.id.picture -> takePicture()
             R.id.settings -> startSettings()
-            R.id.info -> AlertDialog.Builder(activity!!)
-                            .setMessage(R.string.info_message)
-                            .setPositiveButton(android.R.string.ok, null)
-                            .show()
+            R.id.info -> OpenCvAlert.show(activity)
         }
     }
 
