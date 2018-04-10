@@ -10,11 +10,5 @@ internal object OpenCvLoader {
         OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, context, callback)
     }
 
-    fun init(context: Context) {
-        init(context, object : BaseLoaderCallback(context) {
-            override fun onManagerConnected(status: Int) {
-                super.onManagerConnected(status)
-            }
-        })
-    }
+    fun init(context: Context) = init(context, object : BaseLoaderCallback(context) {})
 }
