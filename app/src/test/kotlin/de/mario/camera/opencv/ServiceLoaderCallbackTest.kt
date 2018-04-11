@@ -16,13 +16,13 @@ import org.opencv.android.LoaderCallbackInterface
 
 
 @RunWith(JUnitPlatform::class)
-object OpenCvLoaderCallbackTest : Spek({
+object ServiceLoaderCallbackTest : Spek({
 
     describe("the call back") {
 
         val context: Activity = mock()
         val intent: Intent = mock()
-        val classUnderTest = LoaderCallback(context, intent)
+        val classUnderTest = ServiceLoaderCallback(context, intent)
 
         beforeEachTest {
             reset(context)

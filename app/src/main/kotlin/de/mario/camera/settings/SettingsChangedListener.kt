@@ -1,8 +1,6 @@
 package de.mario.camera.settings
 
 import android.content.Context
-import android.content.DialogInterface
-import android.content.DialogInterface.OnClickListener
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.preference.CheckBoxPreference
