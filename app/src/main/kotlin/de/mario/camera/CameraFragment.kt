@@ -93,10 +93,6 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         textureView = view.findViewById<AutoFitTextureView>(R.id.texture)
-
-        if (hasOpenCv()) {
-            view.findViewById<View>(R.id.info).visibility = View.GONE
-        }
     }
 
     private fun hasOpenCv() = PackageLookup(this).exists(PackageLookup.OPENCV)
@@ -126,6 +122,10 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
             openCamera(textureView.width, textureView.height)
         } else {
             textureView.surfaceTextureListener = mSurfaceTextureListener
+        }
+
+        if (hasOpenCv()) {
+            view.findViewById<View>(R.id.info).visibility = View.GONE
         }
     }
 

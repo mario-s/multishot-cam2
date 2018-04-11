@@ -58,6 +58,8 @@ object CameraFragmentTest : Spek({
         beforeEachTest {
             tmp.create()
             reset(view, activity, windowManager, display, deviceOrientationListener)
+
+            given(activity.packageManager).willReturn(packageManager)
             given(activity.windowManager).willReturn(windowManager)
             given(windowManager.defaultDisplay).willReturn(display)
         }
@@ -74,7 +76,6 @@ object CameraFragmentTest : Spek({
         it("should request texture view onViewCreated") {
             val instance = spy(CameraFragment())
             given(instance.context).willReturn(activity)
-            given(activity.packageManager).willReturn(packageManager)
             val other: View = mock()
             val textureView: AutoFitTextureView = mock()
             given(view.findViewById<View>(anyInt())).willReturn(other)
@@ -93,7 +94,7 @@ object CameraFragmentTest : Spek({
             instance.onActivityCreated(null)
         }
 
-        it("should toogle views onResume") {
+        it("should toggle views onResume") {
             val instance = spy(CameraFragment())
             val viewsMediator: ViewsMediatable = mock()
             val broadcastingReceiverRegister: BroadcastingReceiverRegister = mock()
@@ -103,6 +104,7 @@ object CameraFragmentTest : Spek({
             ReflectionTestUtils.setField(instance, "broadcastingReceiverRegister", broadcastingReceiverRegister)
             ReflectionTestUtils.setField(instance, "deviceOrientationListener", deviceOrientationListener)
 
+            given(instance.context).willReturn(activity)
             given(instance.activity).willReturn(activity)
             given(instance.view).willReturn(view)
 
