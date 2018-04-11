@@ -1,8 +1,5 @@
 package de.mario.camera.opencv
 
-import android.content.Context
-import org.opencv.android.BaseLoaderCallback
-import org.opencv.android.OpenCVLoader
 import org.opencv.core.Mat
 import org.opencv.core.Scalar
 import org.opencv.imgcodecs.Imgcodecs

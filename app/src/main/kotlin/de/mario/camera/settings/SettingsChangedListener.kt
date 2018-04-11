@@ -1,7 +1,8 @@
 package de.mario.camera.settings
 
-import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
+import android.content.DialogInterface.OnClickListener
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.preference.CheckBoxPreference
@@ -22,8 +23,7 @@ internal class SettingsChangedListener(private val context: Context) : OnSharedP
 
     override fun onSharedPreferenceChanged(preferences: SharedPreferences?, key: String?) {
         if(isHdr(key) && !hasOpenCv()) {
-            resetHdrCheck(preferences, key)
-            showAlert()
+            showAlert {resetHdrCheck(preferences, key)}
         }
     }
 
@@ -34,7 +34,7 @@ internal class SettingsChangedListener(private val context: Context) : OnSharedP
         register()
     }
 
-    internal fun showAlert() = OpenCvAlert.show(context)
+    internal fun showAlert(listener: () -> Unit) = OpenCvAlert.show(context, listener)
 
     private fun isHdr(key: String?) =
             key.equals(string(R.string.hdr)) && settings.isEnabled(R.string.hdr)

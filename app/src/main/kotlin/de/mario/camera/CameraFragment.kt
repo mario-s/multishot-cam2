@@ -340,13 +340,13 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
      * Lock the focus as the first step for a still image capture.
      */
     private fun takePicture() {
-        prepareSession({
+        prepareSession {
             // This is how to tell the camera to lock focus.
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
                     CameraMetadata.CONTROL_AF_TRIGGER_START)
             // Tell #captureProgressCallback to wait for the lock.
             camState.currentState = CameraState.STATE_WAITING_LOCK
-        })
+        }
     }
 
     /**
@@ -354,13 +354,13 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
      * we get a response in [.captureProgressCallback] from [.lockFocus].
      */
     override fun prepareCapturing() {
-        prepareSession({
+        prepareSession {
             // This is how to tell the camera to trigger.
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER,
                     CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START)
             // Tell #captureProgressCallback to wait for the precapture sequence to be set.
             camState.currentState = CameraState.STATE_WAITING_PRECAPTURE
-        })
+        }
     }
 
     private fun prepareSession(before: () -> Unit) {

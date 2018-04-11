@@ -38,7 +38,7 @@ object SettingsChangedListenerTest : Spek({
             given(settings.isEnabled(anyInt())).willReturn(true)
 
             val spy = spy(classUnderTest)
-            doNothing().`when`(spy).showAlert()
+            doNothing().`when`(spy).showAlert(any())
 
             spy.onSharedPreferenceChanged(mock(), foo)
 
