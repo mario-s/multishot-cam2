@@ -11,7 +11,8 @@ object OpenCvAlert {
 
     fun show(context: Context, noListener: () -> Unit = {}) {
         AlertDialog.Builder(context)
-                .setMessage(R.string.info_message)
+                .setTitle(R.string.opencv_alert_title)
+                .setMessage(R.string.opencv_alert_message)
                 .setPositiveButton(android.R.string.yes) {_, _ -> OpenCvLoader.init(context)}
                 .setNegativeButton(android.R.string.no) {_,_ -> noListener()}
                 .show()
