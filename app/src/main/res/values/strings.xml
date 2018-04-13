@@ -23,7 +23,7 @@
     <string name="opencv_alert_message">
         <![CDATA[
 
-            OpenCV Manager is required for some features of this app. Do you want to install it now?
+            OpenCV Manager is needed for some features of this app. Do you want to install it now?
 
         ]]>
     </string>
