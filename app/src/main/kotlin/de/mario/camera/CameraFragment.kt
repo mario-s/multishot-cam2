@@ -1,6 +1,5 @@
 package de.mario.camera
 
-import android.app.AlertDialog
 import android.app.Fragment
 import android.databinding.ObservableArrayList
 import android.graphics.ImageFormat
@@ -21,13 +20,15 @@ import android.view.View.OnClickListener
 import android.view.ViewGroup
 import de.mario.camera.device.CameraDeviceProxy
 import de.mario.camera.device.CameraLookup
+import de.mario.camera.device.PackageLookup
 import de.mario.camera.glue.*
 import de.mario.camera.io.ImageSaver
 import de.mario.camera.message.BroadcastingReceiverRegister
 import de.mario.camera.message.MessageHandler
 import de.mario.camera.orientation.DeviceOrientationListener
 import de.mario.camera.orientation.ViewsOrientationListener
-import de.mario.camera.process.FileNameListCallback
+import de.mario.camera.opencv.FileNameListCallback
+import de.mario.camera.opencv.OpenCvAlert
 import de.mario.camera.settings.SettingsAccess
 import de.mario.camera.settings.SettingsLauncher
 import de.mario.camera.view.AutoFitTextureView
@@ -94,6 +95,8 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         textureView = view.findViewById<AutoFitTextureView>(R.id.texture)
     }
 
+    private fun hasOpenCv() = PackageLookup(this).exists(PackageLookup.OPENCV)
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
@@ -120,6 +123,10 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         } else {
             textureView.surfaceTextureListener = mSurfaceTextureListener
         }
+
+        if (hasOpenCv()) {
+            view.findViewById<View>(R.id.info).visibility = View.GONE
+        }
     }
 
     override fun onPause() {
@@ -142,10 +149,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         when (view.id) {
             R.id.picture -> takePicture()
             R.id.settings -> startSettings()
-            R.id.info -> AlertDialog.Builder(activity!!)
-                            .setMessage(R.string.intro_message)
-                            .setPositiveButton(android.R.string.ok, null)
-                            .show()
+            R.id.info -> OpenCvAlert.show(activity)
         }
     }
 
@@ -336,13 +340,13 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
      * Lock the focus as the first step for a still image capture.
      */
     private fun takePicture() {
-        prepareSession({
+        prepareSession {
             // This is how to tell the camera to lock focus.
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
                     CameraMetadata.CONTROL_AF_TRIGGER_START)
             // Tell #captureProgressCallback to wait for the lock.
             camState.currentState = CameraState.STATE_WAITING_LOCK
-        })
+        }
     }
 
     /**
@@ -350,13 +354,13 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
      * we get a response in [.captureProgressCallback] from [.lockFocus].
      */
     override fun prepareCapturing() {
-        prepareSession({
+        prepareSession {
             // This is how to tell the camera to trigger.
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER,
                     CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START)
             // Tell #captureProgressCallback to wait for the precapture sequence to be set.
             camState.currentState = CameraState.STATE_WAITING_PRECAPTURE
-        })
+        }
     }
 
     private fun prepareSession(before: () -> Unit) {

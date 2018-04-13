@@ -4,6 +4,7 @@ import android.app.Fragment
 import android.hardware.camera2.CameraCharacteristics
 
 /**
+ * This class searches for the id of the camera that we are going to use.
  */
 class CameraLookup(val fragment: Fragment) {
 

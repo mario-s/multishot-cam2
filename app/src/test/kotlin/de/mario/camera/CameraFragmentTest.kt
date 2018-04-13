@@ -2,6 +2,7 @@ package de.mario.camera
 
 
 import android.app.Activity
+import android.content.pm.PackageManager
 import android.databinding.ObservableArrayList
 import android.databinding.ObservableList
 import android.hardware.camera2.CameraCaptureSession
@@ -19,10 +20,11 @@ import de.mario.camera.device.CameraDeviceProxy
 import de.mario.camera.glue.ViewsMediatable
 import de.mario.camera.message.BroadcastingReceiverRegister
 import de.mario.camera.orientation.DeviceOrientationListener
-import de.mario.camera.process.FileNameListCallback
+import de.mario.camera.opencv.FileNameListCallback
 import de.mario.camera.view.AutoFitTextureView
 import org.hamcrest.CoreMatchers.notNullValue
 import org.jetbrains.spek.api.Spek
+import org.jetbrains.spek.api.dsl.context
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
@@ -51,10 +53,13 @@ object CameraFragmentTest : Spek({
         val textureView: AutoFitTextureView = mock()
         val tmp = TemporaryFolder()
         val deviceOrientationListener: DeviceOrientationListener = mock()
+        val packageManager: PackageManager = mock()
 
         beforeEachTest {
             tmp.create()
             reset(view, activity, windowManager, display, deviceOrientationListener)
+
+            given(activity.packageManager).willReturn(packageManager)
             given(activity.windowManager).willReturn(windowManager)
             given(windowManager.defaultDisplay).willReturn(display)
         }
@@ -69,7 +74,8 @@ object CameraFragmentTest : Spek({
         }
 
         it("should request texture view onViewCreated") {
-            val instance = CameraFragment.newInstance()
+            val instance = spy(CameraFragment())
+            given(instance.context).willReturn(activity)
             val other: View = mock()
             val textureView: AutoFitTextureView = mock()
             given(view.findViewById<View>(anyInt())).willReturn(other)
@@ -88,7 +94,7 @@ object CameraFragmentTest : Spek({
             instance.onActivityCreated(null)
         }
 
-        it("should toogle views onResume") {
+        it("should toggle views onResume") {
             val instance = spy(CameraFragment())
             val viewsMediator: ViewsMediatable = mock()
             val broadcastingReceiverRegister: BroadcastingReceiverRegister = mock()
@@ -98,6 +104,7 @@ object CameraFragmentTest : Spek({
             ReflectionTestUtils.setField(instance, "broadcastingReceiverRegister", broadcastingReceiverRegister)
             ReflectionTestUtils.setField(instance, "deviceOrientationListener", deviceOrientationListener)
 
+            given(instance.context).willReturn(activity)
             given(instance.activity).willReturn(activity)
             given(instance.view).willReturn(view)
 

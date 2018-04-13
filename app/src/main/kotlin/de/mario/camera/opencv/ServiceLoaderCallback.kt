@@ -1,4 +1,4 @@
-package de.mario.camera.process
+package de.mario.camera.opencv
 
 import android.content.Context
 import android.content.Intent
@@ -9,7 +9,7 @@ import org.opencv.android.LoaderCallbackInterface
 /**
  * Callback when OpenCV is loaded.
  */
-class OpenCvLoaderCallback internal constructor(context: Context, private val intent: Intent) : BaseLoaderCallback(context) {
+internal class ServiceLoaderCallback(context: Context, private val intent: Intent) : BaseLoaderCallback(context) {
 
     override fun onManagerConnected(status: Int) {
         if (status == LoaderCallbackInterface.SUCCESS) {

@@ -1,4 +1,4 @@
-package de.mario.camera.process
+package de.mario.camera.opencv
 
 
 import android.app.Activity
@@ -16,13 +16,13 @@ import org.opencv.android.LoaderCallbackInterface
 
 
 @RunWith(JUnitPlatform::class)
-object OpenCvLoaderCallbackTest : Spek({
+object ServiceLoaderCallbackTest : Spek({
 
     describe("the call back") {
 
         val context: Activity = mock()
         val intent: Intent = mock()
-        val classUnderTest = OpenCvLoaderCallback(context, intent)
+        val classUnderTest = ServiceLoaderCallback(context, intent)
 
         beforeEachTest {
             reset(context)

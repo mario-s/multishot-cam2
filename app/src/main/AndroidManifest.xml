@@ -41,7 +41,7 @@
         </activity>
 
         <service
-            android:name="de.mario.camera.process.ExposureMergeService">
+            android:name="de.mario.camera.opencv.ExposureMergeService">
         </service>
 
     </application>
