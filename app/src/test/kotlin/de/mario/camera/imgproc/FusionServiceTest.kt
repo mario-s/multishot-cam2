@@ -1,4 +1,4 @@
-package de.mario.camera.opencv
+package de.mario.camera.imgproc
 
 import com.nhaarman.mockito_kotlin.*
 import de.mario.camera.exif.ExifTagWriteable
@@ -16,7 +16,7 @@ import java.io.File
 
 
 @RunWith(JUnitPlatform::class)
-object ExposureMergeServiceTest : Spek({
+object FusionServiceTest : Spek({
 
     describe("the exposure merge service") {
 
@@ -25,7 +25,7 @@ object ExposureMergeServiceTest : Spek({
         val mat: Mat = mock()
         val settingsAccess: SettingsAccessable = mock()
 
-        val classUnderTest = ExposureMergeService()
+        val classUnderTest = FusionService()
         ReflectionTestUtils.setField(classUnderTest, "exifWriter", exifWriter)
         ReflectionTestUtils.setField(classUnderTest, "proxy", proxy)
         ReflectionTestUtils.setField(classUnderTest, "settingsAccess", settingsAccess)

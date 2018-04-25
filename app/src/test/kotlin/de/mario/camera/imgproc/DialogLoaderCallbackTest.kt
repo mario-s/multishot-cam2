@@ -1,4 +1,4 @@
-package de.mario.camera.opencv
+package de.mario.camera.imgproc
 
 import android.content.Context
 import com.nhaarman.mockito_kotlin.mock

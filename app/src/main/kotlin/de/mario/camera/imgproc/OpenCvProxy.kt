@@ -1,4 +1,4 @@
-package de.mario.camera.opencv
+package de.mario.camera.imgproc
 
 import org.opencv.core.Mat
 import org.opencv.core.Scalar
@@ -20,16 +20,15 @@ internal class OpenCvProxy {
         return fusion
     }
 
-    fun read(file: File): Mat = read(file.path)
-
-    fun read(path: String): Mat = Imgcodecs.imread(path)
-
-    fun write(img: Mat, out: File) {
-        Imgcodecs.imwrite(out.path, img)
-    }
-
     fun multiply(src: Mat): Mat {
         val filter = Mat(src.size(), src.type(), SCALAR)
         return src.mul(filter)
     }
+
+    fun read(file: File): Mat = read(file.path)
+
+    fun read(path: String): Mat = Imgcodecs.imread(path)
+
+    fun write(img: Mat, out: File) = Imgcodecs.imwrite(out.path, img)
+
 }

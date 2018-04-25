@@ -1,4 +1,4 @@
-package de.mario.camera.opencv
+package de.mario.camera.imgproc
 
 import android.app.IntentService
 import android.content.Intent
@@ -14,7 +14,7 @@ import java.io.File
 
 
 
-internal class ExposureMergeService() : IntentService(TAG) {
+internal class FusionService() : IntentService(TAG) {
 
     private val exifWriter: ExifTagWriteable = ExifWriter()
 
@@ -23,7 +23,7 @@ internal class ExposureMergeService() : IntentService(TAG) {
     private val settingsAccess: SettingsAccessable = SettingsAccess(this)
 
     companion object {
-        const val TAG = "ExposureMergeService"
+        const val TAG = "FusionService"
         const val PARAM_PICS = "de.mario.camera.extra.PICS"
         const val MERGED = "_fusion"
     }

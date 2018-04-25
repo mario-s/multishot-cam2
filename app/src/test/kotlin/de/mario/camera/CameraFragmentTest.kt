@@ -20,11 +20,10 @@ import de.mario.camera.device.CameraDeviceProxy
 import de.mario.camera.glue.ViewsMediatable
 import de.mario.camera.message.BroadcastingReceiverRegister
 import de.mario.camera.orientation.DeviceOrientationListener
-import de.mario.camera.opencv.FileNameListCallback
+import de.mario.camera.imgproc.FileNameListCallback
 import de.mario.camera.view.AutoFitTextureView
 import org.hamcrest.CoreMatchers.notNullValue
 import org.jetbrains.spek.api.Spek
-import org.jetbrains.spek.api.dsl.context
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on

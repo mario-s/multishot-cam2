@@ -1,4 +1,4 @@
-package de.mario.camera.opencv
+package de.mario.camera.imgproc
 
 import android.databinding.ObservableArrayList
 import android.databinding.ObservableList.OnListChangedCallback;
