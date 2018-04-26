@@ -1,5 +1,6 @@
 package de.mario.camera.imgproc
 
+import android.content.Intent
 import com.nhaarman.mockito_kotlin.*
 import de.mario.camera.exif.ExifTagWriteable
 import de.mario.camera.glue.SettingsAccessable
@@ -23,6 +24,7 @@ object FusionServiceTest : Spek({
         val proxy: OpenCvProxy = mock()
         val exifWriter: ExifTagWriteable = mock()
         val mat: Mat = mock()
+        val intent: Intent = mock()
         val settingsAccess: SettingsAccessable = mock()
 
         val classUnderTest = FusionService()
@@ -37,8 +39,9 @@ object FusionServiceTest : Spek({
         it("should merge images") {
             given(proxy.read(any<File>())).willReturn(mat)
             given(proxy.merge(any())).willReturn(mat)
+            given(intent.getStringArrayExtra(FusionService.PARAM_PICS)).willReturn(arrayOf("FOO.png", "BAR.png"))
 
-            classUnderTest.process(arrayOf("FOO.png", "BAR.png"))
+            classUnderTest.process(intent)
 
             val order = Mockito.inOrder(proxy, settingsAccess)
             order.verify(proxy, atLeastOnce()).read(any<File>())

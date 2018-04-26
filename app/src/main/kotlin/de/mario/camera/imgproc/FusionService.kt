@@ -29,15 +29,17 @@ internal class FusionService() : IntentService(TAG) {
     }
 
     override fun onHandleIntent(intent: Intent?) {
-        process(intent!!.getStringArrayExtra(PARAM_PICS))
+        process(intent!!)
     }
 
-    internal fun process(pictures: Array<String>) {
-        val images = loadImages(pictures)
+    internal fun process(intent: Intent) {
+        val picsNames = intent.getStringArrayExtra(PARAM_PICS)
+
+        val images = loadImages(picsNames)
 
         val fusion = proxy.merge(images)
 
-        val firstPic = pictures[0]
+        val firstPic = picsNames[0]
         val out = File(createFileName(firstPic))
         write(fusion, out)
         copyExif(firstPic, out)
