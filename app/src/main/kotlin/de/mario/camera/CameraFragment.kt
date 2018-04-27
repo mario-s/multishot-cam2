@@ -106,7 +106,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         val viewsOrientationListener = ViewsOrientationListener(activity)
         viewsMediator = ViewsMediator(activity, settings, viewsOrientationListener)
         viewsMediator.setOnClickListener(this)
-        listCallback = FileNameListCallback(this)
+        listCallback = FileNameListCallback(this, settings)
         fileNames.addOnListChangedCallback(listCallback)
     }
 

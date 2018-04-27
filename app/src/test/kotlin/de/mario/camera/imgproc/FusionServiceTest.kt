@@ -25,12 +25,10 @@ object FusionServiceTest : Spek({
         val exifWriter: ExifTagWriteable = mock()
         val mat: Mat = mock()
         val intent: Intent = mock()
-        val settingsAccess: SettingsAccessable = mock()
 
         val classUnderTest = FusionService()
         ReflectionTestUtils.setField(classUnderTest, "exifWriter", exifWriter)
         ReflectionTestUtils.setField(classUnderTest, "proxy", proxy)
-        ReflectionTestUtils.setField(classUnderTest, "settingsAccess", settingsAccess)
 
         beforeEachTest {
             reset(proxy, mat)
@@ -39,14 +37,13 @@ object FusionServiceTest : Spek({
         it("should merge images") {
             given(proxy.read(any<File>())).willReturn(mat)
             given(proxy.merge(any())).willReturn(mat)
-            given(intent.getStringArrayExtra(FusionService.PARAM_PICS)).willReturn(arrayOf("FOO.png", "BAR.png"))
+            given(intent.getStringArrayExtra(FusionService.PICTURES)).willReturn(arrayOf("FOO.png", "BAR.png"))
 
             classUnderTest.process(intent)
 
-            val order = Mockito.inOrder(proxy, settingsAccess)
+            val order = Mockito.inOrder(proxy)
             order.verify(proxy, atLeastOnce()).read(any<File>())
             order.verify(proxy).merge(any())
-            order.verify(settingsAccess).isEnabled(anyInt())
         }
 
     }

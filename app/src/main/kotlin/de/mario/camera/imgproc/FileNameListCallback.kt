@@ -8,18 +8,19 @@ import android.os.HandlerThread
 import android.util.Log
 import de.mario.camera.R
 import de.mario.camera.glue.CameraControlable
-import de.mario.camera.settings.SettingsAccess
+import de.mario.camera.glue.SettingsAccessable
 import java.io.File
 
 /**
  * Listener for the collection of saved files, which may trigger processing.
  */
-class FileNameListCallback(private val control: CameraControlable): OnListChangedCallback<ObservableArrayList<String>>()  {
+class FileNameListCallback(private val control: CameraControlable, private val settings: SettingsAccessable):
+        OnListChangedCallback<ObservableArrayList<String>>()  {
+
     private val context = control.getContext()
     private val handlerThread: HandlerThread
     private val handler: Handler
-    private val trigger = FusionProcessTrigger(context)
-    private val settings = SettingsAccess(context)
+    private val trigger = FusionProcessTrigger(context, settings)
 
     var requiredImages: Int = INIT
     set

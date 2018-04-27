@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.HandlerThread
 import com.nhaarman.mockito_kotlin.mock
 import de.mario.camera.glue.CameraControlable
+import de.mario.camera.glue.SettingsAccessable
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
@@ -26,8 +27,9 @@ object FileNameListCallbackTest : Spek({
         val context: Context = mock()
         val handlerThread: HandlerThread = mock()
         val handler: Handler = mock()
+        val settings: SettingsAccessable = mock()
         given(control.getContext()).willReturn(context)
-        val classUnderTest = FileNameListCallback(control)
+        val classUnderTest = FileNameListCallback(control, settings)
         ReflectionTestUtils.setField(classUnderTest, "handler", handler)
         ReflectionTestUtils.setField(classUnderTest, "handlerThread", handlerThread)
 
