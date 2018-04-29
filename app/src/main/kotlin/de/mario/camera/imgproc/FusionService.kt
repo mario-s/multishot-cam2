@@ -21,6 +21,7 @@ internal class FusionService() : IntentService(TAG) {
     companion object {
         const val TAG = "FusionService"
         const val PICTURES = "de.mario.camera.extra.PICTURES"
+        const val ALIGN = "de.mario.camera.extra.ALIGN"
         const val SYSTEM_NOTIFY = "de.mario.camera.extra.NOTIFY"
         const val MERGED = "_fusion"
     }

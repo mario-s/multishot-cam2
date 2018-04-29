@@ -3,13 +3,11 @@ package de.mario.camera.imgproc
 import android.content.Intent
 import com.nhaarman.mockito_kotlin.*
 import de.mario.camera.exif.ExifTagWriteable
-import de.mario.camera.glue.SettingsAccessable
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mockito
 import org.opencv.core.Mat
 import org.springframework.test.util.ReflectionTestUtils

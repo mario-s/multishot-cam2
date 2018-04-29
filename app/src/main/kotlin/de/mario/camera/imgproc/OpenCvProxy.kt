@@ -1,12 +1,12 @@
 package de.mario.camera.imgproc
 
+import java.io.File
 import org.opencv.core.CvType
 import org.opencv.core.Mat
 import org.opencv.core.Scalar
+import org.opencv.imgproc.Imgproc
 import org.opencv.imgcodecs.Imgcodecs
 import org.opencv.photo.Photo
-import java.io.File
-import org.opencv.imgproc.Imgproc
 import org.opencv.video.Video
 
 
@@ -14,7 +14,6 @@ internal class OpenCvProxy {
 
     private companion object {
         val SCALAR = Scalar(255.0, 255.0, 255.0)
-        val WARP_MATRIX = Mat.eye(3, 3, CvType.CV_32F)
     }
 
     fun merge(images: List<Mat>): Mat {
@@ -32,6 +31,8 @@ internal class OpenCvProxy {
     fun align(images: List<Mat>): List<Mat> {
         val size = images.size
         if (size > 1) {
+            val matrix = Mat.eye(3, 3, CvType.CV_32F)
+
             val result = mutableListOf<Mat>()
             val head = images[0]
             result.add(head)
@@ -40,7 +41,7 @@ internal class OpenCvProxy {
             //convert first image to gray
             val headGray = toGray(head)
             //align others
-            tail.forEach { result.add(warp(headGray, it)) }
+            tail.forEach { result.add(warp(it, headGray, matrix)) }
 
             return result
         }
@@ -48,10 +49,10 @@ internal class OpenCvProxy {
         return images
     }
 
-    private fun warp(first: Mat, img: Mat): Mat {
-        Video.findTransformECC(toGray(img), first, WARP_MATRIX, Video.MOTION_HOMOGRAPHY)
+    private fun warp(img: Mat, first: Mat, matrix: Mat): Mat {
+        Video.findTransformECC(toGray(img), first, matrix, Video.MOTION_HOMOGRAPHY)
         val dest = Mat()
-        Imgproc.warpPerspective(img, dest, WARP_MATRIX, first.size())
+        Imgproc.warpPerspective(img, dest, matrix, first.size())
         return dest
     }
 
