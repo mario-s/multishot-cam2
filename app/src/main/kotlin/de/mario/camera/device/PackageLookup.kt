@@ -18,7 +18,7 @@ class PackageLookup(private val context: Context) {
     /**
      * Returns true if the package is installed, otherwise false.
      */
-    fun exists(name: String): Boolean {
+    fun exists(name: String = OPENCV): Boolean {
         val packageInfoList = context.packageManager.getInstalledPackages(PackageManager.GET_ACTIVITIES)
         return packageInfoList.asSequence().filter { it?.packageName == name }.any()
     }

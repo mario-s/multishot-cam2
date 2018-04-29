@@ -95,7 +95,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         textureView = view.findViewById<AutoFitTextureView>(R.id.texture)
     }
 
-    private fun hasOpenCv() = PackageLookup(this).exists(PackageLookup.OPENCV)
+    private fun hasOpenCv() = PackageLookup(this).exists()
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -183,18 +183,25 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     private fun createPreviewSize(origin: Size): Size = previewSizeFactory.createPreviewSize(origin)
 
     private fun sizeForImageReader(): Size {
-        try {
-            val sizePrefs = settings.getString(getString(R.string.pictureSize))
-            return Size.parseSize(sizePrefs)
-        } catch (e: NumberFormatException) {
-            val resolutions = cameraDeviceProxy.imageSizes()
-            if (!resolutions.isEmpty()){
-                val index: Int = resolutions.size / 2
-                return resolutions.get(index)
+        val sizePrefs = settings.getString(getString(R.string.pictureSize))
+        when (sizePrefs.isBlank()) {
+            false -> try {
+                return Size.parseSize(sizePrefs)
+            } catch (e: NumberFormatException) {
+                return fallBackSize()
             }
-            //if everything fails return the preview size
-            return previewSize
+            true -> return fallBackSize()
         }
+    }
+
+    private fun fallBackSize(): Size {
+        val resolutions = cameraDeviceProxy.imageSizes()
+        if (!resolutions.isEmpty()) {
+            val index: Int = resolutions.size / 2
+            return resolutions.get(index)
+        }
+        //if everything fails return the preview size
+        return previewSize
     }
 
     private fun initImageReader() {
@@ -216,7 +223,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
                 if (!cameraOpenCloseLock.tryAcquire(TIMEOUT, TimeUnit.MILLISECONDS)) {
                     throw IllegalStateException("Time out waiting to lock camera opening.")
                 }
-                if(mBackgroundHandler != null){
+                if (mBackgroundHandler != null) {
                     cameraDeviceProxy.openCamera(mStateCallback, mBackgroundHandler!!)
                 }
             } catch (e: CameraAccessException) {
@@ -311,7 +318,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
                         }
 
                         override fun onConfigureFailed(
-                                 cameraCaptureSession: CameraCaptureSession) {
+                                cameraCaptureSession: CameraCaptureSession) {
                             showToast("Failed")
                         }
                     }
@@ -367,7 +374,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
         try {
             before()
             captureSession?.capture(mPreviewRequestBuilder.build(), captureProgressCallback,
-                mBackgroundHandler!!)
+                    mBackgroundHandler!!)
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
         }
@@ -387,7 +394,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     }
 
     private fun playShutterSound() {
-        if(settings.isEnabled(R.string.shutter_sound)) {
+        if (settings.isEnabled(R.string.shutter_sound)) {
             sound.play(MediaActionSound.SHUTTER_CLICK)
         }
     }
