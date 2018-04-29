@@ -33,15 +33,13 @@ internal class OpenCvProxy {
         if (size > 1) {
             val matrix = Mat.eye(3, 3, CvType.CV_32F)
 
-            val result = mutableListOf<Mat>()
             val head = images[0]
-            result.add(head)
-            val tail = images.drop(1)
+            val result = mutableListOf<Mat>(head)
 
             //convert first image to gray
             val headGray = toGray(head)
             //align others
-            tail.forEach { result.add(warp(it, headGray, matrix)) }
+            images.drop(1).forEach { result.add(warp(it, headGray, matrix)) }
 
             return result
         }
