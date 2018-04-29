@@ -14,6 +14,7 @@ internal class FusionProcessTrigger(private val context: Context, private val se
     fun process(pictures: Array<String>) {
         val intent = Intent(context, FusionService::class.java)
         intent.putExtra(FusionService.PICTURES, pictures)
+        intent.putExtra(FusionService.ALIGN, settings.isEnabled(R.string.align))
         intent.putExtra(FusionService.SYSTEM_NOTIFY, settings.isEnabled(R.string.notifyHdr))
 
         Loader.init(context, ServiceLoaderCallback(context, intent))

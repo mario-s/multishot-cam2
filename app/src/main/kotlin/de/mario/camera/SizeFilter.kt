@@ -11,20 +11,6 @@ import java.util.Collections.*
 object SizeFilter {
     private data class Result(val bigEnough: ArrayList<Size>, val notBigEnough: ArrayList<Size>)
 
-    /**
-     * Try to create a Size based on the given string.
-     */
-    fun parse(input: String): Size? {
-        var result: Size? = null
-        if(!input.isEmpty()) {
-            val pair = input.split("x").map { it.toInt() }
-            if(pair.size > 1) {
-                result = Size(pair.first(), pair.last())
-            }
-        }
-        return result
-    }
-
     /*
      * Given {@code choices} of {@code Size}s supported by a camera, choose the smallest one that
      * is at least as large as the respective texture view size, and that is at most as large as the

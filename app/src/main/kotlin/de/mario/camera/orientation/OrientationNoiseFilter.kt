@@ -26,6 +26,14 @@ class OrientationNoiseFilter {
         timestampOld = System.nanoTime().toFloat()
     }
 
+    companion object {
+        private const val TIME_CONSTANT = .297f
+
+        private const val FAC = 1000000000.0f
+
+        internal const val MAX = 360
+    }
+
     /**
      * Filters noise out of the orientation values.
      * @param input values in degree
@@ -75,14 +83,5 @@ class OrientationNoiseFilter {
 
     private fun filter(previous: Double, current: Double): Double {
         return previous + alpha * (current - previous)
-    }
-
-    companion object {
-
-        private val TIME_CONSTANT = .297f
-
-        internal val MAX = 360
-
-        private val FAC = 1000000000.0f
     }
 }

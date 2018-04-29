@@ -38,8 +38,6 @@ import org.springframework.test.util.ReflectionTestUtils
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 
-/**
- */
 @RunWith(JUnitPlatform::class)
 object CameraFragmentTest : Spek({
 
@@ -56,7 +54,7 @@ object CameraFragmentTest : Spek({
 
         beforeEachTest {
             tmp.create()
-            reset(view, activity, windowManager, display, deviceOrientationListener)
+            reset(view, activity, windowManager, display, deviceOrientationListener, textureView)
 
             given(activity.packageManager).willReturn(packageManager)
             given(activity.windowManager).willReturn(windowManager)
@@ -76,7 +74,6 @@ object CameraFragmentTest : Spek({
             val instance = spy(CameraFragment())
             given(instance.context).willReturn(activity)
             val other: View = mock()
-            val textureView: AutoFitTextureView = mock()
             given(view.findViewById<View>(anyInt())).willReturn(other)
             given(view.findViewById<View>(R.id.texture)).willReturn(textureView)
 

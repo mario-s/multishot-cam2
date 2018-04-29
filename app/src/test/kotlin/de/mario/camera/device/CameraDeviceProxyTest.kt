@@ -88,7 +88,6 @@ object CameraDeviceProxyTest : Spek({
             given(characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE)).willReturn(range)
             given(cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)).willReturn(builder)
 
-            val target: Surface = mock()
             val result = classUnderTest.createBurstRequests(0, target)
             assertThat(result.isEmpty(), `is`(false))
         }

@@ -5,35 +5,35 @@
         android:title="@string/camera">
 
         <ListPreference
+            android:key="@string/evSequence"
             android:defaultValue="0"
             android:enabled="true"
             android:entries="@array/exposureArray"
             android:entryValues="@array/exposureValues"
-            android:key="@string/evSequence"
             android:summary="@string/prefs_exposure_description"
             android:title="@string/prefs_exposure_title"/>
 
         <ListPreference
-            android:enabled="true"
             android:key="@string/pictureSize"
+            android:enabled="true"
             android:summary="@string/prefs_picture_size_description"
             android:title="@string/prefs_picture_size_title"/>
 
         <CheckBoxPreference
-            android:defaultValue="true"
             android:key="@string/shutter_sound"
+            android:defaultValue="true"
             android:summary="@string/prefs_shutter_sound_enabled_description"
             android:title="@string/prefs_shutter_sound_enabled_title" />
 
         <CheckBoxPreference
-            android:defaultValue="false"
             android:key="@string/grid"
+            android:defaultValue="false"
             android:summary="@string/prefs_grid_enabled_description"
             android:title="@string/prefs_grid_enabled_title" />
 
         <CheckBoxPreference
-            android:defaultValue="false"
             android:key="@string/level"
+            android:defaultValue="false"
             android:summary="@string/prefs_level_enabled_description"
             android:title="@string/prefs_level_enabled_title" />
 
@@ -43,14 +43,20 @@
         android:key="@string/cat_hdr"
         android:title="@string/prefs_process_hdr_title">
         <CheckBoxPreference
-            android:defaultValue="false"
             android:key="@string/hdr"
+            android:defaultValue="false"
             android:summary="@string/prefs_hdr_enabled_description"
             android:title="@string/prefs_hdr_enabled_title" />
         <CheckBoxPreference
+            android:key="@string/align"
             android:defaultValue="false"
             android:dependency="@string/hdr"
+            android:summary="@string/prefs_align_description"
+            android:title="@string/prefs_align_title" />
+        <CheckBoxPreference
             android:key="@string/notifyHdr"
+            android:defaultValue="false"
+            android:dependency="@string/hdr"
             android:summary="@string/prefs_broadcast_hdr_enabled_description"
             android:title="@string/prefs_broadcast_hdr_enabled_title"/>
 

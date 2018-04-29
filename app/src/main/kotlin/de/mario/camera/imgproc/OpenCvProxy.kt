@@ -1,10 +1,13 @@
 package de.mario.camera.imgproc
 
+import java.io.File
+import org.opencv.core.CvType
 import org.opencv.core.Mat
 import org.opencv.core.Scalar
+import org.opencv.imgproc.Imgproc
 import org.opencv.imgcodecs.Imgcodecs
 import org.opencv.photo.Photo
-import java.io.File
+import org.opencv.video.Video
 
 
 internal class OpenCvProxy {
@@ -23,6 +26,38 @@ internal class OpenCvProxy {
     fun multiply(src: Mat): Mat {
         val filter = Mat(src.size(), src.type(), SCALAR)
         return src.mul(filter)
+    }
+
+    fun align(images: List<Mat>): List<Mat> {
+        val size = images.size
+        if (size > 1) {
+            val matrix = Mat.eye(3, 3, CvType.CV_32F)
+
+            val head = images[0]
+            val result = mutableListOf<Mat>(head)
+
+            //convert first image to gray
+            val headGray = toGray(head)
+            //align others
+            images.drop(1).forEach { result.add(warp(it, headGray, matrix)) }
+
+            return result
+        }
+
+        return images
+    }
+
+    private fun warp(img: Mat, first: Mat, matrix: Mat): Mat {
+        Video.findTransformECC(toGray(img), first, matrix, Video.MOTION_HOMOGRAPHY)
+        val dest = Mat()
+        Imgproc.warpPerspective(img, dest, matrix, first.size())
+        return dest
+    }
+
+    private fun toGray(bgr: Mat): Mat {
+        val gray = Mat()
+        Imgproc.cvtColor(bgr, gray, Imgproc.COLOR_BGR2GRAY)
+        return gray
     }
 
     fun read(file: File): Mat = read(file.path)
