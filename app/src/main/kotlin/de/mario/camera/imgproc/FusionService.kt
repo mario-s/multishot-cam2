@@ -19,11 +19,11 @@ internal class FusionService() : IntentService(TAG) {
     private val proxy = OpenCvProxy()
 
     companion object {
+        private const val MERGED = "_fusion"
         const val TAG = "FusionService"
         const val PICTURES = "de.mario.camera.extra.PICTURES"
         const val ALIGN = "de.mario.camera.extra.ALIGN"
         const val SYSTEM_NOTIFY = "de.mario.camera.extra.NOTIFY"
-        const val MERGED = "_fusion"
     }
 
     override fun onHandleIntent(intent: Intent?) {
@@ -83,13 +83,10 @@ internal class FusionService() : IntentService(TAG) {
     }
 
     private fun loadImages(pics: Array<String>): List<Mat> {
-        val imgs: MutableList<Mat> = mutableListOf()
+        val images = mutableListOf<Mat>()
 
-        pics.forEach {
-            val mat = proxy.read(File(it))
-            imgs.add(mat)
-        }
+        pics.forEach {images.add(proxy.read(File(it)))}
 
-        return imgs
+        return images
     }
 }

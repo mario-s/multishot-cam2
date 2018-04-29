@@ -13,9 +13,12 @@ import de.mario.camera.widget.ErrorDialog
  */
 class PermissionRequester(private val fragment: Fragment) : FragmentCompat.OnRequestPermissionsResultCallback {
 
-    private val FRAGMENT_DIALOG = "dialog"
     private val cameraPermission = R.string.request_camera_permission
     private val writePermission = R.string.request_write_permission
+
+    private companion object {
+        const val FRAGMENT_DIALOG = "dialog"
+    }
 
     /**
      * This method requests the required permissions for this app.
