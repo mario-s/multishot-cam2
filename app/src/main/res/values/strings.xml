@@ -11,6 +11,7 @@
     <string name="cat_hdr"><xliff:g id="preference_key">hdrProcess</xliff:g></string>
     <string name="hdr"><xliff:g id="preference_key">hdr</xliff:g></string>
     <string name="notifyHdr"><xliff:g id="preference_key">notifyHdr</xliff:g></string>
+    <string name="align"><xliff:g id="preference_key">align</xliff:g></string>
 
     <!-- keys for settings NO TRANSLATION -->
 
@@ -55,5 +56,7 @@
     <string name="prefs_picture_size_title">Picture Size</string>
     <string name="prefs_exposure_description">Set the sequence of exposure values.</string>
     <string name="prefs_exposure_title">Exposure Values</string>
+    <string name="prefs_align_description">Align the images before merging.</string>
+    <string name="prefs_align_title">Align</string>
 
 </resources>

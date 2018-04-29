@@ -34,8 +34,7 @@ internal class FusionService() : IntentService(TAG) {
         val picsNames = intent.getStringArrayExtra(PICTURES)
 
         val images = loadImages(picsNames)
-
-        val fusion = proxy.merge(images)
+        val fusion = merge(images, intent.getBooleanExtra(ALIGN, false))
 
         val firstPic = picsNames[0]
         val out = File(createFileName(firstPic))
@@ -50,6 +49,13 @@ internal class FusionService() : IntentService(TAG) {
         if(intent.getBooleanExtra(SYSTEM_NOTIFY, false)) {
             NotificationSender(this).send(path)
         }
+    }
+
+    private fun merge(source: List<Mat>, align: Boolean) : Mat {
+        if(align) {
+            return proxy.merge(proxy.align(source))
+        }
+        return proxy.merge(source)
     }
 
     private fun broadcast(path: String) {
