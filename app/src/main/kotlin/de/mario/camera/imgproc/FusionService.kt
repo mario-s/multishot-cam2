@@ -6,9 +6,7 @@ import android.media.MediaScannerConnection
 import de.mario.camera.R
 import de.mario.camera.exif.ExifTagWriteable
 import de.mario.camera.exif.ExifWriter
-import de.mario.camera.glue.SettingsAccessable
 import de.mario.camera.message.BroadcastingSender
-import de.mario.camera.settings.SettingsAccess
 import org.opencv.core.Mat
 import java.io.File
 
@@ -20,43 +18,44 @@ internal class FusionService() : IntentService(TAG) {
 
     private val proxy = OpenCvProxy()
 
-    private val settingsAccess: SettingsAccessable = SettingsAccess(this)
-
     companion object {
         const val TAG = "FusionService"
-        const val PARAM_PICS = "de.mario.camera.extra.PICS"
+        const val PICTURES = "de.mario.camera.extra.PICTURES"
+        const val SYSTEM_NOTIFY = "de.mario.camera.extra.NOTIFY"
         const val MERGED = "_fusion"
     }
 
     override fun onHandleIntent(intent: Intent?) {
-        process(intent!!.getStringArrayExtra(PARAM_PICS))
+        process(intent!!)
     }
 
-    internal fun process(pictures: Array<String>) {
-        val images = loadImages(pictures)
+    internal fun process(intent: Intent) {
+        val picsNames = intent.getStringArrayExtra(PICTURES)
+
+        val images = loadImages(picsNames)
 
         val fusion = proxy.merge(images)
 
-        val firstPic = pictures[0]
+        val firstPic = picsNames[0]
         val out = File(createFileName(firstPic))
         write(fusion, out)
         copyExif(firstPic, out)
 
-        MediaScannerConnection.scanFile(applicationContext, arrayOf(out.path), null, null)
-        sendNotification(out)
+        val path = out.absolutePath
+        MediaScannerConnection.scanFile(applicationContext, arrayOf(path), null, null)
+
+        broadcast(path)
+
+        if(intent.getBooleanExtra(SYSTEM_NOTIFY, false)) {
+            NotificationSender(this).send(path)
+        }
     }
 
-    private fun sendNotification(file: File) {
-        val path = file.absolutePath
+    private fun broadcast(path: String) {
         //message for the app
         val intent = Intent(getString(R.string.EXPOSURE_MERGE))
         intent.putExtra(getString(R.string.MERGED), path)
         BroadcastingSender.send(baseContext, intent)
-
-        //general notification
-        if (settingsAccess.isEnabled(R.string.notifyHdr)) {
-            NotificationSender(this).send(path)
-        }
     }
 
     private fun copyExif(src: String, target: File) {
