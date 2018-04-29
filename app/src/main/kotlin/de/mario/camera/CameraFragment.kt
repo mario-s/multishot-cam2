@@ -183,18 +183,18 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     private fun createPreviewSize(origin: Size): Size = previewSizeFactory.createPreviewSize(origin)
 
     private fun sizeForImageReader(): Size {
-        val sizePrefs = settings.getString(getString(R.string.pictureSize))
-        val size = SizeFilter.parse(sizePrefs)
-        if(size != null) {
-            return size
+        try {
+            val sizePrefs = settings.getString(getString(R.string.pictureSize))
+            return Size.parseSize(sizePrefs)
+        } catch (e: NumberFormatException) {
+            val resolutions = cameraDeviceProxy.imageSizes()
+            if (!resolutions.isEmpty()){
+                val index: Int = resolutions.size / 2
+                return resolutions.get(index)
+            }
+            //if everything fails return the preview size
+            return previewSize
         }
-        val resolutions = cameraDeviceProxy.imageSizes()
-        if (!resolutions.isEmpty()){
-            val index: Int = resolutions.size / 2
-            return resolutions.get(index)
-        }
-        //if everything fails return the preview size
-        return previewSize
     }
 
     private fun initImageReader() {
