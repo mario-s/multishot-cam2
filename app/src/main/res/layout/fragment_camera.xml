@@ -47,10 +47,10 @@
         android:background="@android:color/black"
         android:paddingTop="3dp">
 
-        <de.mario.camera.view.AutoFitTextureView
+        <TextureView
             android:id="@+id/texture"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" />
 
         <de.mario.camera.view.GridView
             android:id="@+id/grid"

@@ -28,7 +28,6 @@ import de.mario.camera.imgproc.FileNameListCallback
 import de.mario.camera.imgproc.PackageManagerAlert
 import de.mario.camera.settings.SettingsAccess
 import de.mario.camera.settings.SettingsLauncher
-import de.mario.camera.view.AutoFitTextureView
 import de.mario.camera.view.ViewsMediator
 import de.mario.camera.widget.ErrorDialog
 import de.mario.camera.widget.Toaster
@@ -89,7 +88,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        textureView = view.findViewById<AutoFitTextureView>(R.id.texture)
+        textureView = view.findViewById<TextureView>(R.id.texture)
     }
 
     private fun hasOpenCv() = PackageLookup(this).exists()
