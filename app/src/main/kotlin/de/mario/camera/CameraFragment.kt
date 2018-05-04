@@ -13,11 +13,8 @@ import android.os.HandlerThread
 import android.os.Message
 import android.util.Log
 import android.util.Size
-import android.view.LayoutInflater
-import android.view.Surface
-import android.view.View
+import android.view.*
 import android.view.View.OnClickListener
-import android.view.ViewGroup
 import de.mario.camera.device.CameraDeviceProxy
 import de.mario.camera.device.CameraLookup
 import de.mario.camera.device.PackageLookup
@@ -59,7 +56,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     private val permissionRequester = PermissionRequester(this)
     private val captureProgressCallback = CaptureProgressCallback(camState, this)
 
-    private lateinit var textureView: AutoFitTextureView
+    private lateinit var textureView: TextureView
     private lateinit var mPreviewRequestBuilder: CaptureRequest.Builder
     private lateinit var mPreviewRequest: CaptureRequest
     private lateinit var settings: SettingsAccessable
@@ -165,10 +162,6 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
 
             previewSize = createPreviewSize(Size(width, height))
             initImageReader()
-
-            // We fit the aspect ratio of TextureView to the size of preview we picked.
-            val orientation = resources.configuration.orientation
-            textureView.setAspectRatio(previewSize, orientation)
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
         } catch (e: NullPointerException) {
