@@ -1,20 +1,13 @@
 package de.mario.camera.orientation
 
 
-import android.view.View
-import de.mario.camera.view.AutoFitTextureView
-import org.hamcrest.CoreMatchers.notNullValue
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
 import org.junit.Assert.assertThat
 import org.junit.platform.runner.JUnitPlatform
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.anyInt
-import org.mockito.BDDMockito.given
-import org.mockito.Mockito.*
 import java.math.BigDecimal
-import de.mario.camera.orientation.OrientationNoiseFilter
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.number.IsCloseTo
 

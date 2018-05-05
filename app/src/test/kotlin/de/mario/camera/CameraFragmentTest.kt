@@ -11,17 +11,13 @@ import android.hardware.camera2.CaptureRequest
 import android.media.ImageReader
 import android.media.MediaActionSound
 import android.util.Size
-import android.view.Display
-import android.view.Surface
-import android.view.View
-import android.view.WindowManager
+import android.view.*
 import com.nhaarman.mockito_kotlin.mock
 import de.mario.camera.device.CameraDeviceProxy
 import de.mario.camera.glue.ViewsMediatable
 import de.mario.camera.message.BroadcastingReceiverRegister
 import de.mario.camera.orientation.DeviceOrientationListener
 import de.mario.camera.imgproc.FileNameListCallback
-import de.mario.camera.view.AutoFitTextureView
 import org.hamcrest.CoreMatchers.notNullValue
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
@@ -47,7 +43,7 @@ object CameraFragmentTest : Spek({
         val activity: Activity = mock()
         val windowManager: WindowManager = mock()
         val display: Display = mock()
-        val textureView: AutoFitTextureView = mock()
+        val textureView: TextureView = mock()
         val tmp = TemporaryFolder()
         val deviceOrientationListener: DeviceOrientationListener = mock()
         val packageManager: PackageManager = mock()

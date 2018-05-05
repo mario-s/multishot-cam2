@@ -3,14 +3,17 @@ package de.mario.camera.view
 import android.app.Activity
 import android.view.View
 import de.mario.camera.R
+import de.mario.camera.device.PackageLookup
 import de.mario.camera.glue.SettingsAccessable
 import de.mario.camera.glue.ViewsMediatable
 import de.mario.camera.glue.ViewsOrientationListenable
 
-class ViewsMediator(val activity: Activity, val settings: SettingsAccessable,
-                    val viewsOrientationListener: ViewsOrientationListenable) : ViewsMediatable {
+class ViewsMediator(private val activity: Activity, val settings: SettingsAccessable,
+                    private val viewsOrientationListener: ViewsOrientationListenable) : ViewsMediatable {
 
-    companion object {
+    private val packageLookup = PackageLookup(activity)
+
+    private companion object {
         //the ids of the buttons
         private val BUTTONS = arrayOf(R.id.picture, R.id.settings, R.id.info)
     }
@@ -24,17 +27,20 @@ class ViewsMediator(val activity: Activity, val settings: SettingsAccessable,
 
     private fun toggleOrientationListener(enable: Boolean) {
         if (enable) {
-            BUTTONS.forEach { viewsOrientationListener.addView(activity.findViewById<View>(it)) }
+            BUTTONS.forEach { viewsOrientationListener.addView(findView(it)) }
             viewsOrientationListener.enable()
         } else {
             viewsOrientationListener.disable()
-            BUTTONS.forEach { viewsOrientationListener.removeView(activity.findViewById<View>(it)) }
+            BUTTONS.forEach { viewsOrientationListener.removeView(findView(it)) }
         }
     }
 
     override fun onResume() {
         toggleViews()
         toggleOrientationListener(true)
+
+        visible(R.id.info, !packageLookup.exists())
+        showProgress(false)
     }
 
     override fun onPause() {
@@ -42,6 +48,18 @@ class ViewsMediator(val activity: Activity, val settings: SettingsAccessable,
     }
 
     override fun setOnClickListener(listener: View.OnClickListener) {
-        BUTTONS.forEach { activity.findViewById<View>(it).setOnClickListener(listener) }
+        BUTTONS.forEach { findView(it).setOnClickListener(listener) }
     }
+
+    override fun showProgress(show: Boolean) {
+        activity.runOnUiThread({
+            visible(R.id.progressBar, show)
+        })
+    }
+
+    private fun visible(id: Int, show: Boolean) {
+        findView(id).visibility = if (show) View.VISIBLE else View.GONE
+    }
+
+    private fun findView(id: Int) = activity.findViewById<View>(id)
 }

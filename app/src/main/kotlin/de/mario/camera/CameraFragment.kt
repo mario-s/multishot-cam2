@@ -13,11 +13,8 @@ import android.os.HandlerThread
 import android.os.Message
 import android.util.Log
 import android.util.Size
-import android.view.LayoutInflater
-import android.view.Surface
-import android.view.View
+import android.view.*
 import android.view.View.OnClickListener
-import android.view.ViewGroup
 import de.mario.camera.device.CameraDeviceProxy
 import de.mario.camera.device.CameraLookup
 import de.mario.camera.device.PackageLookup
@@ -31,7 +28,6 @@ import de.mario.camera.imgproc.FileNameListCallback
 import de.mario.camera.imgproc.PackageManagerAlert
 import de.mario.camera.settings.SettingsAccess
 import de.mario.camera.settings.SettingsLauncher
-import de.mario.camera.view.AutoFitTextureView
 import de.mario.camera.view.ViewsMediator
 import de.mario.camera.widget.ErrorDialog
 import de.mario.camera.widget.Toaster
@@ -59,7 +55,7 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     private val permissionRequester = PermissionRequester(this)
     private val captureProgressCallback = CaptureProgressCallback(camState, this)
 
-    private lateinit var textureView: AutoFitTextureView
+    private lateinit var textureView: TextureView
     private lateinit var mPreviewRequestBuilder: CaptureRequest.Builder
     private lateinit var mPreviewRequest: CaptureRequest
     private lateinit var settings: SettingsAccessable
@@ -86,16 +82,16 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
 
     override fun getMessageHandler(): Handler = messageHandler
 
+    override fun getViewsMediator(): ViewsMediatable = viewsMediator
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_camera, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        textureView = view.findViewById<AutoFitTextureView>(R.id.texture)
+        textureView = view.findViewById<TextureView>(R.id.texture)
     }
-
-    private fun hasOpenCv() = PackageLookup(this).exists()
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -122,10 +118,6 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
             openCamera(textureView.width, textureView.height)
         } else {
             textureView.surfaceTextureListener = mSurfaceTextureListener
-        }
-
-        if (hasOpenCv()) {
-            view.findViewById<View>(R.id.info).visibility = View.GONE
         }
     }
 
@@ -165,10 +157,6 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
 
             previewSize = createPreviewSize(Size(width, height))
             initImageReader()
-
-            // We fit the aspect ratio of TextureView to the size of preview we picked.
-            val orientation = resources.configuration.orientation
-            textureView.setAspectRatio(previewSize, orientation)
         } catch (e: CameraAccessException) {
             Log.w(TAG, e.message, e)
         } catch (e: NullPointerException) {
