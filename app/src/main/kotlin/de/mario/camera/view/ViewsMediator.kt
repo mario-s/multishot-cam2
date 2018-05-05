@@ -39,7 +39,7 @@ class ViewsMediator(private val activity: Activity, val settings: SettingsAccess
         toggleViews()
         toggleOrientationListener(true)
 
-        visible(R.id.info, packageLookup.exists())
+        visible(R.id.info, !packageLookup.exists())
     }
 
     override fun onPause() {
