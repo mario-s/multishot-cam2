@@ -8,7 +8,7 @@ import de.mario.camera.glue.ViewsMediatable
 import de.mario.camera.glue.ViewsOrientationListenable
 
 class ViewsMediator(val activity: Activity, val settings: SettingsAccessable,
-                    val viewsOrientationListener: ViewsOrientationListenable) : ViewsMediatable {
+                    private val viewsOrientationListener: ViewsOrientationListenable) : ViewsMediatable {
 
     companion object {
         //the ids of the buttons
