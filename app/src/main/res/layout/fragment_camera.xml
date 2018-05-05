@@ -5,17 +5,14 @@
                 android:layout_height="match_parent">
 
     <!-- top -->
-    <FrameLayout
+    <GridLayout
         android:id="@+id/top"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:layout_alignParentTop="true"
+        android:columnCount="2"
+        android:rowCount="1"
         android:background="#000">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
 
         <ProgressBar
             android:id="@+id/progressBar"
@@ -29,12 +26,11 @@
             style="@style/ButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="end"
             android:contentDescription="@string/description_info"
             android:src="@drawable/ic_action_info"/>
 
-        </LinearLayout>
-
-    </FrameLayout>
+    </GridLayout>
 
 
     <!-- center -->
