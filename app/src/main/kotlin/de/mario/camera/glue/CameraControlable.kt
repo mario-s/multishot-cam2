@@ -8,6 +8,8 @@ interface CameraControlable {
 
     fun getContext(): Context
 
+    fun getViewsMediator(): ViewsMediatable
+
     fun getMessageHandler(): Handler
 
     fun showToast(msg: String?)

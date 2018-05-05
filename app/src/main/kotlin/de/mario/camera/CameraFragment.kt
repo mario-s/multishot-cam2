@@ -82,6 +82,8 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
 
     override fun getMessageHandler(): Handler = messageHandler
 
+    override fun getViewsMediator(): ViewsMediatable = viewsMediator
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_camera, container, false)
@@ -90,8 +92,6 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         textureView = view.findViewById<TextureView>(R.id.texture)
     }
-
-    private fun hasOpenCv() = PackageLookup(this).exists()
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -118,10 +118,6 @@ class CameraFragment : Fragment(), OnClickListener, CameraControlable, Captureab
             openCamera(textureView.width, textureView.height)
         } else {
             textureView.surfaceTextureListener = mSurfaceTextureListener
-        }
-
-        if (hasOpenCv()) {
-            view.findViewById<View>(R.id.info).visibility = View.GONE
         }
     }
 

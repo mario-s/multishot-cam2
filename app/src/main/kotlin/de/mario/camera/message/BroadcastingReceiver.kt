@@ -12,6 +12,7 @@ class BroadcastingReceiver(private val control: CameraControlable) : BroadcastRe
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == string(R.string.EXPOSURE_MERGE)) {
+            control.getViewsMediator().showProgress(false)
             val result = intent.getStringExtra(string(R.string.MERGED))
             val path = File(result).parent
             val msg = string(R.string.fusion_saved)

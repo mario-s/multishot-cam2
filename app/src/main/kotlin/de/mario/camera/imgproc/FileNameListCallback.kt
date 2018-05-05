@@ -52,6 +52,7 @@ class FileNameListCallback(private val control: CameraControlable, private val s
             MediaScannerConnection.scanFile(context, source, null, null)
 
             if(settings.isEnabled(R.string.hdr)) {
+                control.getViewsMediator().showProgress(true)
                 trigger.process(source)
             }
         })

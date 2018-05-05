@@ -9,4 +9,6 @@ interface ViewsMediatable {
     fun onPause()
 
     fun setOnClickListener(listener: View.OnClickListener)
+
+    fun showProgress(show: Boolean)
 }
