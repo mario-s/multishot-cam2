@@ -50,7 +50,11 @@ class ViewsMediator(private val activity: Activity, val settings: SettingsAccess
         BUTTONS.forEach { findView(it).setOnClickListener(listener) }
     }
 
-    override fun showProgress(show: Boolean) = visible(R.id.progressBar, show)
+    override fun showProgress(show: Boolean) {
+        activity.runOnUiThread({
+            visible(R.id.progressBar, show)
+        })
+    }
 
     private fun visible(id: Int, show: Boolean) {
         findView(id).visibility = if (show) View.VISIBLE else View.GONE
