@@ -40,6 +40,7 @@ class ViewsMediator(private val activity: Activity, val settings: SettingsAccess
         toggleOrientationListener(true)
 
         visible(R.id.info, !packageLookup.exists())
+        showProgress(false)
     }
 
     override fun onPause() {
