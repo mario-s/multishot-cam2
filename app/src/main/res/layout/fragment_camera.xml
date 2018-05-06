@@ -84,8 +84,8 @@
             android:layout_width="38dp"
             android:layout_height="38dp"
             android:layout_gravity="center_vertical|end"
-            android:layout_marginRight="5dip"
-            android:src="@drawable/ic_settings"
+            android:layout_marginRight="8dip"
+            android:src="@drawable/ic_tune"
             android:text="@string/ac_settings"/>
 
     </FrameLayout>
